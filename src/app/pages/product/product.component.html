@@ -1,0 +1,74 @@
+<div class="product-page">
+  <h1>Productos</h1>
+  <p class="lead">Carga los precios de la carta y activa o desactiva productos.</p>
+
+  <div class="price-warning" *ngIf="pendingPriceCount > 0">
+    Hay <strong>{{ pendingPriceCount }}</strong> producto(s) activos en S/ 0.00. No se pueden vender
+    correctamente hasta que les asignes un precio.
+  </div>
+
+  <div class="filter-bar">
+    <label for="categoryFilter">Categoria</label>
+    <select id="categoryFilter" [(ngModel)]="categoryFilter">
+      <option [ngValue]="'ALL'">Todas</option>
+      <option *ngFor="let c of categories" [ngValue]="c.idCategory">{{ c.name }}</option>
+    </select>
+  </div>
+
+  <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <p class="loading-msg" *ngIf="loading">Cargando productos...</p>
+
+  <table class="product-table" *ngIf="!loading">
+    <thead>
+      <tr>
+        <th>Producto</th>
+        <th>Categoria</th>
+        <th>Sabor</th>
+        <th>Precio (S/)</th>
+        <th>Estado</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let p of visibleProducts" [class.inactive]="p.active === false">
+        <td class="product-name-cell">{{ p.name }}</td>
+        <td>{{ p.category.name }}</td>
+        <td>
+          <span class="flavor-tag" *ngIf="p.requiresFlavor">Pide sabor</span>
+        </td>
+        <td class="price-cell">
+          <input
+            type="number"
+            min="0.10"
+            step="0.10"
+            [ngModel]="priceDraft.get(p.idProduct!)"
+            (ngModelChange)="priceDraft.set(p.idProduct!, $event)"
+            [class.zero]="p.price <= 0"
+          />
+          <button
+            type="button"
+            class="save-price-btn"
+            [disabled]="savingId === p.idProduct"
+            (click)="savePrice(p)"
+          >
+            {{ savingId === p.idProduct ? '...' : savedId === p.idProduct ? 'Guardado' : 'Guardar' }}
+          </button>
+        </td>
+        <td>
+          <button
+            type="button"
+            class="state-btn"
+            [class.on]="p.active !== false"
+            (click)="toggleActive(p)"
+          >
+            {{ p.active === false ? 'Inactivo' : 'Activo' }}
+          </button>
+        </td>
+      </tr>
+
+      <tr *ngIf="visibleProducts.length === 0">
+        <td colspan="5" class="empty-state">No hay productos en esta categoria.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

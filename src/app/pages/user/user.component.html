@@ -1,0 +1,33 @@
+<div>
+  <h2>Gestión de Usuarios</h2>
+  <button routerLink="new">+ Nuevo Usuario</button>
+
+  <router-outlet></router-outlet>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Usuario</th>
+        <th>Email</th>
+        <th>Rol</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let u of users">
+        <td>{{ u.idUser }}</td>
+        <td>{{ u.username }}</td>
+        <td>{{ u.email }}</td>
+        <td>{{ u.role.name || 'N/A' }}</td>
+        <td>
+          <button [routerLink]="['edit', u.idUser]">Editar</button>
+          <button (click)="deleteUser(u.idUser)">Eliminar</button>
+        </td>
+      </tr>
+      <tr *ngIf="users.length === 0">
+        <td colspan="5">No hay usuarios registrados.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

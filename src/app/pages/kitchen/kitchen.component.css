@@ -1,0 +1,155 @@
+.kitchen-page h1 {
+  margin-bottom: 2px;
+}
+
+.lead {
+  margin: 0 0 22px;
+}
+
+.ticket-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+.ticket-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--surface-card);
+  border: 2px solid var(--surface-border);
+  border-left: 5px solid #6b6462;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: 16px;
+}
+
+/* El color de la comanda lo marca el tiempo de espera, no el estado:
+   verde recien llegada, naranja desde 6 min, rojo pasados 12 min. */
+.ticket-card.fresh {
+  border-left-color: #2e7d32;
+}
+
+.ticket-card.warn {
+  border-left-color: #f0a202;
+}
+
+.ticket-card.late {
+  border-left-color: #c62828;
+  background: #fdf2f2;
+  border-color: #f0c9c9;
+}
+
+.ticket-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.ticket-table {
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+
+.ticket-code {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.ticket-body {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.ticket-qty {
+  font-weight: 800;
+  color: var(--carretero-red);
+}
+
+.ticket-product {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+/* El sabor es lo que distingue una comanda de otra: va destacado, no como nota. */
+.ticket-flavor {
+  align-self: flex-start;
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm, 6px);
+  background: #2b2726;
+  color: var(--carretero-white);
+}
+
+.ticket-notes {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0;
+  font-style: italic;
+}
+
+.ticket-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ticket-status {
+  font-size: 0.66rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #6b6462;
+  color: var(--carretero-white);
+}
+
+.ticket-status.in-progress {
+  background: #55504e;
+}
+
+.ticket-timer {
+  font-size: 0.78rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.ticket-timer.fresh {
+  color: #2e7d32;
+  background: #e8f3e9;
+}
+
+.ticket-timer.warn {
+  color: #8a5b00;
+  background: #fdf0d5;
+}
+
+.ticket-timer.late {
+  color: var(--carretero-white);
+  background: #c62828;
+}
+
+.advance-btn {
+  margin: 6px 0 0;
+  padding: 10px;
+  font-size: 0.8rem;
+}
+
+.empty-state,
+.no-station {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+}

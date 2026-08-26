@@ -1,0 +1,72 @@
+<div class="client-page">
+  <h1>Clientes</h1>
+  <p class="lead">Registro de clientes para delivery y comprobantes.</p>
+
+  <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <div class="add-form">
+    <h3>Nuevo cliente</h3>
+    <div class="form-row">
+      <select [(ngModel)]="newClient.docType">
+        <option *ngFor="let d of docTypes" [ngValue]="d">{{ d }}</option>
+      </select>
+      <input type="text" placeholder="N° documento" [(ngModel)]="newClient.docNumber" />
+      <input type="text" placeholder="Nombre o razon social" [(ngModel)]="newClient.name" />
+      <input type="text" placeholder="Telefono" [(ngModel)]="newClient.phone" />
+      <input type="email" placeholder="Correo" [(ngModel)]="newClient.email" />
+      <button type="button" class="primary" (click)="create()">Agregar</button>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <input type="text" placeholder="Buscar por nombre, documento o telefono" [(ngModel)]="query" />
+  </div>
+
+  <p class="loading-msg" *ngIf="loading">Cargando clientes...</p>
+
+  <table class="client-table" *ngIf="!loading">
+    <thead>
+      <tr>
+        <th>Documento</th>
+        <th>Nombre</th>
+        <th>Telefono</th>
+        <th>Correo</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <ng-container *ngFor="let c of visibleClients">
+        <tr *ngIf="editing?.idClient !== c.idClient">
+          <td>{{ c.docType }} {{ c.docNumber }}</td>
+          <td class="name-cell">{{ c.name }}</td>
+          <td>{{ c.phone }}</td>
+          <td>{{ c.email }}</td>
+          <td class="actions-cell">
+            <button type="button" class="mini" (click)="startEdit(c)">Editar</button>
+            <button type="button" class="mini danger" (click)="remove(c)">Borrar</button>
+          </td>
+        </tr>
+
+        <tr *ngIf="editing && editing.idClient === c.idClient" class="editing-row">
+          <td>
+            <select [(ngModel)]="editing.docType">
+              <option *ngFor="let d of docTypes" [ngValue]="d">{{ d }}</option>
+            </select>
+            <input type="text" [(ngModel)]="editing.docNumber" />
+          </td>
+          <td><input type="text" [(ngModel)]="editing.name" /></td>
+          <td><input type="text" [(ngModel)]="editing.phone" /></td>
+          <td><input type="email" [(ngModel)]="editing.email" /></td>
+          <td class="actions-cell">
+            <button type="button" class="mini" (click)="saveEdit()">Guardar</button>
+            <button type="button" class="mini" (click)="cancelEdit()">Cancelar</button>
+          </td>
+        </tr>
+      </ng-container>
+
+      <tr *ngIf="visibleClients.length === 0">
+        <td colspan="5" class="empty-state">No hay clientes registrados.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

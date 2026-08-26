@@ -1,0 +1,72 @@
+.register-page {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 48px 20px;
+  background: radial-gradient(circle at 50% -10%, #ff3b3b 0%, var(--carretero-red) 45%, var(--carretero-red-darker) 100%);
+}
+
+.register-brand {
+  display: flex;
+  justify-content: center;
+  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.25));
+}
+
+.register-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--surface-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 32px 32px 26px;
+}
+
+.register-card h2 {
+  text-align: center;
+  font-size: 1.4rem;
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  text-align: center;
+  font-size: 0.82rem;
+  margin-bottom: 20px;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 12px;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.error-message {
+  color: var(--carretero-red-dark);
+  background: #fdecec;
+  border: 1px solid #f6c8c8;
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  margin-bottom: 14px;
+}
+
+.success-message {
+  color: #1f7a35;
+  background: #e9f7ee;
+  border: 1px solid #b9e6c8;
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  margin-bottom: 14px;
+}
+
+.back-note {
+  text-align: center;
+  font-size: 0.82rem;
+  margin: 18px 0 0;
+}

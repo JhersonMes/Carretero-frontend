@@ -1,0 +1,149 @@
+.client-page h1 {
+  margin-bottom: 2px;
+}
+
+.lead {
+  margin: 0 0 18px;
+}
+
+.add-form {
+  background: var(--surface-card);
+  border: 2px solid var(--surface-border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+
+.add-form h3 {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin-bottom: 9px;
+}
+
+.form-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.form-row input,
+.form-row select,
+.filter-bar input,
+.client-table input,
+.client-table select {
+  padding: 8px 10px;
+  font-size: 0.85rem;
+  border: 2px solid var(--surface-border);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  color: var(--text-primary);
+}
+
+.form-row input {
+  flex: 1;
+  min-width: 130px;
+}
+
+.filter-bar {
+  margin-bottom: 14px;
+}
+
+.filter-bar input {
+  width: 100%;
+  max-width: 420px;
+}
+
+.primary {
+  padding: 9px 16px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  border-radius: var(--radius-md);
+  background: var(--carretero-red);
+  border: 2px solid var(--carretero-red);
+  color: var(--carretero-white);
+  cursor: pointer;
+}
+
+.loading-msg,
+.empty-state {
+  color: var(--text-muted);
+  text-align: center;
+  padding: 30px 20px;
+}
+
+.client-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface-card);
+  border: 2px solid var(--surface-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.client-table th {
+  text-align: left;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  padding: 12px 14px;
+  background: var(--surface);
+  border-bottom: 2px solid var(--surface-border);
+}
+
+.client-table td {
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  border-bottom: 1px solid var(--surface-border);
+  vertical-align: middle;
+}
+
+.client-table tr.editing-row td {
+  background: var(--surface);
+}
+
+.client-table input,
+.client-table select {
+  width: 100%;
+  padding: 6px 8px;
+  font-size: 0.8rem;
+}
+
+.name-cell {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.actions-cell {
+  display: flex;
+  gap: 6px;
+}
+
+.mini {
+  padding: 6px 10px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--surface-border);
+  background: var(--surface);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.mini.danger {
+  border-color: #f0c9c9;
+  color: #c62828;
+}
+
+.error-message {
+  background: #fdf2f2;
+  border: 2px solid #f0c9c9;
+  color: #c62828;
+  border-radius: var(--radius-md);
+  padding: 11px 15px;
+  margin-bottom: 14px;
+  font-size: 0.86rem;
+  font-weight: 600;
+}

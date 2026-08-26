@@ -1,0 +1,36 @@
+<div class="register-page">
+  <div class="register-brand">
+    <app-logo [size]="150" [animated]="true" [showWordmark]="true"></app-logo>
+  </div>
+
+  <div class="register-card">
+    <h2>Registro de cuenta</h2>
+    <p class="subtitle">Esta cuenta se creara con el rol operativo basico (Mesero)</p>
+
+    <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
+    <div class="success-message" *ngIf="successMessage">{{ successMessage }}</div>
+
+    <form (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="username">Usuario</label>
+        <input type="text" id="username" [(ngModel)]="username" name="username" required>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Correo electronico</label>
+        <input type="email" id="email" [(ngModel)]="email" name="email" required>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Contrasena</label>
+        <input type="password" id="password" [(ngModel)]="password" name="password" required>
+      </div>
+
+      <button type="submit" class="submit-btn">Registrarse</button>
+    </form>
+
+    <p class="back-note">
+      &iquest;Ya tienes cuenta? <a routerLink="/login">Inicia sesion</a>
+    </p>
+  </div>
+</div>

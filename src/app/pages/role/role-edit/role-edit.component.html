@@ -1,0 +1,15 @@
+<div style="border: 1px solid #aaa; padding: 15px; margin: 15px 0; background: #fff;">
+  <h3>{{ isEdit ? 'Editar Rol' : 'Nuevo Rol' }}</h3>
+  <form (ngSubmit)="save()">
+    <div class="form-group">
+      <label>Nombre:</label>
+      <input type="text" [(ngModel)]="name" name="name" required>
+    </div>
+    <div class="form-group">
+      <label>Descripción:</label>
+      <input type="text" [(ngModel)]="description" name="description">
+    </div>
+    <button type="submit">Guardar</button>
+    <button type="button" routerLink="/pages/role">Cancelar</button>
+  </form>
+</div>

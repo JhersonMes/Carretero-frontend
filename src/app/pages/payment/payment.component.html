@@ -1,0 +1,39 @@
+<div>
+  <h2>Historial y Registro de Pagos</h2>
+  <button routerLink="new">+ Registrar Nuevo Pago</button>
+
+  <router-outlet></router-outlet>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Fecha</th>
+        <th>Cliente / RUC</th>
+        <th>Monto</th>
+        <th>Método de Pago</th>
+        <th>Trabajador</th>
+        <th>Detalles</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let p of payments">
+        <td>{{ p.idPayment }}</td>
+        <td>{{ p.paymentDate }}</td>
+        <td>{{ p.clientName }} ({{ p.rucClient }})</td>
+        <td>S/ {{ p.amount | number:'1.2-2' }}</td>
+        <td>{{ p.paymentMethod.name || 'N/A' }}</td>
+        <td>{{ p.user?.username || 'Sistema' }}</td>
+        <td>{{ p.details }}</td>
+        <td>
+          <button [routerLink]="['edit', p.idPayment]">Editar</button>
+          <button (click)="deletePayment(p.idPayment)">Eliminar</button>
+        </td>
+      </tr>
+      <tr *ngIf="payments.length === 0">
+        <td colspan="8">No hay registros de pagos.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

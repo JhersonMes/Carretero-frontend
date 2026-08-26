@@ -1,0 +1,132 @@
+:host {
+  display: inline-block;
+  line-height: 0;
+}
+
+.logo-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  overflow: visible;
+}
+
+/* Trazos y wordmark: blanco por defecto (fondos rojos/oscuros) */
+.cls-4 {
+  fill: #fff;
+}
+
+:host(.is-dark) .cls-4 {
+  fill: var(--carretero-red, #e31b22);
+}
+
+/* Paleta de la fogata */
+.cls-1 { fill: #cb161a; }
+.cls-2 { fill: #f7dd10; }
+.cls-3 { fill: #6f2222; }
+.cls-5 { fill: #c82637; }
+.cls-6 { fill: #c82738; }
+.cls-7 { fill: #c92838; }
+.cls-8 { fill: #b3381c; }
+.cls-9 { fill: #b5351d; }
+.cls-10 { fill: #a1323d; }
+.cls-11 { fill: #c92739; }
+.cls-12 { fill: #991a1f; }
+
+#Lllama_grande_roja,
+#Borde_blanco_de_llama,
+#Llama_pequena_amarilla {
+  transform-box: fill-box;
+  transform-origin: 50% 90%;
+}
+
+#Lllama_grande_roja {
+  animation: oscilacionMayor 1.1s infinite alternate ease-in-out;
+}
+
+#Borde_blanco_de_llama {
+  animation: oscilacionBorde 1.1s infinite alternate ease-in-out;
+}
+
+#Llama_pequena_amarilla {
+  animation: oscilacionMenor .75s infinite alternate ease-in-out;
+}
+
+#Parte_iluminada_de_carbones path {
+  animation: pulsoIgnicion 1.8s infinite alternate ease-in-out;
+}
+
+#Parte_iluminada_de_carbones path:nth-child(even) {
+  animation-delay: .4s;
+  animation-duration: 2.2s;
+}
+
+#Parte_iluminada_de_carbones path:nth-child(3n) {
+  animation-delay: .9s;
+  animation-duration: 1.5s;
+}
+
+#Carretero path,
+#Carretero polygon,
+#Carretero polyline,
+#Hamburguesas_artesanales path,
+#Hamburguesas_artesanales polygon {
+  opacity: 0;
+  transform: translateY(15px);
+  animation: smoothEntrance 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+#Carretero g g path:nth-child(1) { animation-delay: 0.2s; }
+#Carretero g g path:nth-child(2) { animation-delay: 0.25s; }
+#Carretero g g polygon:nth-child(3) { animation-delay: 0.3s; }
+#Carretero g g polyline:nth-child(4) { animation-delay: 0.35s; }
+#Carretero g g path:nth-child(5) { animation-delay: 0.4s; }
+#Carretero g g path:nth-child(6) { animation-delay: 0.45s; }
+#Carretero g g path:nth-child(7) { animation-delay: 0.5s; }
+#Carretero g g polygon:nth-child(8) { animation-delay: 0.55s; }
+#Carretero g > path:nth-child(2) { animation-delay: 0.6s; }
+#Hamburguesas_artesanales g > * { animation-delay: 0.7s; }
+
+/* Variante estatica: sin parpadeo de llama, util en cabeceras compactas */
+:host(.is-static) #Lllama_grande_roja,
+:host(.is-static) #Borde_blanco_de_llama,
+:host(.is-static) #Llama_pequena_amarilla,
+:host(.is-static) #Parte_iluminada_de_carbones path,
+:host(.is-static) #Carretero path,
+:host(.is-static) #Carretero polygon,
+:host(.is-static) #Carretero polyline,
+:host(.is-static) #Hamburguesas_artesanales path,
+:host(.is-static) #Hamburguesas_artesanales polygon {
+  animation: none;
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+@keyframes smoothEntrance {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes oscilacionMayor {
+  0% { transform: scale(1, 1) skewX(0deg); }
+  50% { transform: scale(1.02, 1.05) skewX(1.5deg); }
+  100% { transform: scale(.98, 1.03) skewX(-1.5deg); }
+}
+
+@keyframes oscilacionBorde {
+  0% { transform: scale(1, 1) skewX(0deg); }
+  50% { transform: scale(1.01, 1.03) skewX(1.5deg); }
+  100% { transform: scale(.99, 1.02) skewX(-1.5deg); }
+}
+
+@keyframes oscilacionMenor {
+  0% { transform: scale(.95, .95) skewX(-1deg); opacity: .9; }
+  100% { transform: scale(1.06, 1.12) skewX(2deg); opacity: 1; }
+}
+
+@keyframes pulsoIgnicion {
+  0% { filter: brightness(.85); }
+  100% { filter: brightness(1.45); }
+}

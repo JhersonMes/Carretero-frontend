@@ -1,0 +1,149 @@
+.product-page h1 {
+  margin-bottom: 2px;
+}
+
+.lead {
+  margin: 0 0 18px;
+}
+
+.price-warning {
+  background: #fdf0d5;
+  border: 2px solid #f0d29a;
+  color: #8a5b00;
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  margin-bottom: 18px;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.filter-bar label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.filter-bar select {
+  padding: 9px 12px;
+  font-size: 0.88rem;
+  border: 2px solid var(--surface-border);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  color: var(--text-primary);
+}
+
+.loading-msg,
+.empty-state {
+  color: var(--text-muted);
+  text-align: center;
+  padding: 30px 20px;
+}
+
+.product-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface-card);
+  border: 2px solid var(--surface-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.product-table th {
+  text-align: left;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  padding: 12px 14px;
+  background: var(--surface);
+  border-bottom: 2px solid var(--surface-border);
+}
+
+.product-table td {
+  padding: 10px 14px;
+  font-size: 0.86rem;
+  border-bottom: 1px solid var(--surface-border);
+  vertical-align: middle;
+}
+
+.product-table tr.inactive td {
+  opacity: 0.5;
+}
+
+.product-name-cell {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.flavor-tag {
+  font-size: 0.66rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #2b2726;
+  color: var(--carretero-white);
+}
+
+.price-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.price-cell input {
+  width: 92px;
+  padding: 8px 10px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  border: 2px solid var(--surface-border);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  color: var(--text-primary);
+}
+
+.price-cell input.zero {
+  border-color: #f0a202;
+  background: #fdf7e8;
+}
+
+.save-price-btn,
+.state-btn {
+  padding: 8px 12px;
+  font-size: 0.76rem;
+  font-weight: 800;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  border: 2px solid var(--surface-border);
+  background: var(--surface);
+  color: var(--text-primary);
+}
+
+.save-price-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.state-btn.on {
+  background: #e8f3e9;
+  border-color: #a8cfae;
+  color: #2e7d32;
+}
+
+.error-message {
+  background: #fdf2f2;
+  border: 2px solid #f0c9c9;
+  color: #c62828;
+  border-radius: var(--radius-md);
+  padding: 11px 15px;
+  margin-bottom: 14px;
+  font-size: 0.86rem;
+  font-weight: 600;
+}

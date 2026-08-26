@@ -1,0 +1,35 @@
+<div>
+  <h2>Gestión de Ingredientes</h2>
+  <button routerLink="new">+ Nuevo Ingrediente</button>
+
+  <router-outlet></router-outlet>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Stock</th>
+        <th>Unidad</th>
+        <th>Costo Unitario</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let ing of ingredients">
+        <td>{{ ing.idIngredient }}</td>
+        <td>{{ ing.name }}</td>
+        <td>{{ ing.stock }}</td>
+        <td>{{ ing.unit }}</td>
+        <td>S/ {{ ing.unitCost | number:'1.2-2' }}</td>
+        <td>
+          <button [routerLink]="['edit', ing.idIngredient]">Editar</button>
+          <button (click)="deleteIngredient(ing.idIngredient)">Eliminar</button>
+        </td>
+      </tr>
+      <tr *ngIf="ingredients.length === 0">
+        <td colspan="6">No hay ingredientes registrados.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

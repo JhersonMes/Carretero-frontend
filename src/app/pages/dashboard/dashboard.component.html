@@ -1,0 +1,38 @@
+<div class="dashboard">
+  <h1>Panel principal</h1>
+  <p class="lead">Bienvenido al sistema de gestion de Carretero.</p>
+
+  <section class="session-card" *ngIf="authService.currentUser() as user">
+    <div class="session-monogram" [style.background]="roleDisplay(user.role.name).color">
+      {{ roleDisplay(user.role.name).monogram }}
+    </div>
+    <div class="session-copy">
+      <span class="session-label">Sesion iniciada como</span>
+      <span class="session-fullname">{{ user.fullName || user.username }}</span>
+      <span class="session-role">
+        Rol: <strong>{{ roleDisplay(user.role.name).label }}</strong>
+        <span class="session-group">&middot; Area: {{ roleDisplay(user.role.name).group }}</span>
+      </span>
+    </div>
+  </section>
+
+  <p class="hint">
+    Este panel se muestra igual para todos los roles por el momento; la seccion superior indica
+    siempre cual es tu rol y estacion de trabajo.
+  </p>
+
+  <div class="cards-grid">
+    <div class="card">
+      <h3>Menus</h3>
+      <p>Gestion de cartas y precios.</p>
+    </div>
+    <div class="card">
+      <h3>Ingredientes</h3>
+      <p>Control de stock e insumos.</p>
+    </div>
+    <div class="card">
+      <h3>Metodos de pago</h3>
+      <p>Configuracion de pasarelas de pago.</p>
+    </div>
+  </div>
+</div>

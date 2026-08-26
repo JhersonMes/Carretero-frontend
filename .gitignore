@@ -1,0 +1,40 @@
+# =============================================
+# Carretero Frontend - Angular
+# =============================================
+
+# ---------- Dependencias ----------
+node_modules/
+
+# ---------- Build / Compilación ----------
+dist/
+.angular/
+
+# ---------- IDE ----------
+.idea/
+*.swp
+*.swo
+
+# ---------- Logs ----------
+*.log
+npm-debug.log*
+
+# ---------- OS ----------
+.DS_Store
+Thumbs.db
+
+# ---------- Environment (producción) ----------
+# Si en el futuro agregas secrets en environment.prod.ts, descoméntalo:
+# src/environments/environment.prod.ts
+
+# ---------- Editor VS Code ----------
+.vscode/
+
+# ---------- Variables de entorno ----------
+.env
+.env.*
+!.env.example
+
+# ---------- Build incremental / cobertura ----------
+*.tsbuildinfo
+coverage/
+yarn-error.log*

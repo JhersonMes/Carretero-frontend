@@ -1,0 +1,31 @@
+<div>
+  <h2>Gestión de Roles</h2>
+  <button routerLink="new">+ Nuevo Rol</button>
+
+  <router-outlet></router-outlet>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Descripción</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let role of roles">
+        <td>{{ role.idRole }}</td>
+        <td>{{ role.name }}</td>
+        <td>{{ role.description }}</td>
+        <td>
+          <button [routerLink]="['edit', role.idRole]">Editar</button>
+          <button (click)="deleteRole(role.idRole)">Eliminar</button>
+        </td>
+      </tr>
+      <tr *ngIf="roles.length === 0">
+        <td colspan="4">No hay roles registrados.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

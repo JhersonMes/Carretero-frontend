@@ -1,0 +1,33 @@
+<div>
+  <h2>Métodos de Pago</h2>
+  <button routerLink="new">+ Nuevo Método de Pago</button>
+
+  <router-outlet></router-outlet>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Descripción</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let pm of methods">
+        <td>{{ pm.idPaymentMethod }}</td>
+        <td>{{ pm.name }}</td>
+        <td>{{ pm.description }}</td>
+        <td>{{ pm.active ? 'Activo' : 'Inactivo' }}</td>
+        <td>
+          <button [routerLink]="['edit', pm.idPaymentMethod]">Editar</button>
+          <button (click)="deleteMethod(pm.idPaymentMethod)">Eliminar</button>
+        </td>
+      </tr>
+      <tr *ngIf="methods.length === 0">
+        <td colspan="5">No hay métodos de pago registrados.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

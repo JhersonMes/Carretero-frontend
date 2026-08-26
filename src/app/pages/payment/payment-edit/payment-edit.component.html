@@ -1,0 +1,30 @@
+<div style="border: 1px solid #aaa; padding: 15px; margin: 15px 0; background: #fff;">
+  <h3>{{ isEdit ? 'Editar Pago' : 'Nuevo Registro de Pago' }}</h3>
+  <form (ngSubmit)="save()">
+    <div class="form-group">
+      <label>Monto (S/):</label>
+      <input type="number" step="0.1" [(ngModel)]="amount" name="amount" required>
+    </div>
+    <div class="form-group">
+      <label>RUC / DNI del Cliente:</label>
+      <input type="text" [(ngModel)]="rucClient" name="rucClient" required>
+    </div>
+    <div class="form-group">
+      <label>Nombre / Razón Social del Cliente:</label>
+      <input type="text" [(ngModel)]="clientName" name="clientName" required>
+    </div>
+    <div class="form-group">
+      <label>Método de Pago:</label>
+      <select [(ngModel)]="idPaymentMethod" name="idPaymentMethod" required>
+        <option [value]="0">Seleccione Método de Pago</option>
+        <option *ngFor="let pm of paymentMethods" [value]="pm.idPaymentMethod">{{ pm.name }}</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Detalles / Observaciones:</label>
+      <textarea [(ngModel)]="details" name="details" rows="3"></textarea>
+    </div>
+    <button type="submit">Guardar Pago</button>
+    <button type="button" routerLink="/pages/payment">Cancelar</button>
+  </form>
+</div>

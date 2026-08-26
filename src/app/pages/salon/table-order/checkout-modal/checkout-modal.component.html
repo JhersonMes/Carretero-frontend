@@ -1,0 +1,123 @@
+<div class="modal-overlay" (click)="close()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <h2>Cobrar {{ order.table?.name || order.orderCode }}</h2>
+
+    <ng-container *ngIf="!fullyPaid">
+      <div class="pay-summary" *ngIf="!splitMode">
+        <span>Saldo pendiente</span>
+        <strong>S/ {{ remainingBalance.toFixed(2) }}</strong>
+      </div>
+
+      <button type="button" class="split-toggle" (click)="toggleSplitMode()">
+        {{ splitMode ? '‹ Volver a cobrar todo junto' : 'Dividir cuenta por productos ›' }}
+      </button>
+
+      <ng-container *ngIf="splitMode">
+        <p class="modal-hint">Selecciona solo los productos que incluye este cobro.</p>
+
+        <div class="items-list">
+          <label class="item-row" *ngFor="let detail of order.details">
+            <input
+              type="checkbox"
+              [checked]="detail.idOrderDetail && selectedDetailIds.has(detail.idOrderDetail)"
+              (change)="toggleDetail(detail.idOrderDetail)"
+            />
+            <span class="item-name">{{ detail.quantity }}x {{ detail.productName }}</span>
+            <span class="item-subtotal">S/ {{ detail.subtotal.toFixed(2) }}</span>
+          </label>
+        </div>
+
+        <div class="balance-row">
+          <span>Seleccionado: <strong>S/ {{ selectedSubtotal.toFixed(2) }}</strong></span>
+          <span>Saldo pendiente: <strong>S/ {{ remainingBalance.toFixed(2) }}</strong></span>
+        </div>
+      </ng-container>
+
+      <h3>Metodo(s) de pago</h3>
+      <div class="payment-line" *ngFor="let line of paymentLines">
+        <select [(ngModel)]="line.idPaymentMethod">
+          <option *ngFor="let m of paymentMethods" [value]="m.idPaymentMethod">{{ m.name }}</option>
+        </select>
+        <input type="number" min="0" [max]="remainingBalance" step="0.5" [(ngModel)]="line.amount" placeholder="0.00" />
+        <button
+          type="button"
+          class="remove-line-btn"
+          (click)="removePaymentLine(line)"
+          [disabled]="paymentLines.length <= 1"
+        >
+          &times;
+        </button>
+      </div>
+
+      <div class="payment-line-actions">
+        <button type="button" class="secondary" (click)="useSuggestedAmount()">Usar monto sugerido</button>
+        <button type="button" class="secondary" (click)="addPaymentLine()">+ Agregar metodo</button>
+      </div>
+
+      <p class="lines-total" [class.over]="overpaying">Total ingresado: S/ {{ paymentLinesTotal.toFixed(2) }}</p>
+      <p class="overpay-warning" *ngIf="overpaying">
+        Supera el saldo pendiente (S/ {{ remainingBalance.toFixed(2) }}).
+      </p>
+
+      <h3>Comprobante</h3>
+      <div class="invoice-type-row">
+        <button
+          type="button"
+          class="invoice-type-btn"
+          [class.active]="invoiceType === 'BOLETA'"
+          (click)="invoiceType = 'BOLETA'"
+        >
+          Boleta
+        </button>
+        <button
+          type="button"
+          class="invoice-type-btn"
+          [class.active]="invoiceType === 'FACTURA'"
+          (click)="invoiceType = 'FACTURA'"
+        >
+          Factura
+        </button>
+        <button
+          type="button"
+          class="invoice-type-btn"
+          [class.active]="invoiceType === 'NOTA_VENTA'"
+          (click)="invoiceType = 'NOTA_VENTA'"
+        >
+          Nota de venta
+        </button>
+      </div>
+
+      <div class="form-group" *ngIf="showDocNumber">
+        <label>{{ docNumberLabel }}</label>
+        <input type="text" [(ngModel)]="docNumber" placeholder="Ej. 10453218976" />
+      </div>
+
+      <div class="form-group">
+        <label>Nombre del cliente (opcional)</label>
+        <input type="text" [(ngModel)]="clientName" placeholder="Ej. Juan Perez" />
+      </div>
+
+      <p class="invoice-note">
+        El comprobante se emite automaticamente cuando el pedido queda totalmente pagado.
+      </p>
+
+      <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
+      <div class="success-message" *ngIf="successMessage">{{ successMessage }}</div>
+
+      <div class="modal-actions">
+        <button type="button" class="secondary" (click)="close()">Cancelar</button>
+        <button type="button" class="confirm-btn" [disabled]="submitting || overpaying" (click)="submit()">
+          {{ submitting ? 'Procesando...' : 'Cobrar' }}
+        </button>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="fullyPaid">
+      <div class="success-message big" *ngIf="successMessage">{{ successMessage }}</div>
+      <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
+      <div class="modal-actions">
+        <button type="button" class="confirm-btn" (click)="close()">Listo</button>
+      </div>
+    </ng-container>
+  </div>
+</div>

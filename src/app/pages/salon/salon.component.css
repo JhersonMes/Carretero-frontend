@@ -1,0 +1,116 @@
+.salon-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.tab-switch {
+  display: inline-flex;
+  align-self: flex-start;
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  border-radius: 999px;
+  padding: 4px;
+  gap: 4px;
+}
+
+.tab-switch button {
+  margin: 0;
+  padding: 8px 24px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 0.9rem;
+  box-shadow: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tab-switch button:hover {
+  background: var(--surface);
+  color: var(--text-primary);
+  box-shadow: none;
+}
+
+.tab-switch button.active {
+  background: var(--carretero-red);
+  color: var(--carretero-white);
+  border-color: var(--carretero-red);
+}
+
+.salon-header {
+  margin-bottom: 8px;
+}
+
+.salon-header h1 {
+  margin: 0 0 4px 0;
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.lead {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.floor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 18px;
+}
+
+.table-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  padding: 20px;
+  background: color-mix(in srgb, var(--status-color) 8%, var(--surface-card));
+  border: 2px solid var(--status-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.table-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  background: color-mix(in srgb, var(--status-color) 8%, var(--surface-card));
+}
+
+.table-name {
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+}
+
+.table-capacity {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 999px;
+  color: var(--carretero-white);
+  font-size: 0.66rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+}

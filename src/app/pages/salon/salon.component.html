@@ -1,0 +1,33 @@
+<div class="salon-page">
+  <div class="tab-switch">
+    <button type="button" [class.active]="tab === 'MESA'" (click)="selectTab('MESA')">Mesa</button>
+    <button type="button" [class.active]="tab === 'BARRA'" (click)="selectTab('BARRA')">Barra</button>
+  </div>
+
+  <div class="salon-header">
+    <h1>{{ tab === 'MESA' ? 'Salón' : 'Barra' }}</h1>
+    <p class="lead">
+      {{ tab === 'MESA' ? 'Selecciona una mesa para tomar el pedido.' : 'Selecciona una barra para tomar el pedido.' }}
+    </p>
+  </div>
+
+  <div class="floor-grid">
+    <button
+      type="button"
+      class="table-card"
+      *ngFor="let table of visibleTables"
+      [style.--status-color]="statusMeta[table.status].color"
+      (click)="openTable(table)"
+    >
+      <span class="table-name">{{ table.name }}</span>
+      <span class="table-capacity">{{ table.capacity }} personas</span>
+      <span class="status-badge" [style.background]="statusMeta[table.status].color">
+        {{ statusMeta[table.status].label }}
+      </span>
+    </button>
+
+    <p class="empty-state" *ngIf="visibleTables.length === 0">
+      No hay {{ tab === 'MESA' ? 'mesas' : 'barras' }} registradas en esta sección.
+    </p>
+  </div>
+</div>

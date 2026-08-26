@@ -1,0 +1,37 @@
+<div>
+  <h2>Gestión de Cartas y Menús</h2>
+  <button routerLink="new">+ Nuevo Platillo</button>
+
+  <router-outlet></router-outlet>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Descripción</th>
+        <th>Precio</th>
+        <th>Categoría</th>
+        <th>Disponible</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let m of menus">
+        <td>{{ m.idMenu }}</td>
+        <td>{{ m.name }}</td>
+        <td>{{ m.description }}</td>
+        <td>S/ {{ m.price | number:'1.2-2' }}</td>
+        <td>{{ m.category }}</td>
+        <td>{{ m.available ? 'Sí' : 'No' }}</td>
+        <td>
+          <button [routerLink]="['edit', m.idMenu]">Editar</button>
+          <button (click)="deleteMenu(m.idMenu)">Eliminar</button>
+        </td>
+      </tr>
+      <tr *ngIf="menus.length === 0">
+        <td colspan="7">No hay menús registrados.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,23 @@
+<div style="border: 1px solid #aaa; padding: 15px; margin: 15px 0; background: #fff;">
+  <h3>{{ isEdit ? 'Editar Ingrediente' : 'Nuevo Ingrediente' }}</h3>
+  <form (ngSubmit)="save()">
+    <div class="form-group">
+      <label>Nombre:</label>
+      <input type="text" [(ngModel)]="name" name="name" required>
+    </div>
+    <div class="form-group">
+      <label>Stock:</label>
+      <input type="number" [(ngModel)]="stock" name="stock" required>
+    </div>
+    <div class="form-group">
+      <label>Unidad de Medida:</label>
+      <input type="text" [(ngModel)]="unit" name="unit" placeholder="Ej. kg, litros, un" required>
+    </div>
+    <div class="form-group">
+      <label>Costo Unitario (S/):</label>
+      <input type="number" step="0.01" [(ngModel)]="unitCost" name="unitCost" required>
+    </div>
+    <button type="submit">Guardar</button>
+    <button type="button" routerLink="/pages/ingredient">Cancelar</button>
+  </form>
+</div>

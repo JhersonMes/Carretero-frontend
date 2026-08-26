@@ -1,0 +1,35 @@
+<div class="app-shell">
+  <header class="app-header">
+    <div class="brand">
+      <app-logo class="brand-icon" [size]="38" [animated]="false" [showWordmark]="false"></app-logo>
+      <div class="brand-text">
+        <app-logo class="brand-name" [size]="150" [animated]="false" [showWordmark]="false" [textOnly]="true"></app-logo>
+        <span class="brand-subtitle">Sistema de Ventas</span>
+      </div>
+    </div>
+
+    <div class="session-info" *ngIf="authService.currentUser() as user">
+      <div class="session-details">
+        <span class="session-name">{{ user.fullName || user.username }}</span>
+        <span class="session-badge" [style.background]="roleDisplay(user.role.name).color">
+          {{ roleDisplay(user.role.name).label }}
+        </span>
+      </div>
+      <button type="button" class="logout-btn" (click)="logout()">Cerrar sesion</button>
+    </div>
+  </header>
+
+  <div class="app-body">
+    <nav class="app-sidebar">
+      <ul>
+        <li *ngFor="let item of navItems">
+          <a [routerLink]="item.path" routerLinkActive="active">{{ item.label }}</a>
+        </li>
+      </ul>
+    </nav>
+
+    <main class="app-main">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

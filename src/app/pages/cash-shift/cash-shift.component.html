@@ -1,0 +1,135 @@
+<div class="cash-page">
+  <h1>Caja</h1>
+
+  <div *ngIf="!loading">
+    <!-- Caja aperturada -->
+    <div class="shift-card open" *ngIf="activeShift">
+      <div class="shift-status">
+        <span class="status-dot"></span>
+        <span>Caja aperturada</span>
+      </div>
+
+      <div class="shift-details">
+        <div class="detail">
+          <span class="detail-label">Aperturada por</span>
+          <span class="detail-value">{{ activeShift.user?.fullName || activeShift.user?.username }}</span>
+        </div>
+        <div class="detail">
+          <span class="detail-label">Hora de apertura</span>
+          <span class="detail-value">{{ activeShift.openTime | date: 'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+        <div class="detail">
+          <span class="detail-label">Monto inicial</span>
+          <span class="detail-value">S/ {{ activeShift.initialAmount.toFixed(2) }}</span>
+        </div>
+        <div class="detail">
+          <span class="detail-label">Efectivo esperado</span>
+          <span class="detail-value">S/ {{ (activeShift.expectedCash ?? 0).toFixed(2) }}</span>
+        </div>
+      </div>
+
+      <div class="sales-grid">
+        <div class="sale-tile">
+          <span class="sale-label">Efectivo</span>
+          <span class="sale-value">S/ {{ (activeShift.cashSales ?? 0).toFixed(2) }}</span>
+        </div>
+        <div class="sale-tile">
+          <span class="sale-label">Tarjeta</span>
+          <span class="sale-value">S/ {{ (activeShift.cardSales ?? 0).toFixed(2) }}</span>
+        </div>
+        <div class="sale-tile">
+          <span class="sale-label">Yape</span>
+          <span class="sale-value">S/ {{ (activeShift.yapeSales ?? 0).toFixed(2) }}</span>
+        </div>
+        <div class="sale-tile">
+          <span class="sale-label">Plin</span>
+          <span class="sale-value">S/ {{ (activeShift.plinSales ?? 0).toFixed(2) }}</span>
+        </div>
+      </div>
+
+      <button type="button" class="close-shift-btn" (click)="openCloseModal()">Cerrar caja</button>
+    </div>
+
+    <!-- Sin caja aperturada -->
+    <div class="shift-card closed" *ngIf="!activeShift">
+      <div class="shift-status">
+        <span class="status-dot inactive"></span>
+        <span>No hay una caja aperturada</span>
+      </div>
+      <p class="closed-hint">
+        Debes aperturar la caja antes de poder enviar pedidos desde Venta rapida o Salon.
+      </p>
+      <button type="button" class="open-shift-btn" (click)="openOpenModal()">Aperturar caja</button>
+    </div>
+  </div>
+
+  <!-- Modal: aperturar caja -->
+  <div class="modal-overlay" *ngIf="showOpenModal" (click)="closeOpenModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h2>Aperturar caja</h2>
+      <p class="modal-hint">Indica con cuanto efectivo se abre la caja.</p>
+
+      <div class="amount-display">S/ {{ (openAmount ?? 0).toFixed(2) }}</div>
+
+      <div class="preset-row">
+        <button
+          type="button"
+          class="preset-btn"
+          *ngFor="let preset of amountPresets"
+          [class.active]="openAmount === preset"
+          (click)="pickPresetAmount(preset)"
+        >
+          S/ {{ preset }}
+        </button>
+      </div>
+
+      <div class="form-group">
+        <label for="openAmount">O ingresa un monto</label>
+        <input type="number" id="openAmount" min="0" step="0.5" [(ngModel)]="openAmount" placeholder="0.00" />
+      </div>
+
+      <div class="form-group">
+        <label for="openNotes">Notas (opcional)</label>
+        <input type="text" id="openNotes" [(ngModel)]="openNotes" placeholder="Ej. turno mañana" />
+      </div>
+
+      <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+      <div class="modal-actions">
+        <button type="button" class="secondary" (click)="closeOpenModal()">Cancelar</button>
+        <button type="button" class="confirm-btn" [disabled]="opening" (click)="confirmOpenShift()">
+          {{ opening ? 'Aperturando...' : 'Aperturar caja' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: cerrar caja -->
+  <div class="modal-overlay" *ngIf="showCloseModal" (click)="closeCloseModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h2>Cerrar caja</h2>
+      <p class="modal-hint">
+        Efectivo esperado: <strong>S/ {{ (activeShift?.expectedCash ?? 0).toFixed(2) }}</strong>
+      </p>
+
+      <div class="form-group">
+        <label for="closeAmount">Efectivo contado</label>
+        <input type="number" id="closeAmount" min="0" step="0.5" [(ngModel)]="closeAmount" placeholder="0.00" />
+      </div>
+
+      <div class="form-group">
+        <label for="closeNotes">Notas (opcional)</label>
+        <input type="text" id="closeNotes" [(ngModel)]="closeNotes" placeholder="Ej. diferencia por vueltos" />
+      </div>
+
+      <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+      <div class="modal-actions">
+        <button type="button" class="secondary" (click)="closeCloseModal()">Cancelar</button>
+        <button type="button" class="confirm-btn" [disabled]="closing" (click)="confirmCloseShift()">
+          {{ closing ? 'Cerrando...' : 'Cerrar caja' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,37 @@
+<div class="kitchen-page">
+  <h1>Comandas</h1>
+  <p class="lead" *ngIf="station">Pedidos pendientes para el area de {{ station | titlecase }}.</p>
+
+  <div class="ticket-grid" *ngIf="station">
+    <div class="ticket-card" *ngFor="let item of items" [ngClass]="urgency(item)">
+      <div class="ticket-header">
+        <span class="ticket-table">{{ item.tableName }}</span>
+        <span class="ticket-code">{{ item.orderCode }}</span>
+      </div>
+
+      <div class="ticket-body">
+        <span class="ticket-qty">{{ item.quantity }}x</span>
+        <span class="ticket-product">{{ item.productName }}</span>
+      </div>
+
+      <span class="ticket-flavor" *ngIf="item.flavorName">{{ item.flavorName }}</span>
+
+      <p class="ticket-notes" *ngIf="item.notes">{{ item.notes }}</p>
+
+      <div class="ticket-meta">
+        <span class="ticket-status" [class.in-progress]="item.itemStatus === 'EN_PREPARACION'">
+          {{ item.itemStatus === 'EN_PREPARACION' ? 'En preparacion' : 'Pendiente' }}
+        </span>
+        <span class="ticket-timer" [ngClass]="urgency(item)">{{ elapsedLabel(item) }}</span>
+      </div>
+
+      <button type="button" class="advance-btn" (click)="advance(item)">{{ actionLabel(item) }}</button>
+    </div>
+
+    <p class="empty-state" *ngIf="!loading && items.length === 0">No hay pedidos pendientes por ahora.</p>
+  </div>
+
+  <p class="no-station" *ngIf="!loading && !station">
+    Tu rol no tiene una estacion de cocina asignada.
+  </p>
+</div>

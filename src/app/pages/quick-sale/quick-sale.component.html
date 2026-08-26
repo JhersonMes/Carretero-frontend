@@ -1,0 +1,76 @@
+<div class="quick-sale-page">
+  <div class="page-header">
+    <h1>Venta rapida</h1>
+    <p class="lead">Selecciona los productos y envia el pedido.</p>
+  </div>
+
+  <div class="shift-warning" *ngIf="!checkingShift && !activeShift">
+    No hay una caja aperturada. <a routerLink="/pages/cash-shift">Apertura la caja</a> antes de enviar pedidos.
+  </div>
+
+  <div class="order-builder-layout">
+    <div class="order-main">
+      <div class="category-tabs">
+        <button
+          type="button"
+          class="category-tab"
+          *ngFor="let category of categories"
+          [class.active]="selectedCategory?.idCategory === category.idCategory"
+          (click)="selectCategory(category)"
+        >
+          {{ category.name }}
+        </button>
+      </div>
+
+      <div class="product-grid">
+        <button type="button" class="product-card" *ngFor="let product of products" (click)="addToCart(product)">
+          <span class="product-name">{{ product.name }}</span>
+          <span class="product-price">S/ {{ product.price.toFixed(2) }}</span>
+        </button>
+
+        <p class="empty-state" *ngIf="products.length === 0">Esta categoria no tiene productos.</p>
+      </div>
+    </div>
+
+    <aside class="cart-panel">
+      <h2>Pedido</h2>
+
+      <div class="cart-lines" *ngIf="cart.length > 0; else emptyCart">
+        <div class="cart-line" *ngFor="let line of cart">
+          <div class="cart-line-info">
+            <span class="cart-line-name">{{ line.product.name }}</span>
+            <span class="cart-line-flavor" *ngIf="line.flavor">{{ line.flavor.name }}</span>
+            <span class="cart-line-price">S/ {{ (line.unitPrice * line.quantity).toFixed(2) }}</span>
+          </div>
+          <div class="cart-line-qty">
+            <button type="button" (click)="decrementLine(line)">-</button>
+            <span>{{ line.quantity }}</span>
+            <button type="button" (click)="incrementLine(line)">+</button>
+          </div>
+        </div>
+      </div>
+      <ng-template #emptyCart>
+        <p class="cart-empty-msg">Aun no has agregado productos.</p>
+      </ng-template>
+
+      <div class="cart-total">
+        <span>Total</span>
+        <span>S/ {{ total.toFixed(2) }}</span>
+      </div>
+
+      <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
+      <div class="success-message" *ngIf="successMessage">{{ successMessage }}</div>
+
+      <button type="button" class="send-btn" [disabled]="!canSend" (click)="sendOrder()">
+        {{ sending ? 'Enviando...' : 'Enviar pedido' }}
+      </button>
+    </aside>
+  </div>
+
+  <app-flavor-modal
+    *ngIf="pendingFlavorProduct"
+    [product]="pendingFlavorProduct"
+    (confirmed)="onFlavorChosen($event)"
+    (cancelled)="onFlavorCancelled()"
+  ></app-flavor-modal>
+</div>

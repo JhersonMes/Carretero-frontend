@@ -1,0 +1,217 @@
+.login-page {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  background: #f6f3f0;
+}
+
+/* --- Panel izquierdo: contenedor del formulario --- */
+.login-panel {
+  flex: 0 1 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f6f3f0;
+  padding: 40px 24px;
+}
+
+/* --- Cuadro con esquinas curvas (Card) --- */
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--carretero-white);
+  border-radius: 22px;
+  border: 1px solid rgba(228, 223, 218, 0.85);
+  box-shadow: 0 14px 40px rgba(32, 31, 31, 0.08), 0 2px 10px rgba(32, 31, 31, 0.03);
+  padding: 42px 36px 36px;
+}
+
+.login-card-header h1 {
+  font-size: 1.9rem;
+  font-weight: 800;
+  color: var(--carretero-ink);
+  margin-bottom: 6px;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin-bottom: 26px;
+  line-height: 1.45;
+}
+
+.login-form .form-group {
+  margin-bottom: 18px;
+}
+
+.login-form .form-group label {
+  display: block;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--carretero-ink);
+  margin-bottom: 6px;
+}
+
+.login-form .form-group input {
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 0.92rem;
+  border-radius: 10px;
+  border: 1.5px solid #dfd9d3;
+  background: #faf8f6;
+  color: var(--carretero-ink);
+  transition: all 0.2s ease;
+}
+
+.login-form .form-group input:focus {
+  outline: none;
+  background: #ffffff;
+  border-color: var(--carretero-red);
+  box-shadow: 0 0 0 3px rgba(227, 27, 34, 0.14);
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 13px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 10px;
+  background: var(--carretero-red);
+  color: var(--carretero-white);
+  border: none;
+  box-shadow: 0 4px 16px rgba(227, 27, 34, 0.32);
+  margin-top: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.submit-btn:hover {
+  background: var(--carretero-red-dark);
+  box-shadow: 0 6px 20px rgba(227, 27, 34, 0.45);
+  transform: translateY(-1px);
+}
+
+.submit-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(227, 27, 34, 0.3);
+}
+
+.error-message {
+  color: var(--carretero-red-dark);
+  background: #fdecec;
+  border: 1px solid #f6c8c8;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+
+.forgot-password {
+  margin-top: 22px;
+  text-align: center;
+}
+
+.forgot-password-link {
+  background: none;
+  border: none;
+  color: var(--carretero-red);
+  font-weight: 600;
+  font-size: 0.84rem;
+  padding: 4px 0;
+  margin: 0;
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.forgot-password-link:hover {
+  background: none;
+  color: var(--carretero-red-darker);
+  box-shadow: none;
+}
+
+.forgot-password-info {
+  margin-top: 12px;
+  background: #f8f6f4;
+  border: 1px solid var(--surface-border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-align: left;
+  line-height: 1.45;
+}
+
+/* --- Panel derecho: marca con degradado y logo grande --- */
+.brand-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 50% 32%, #ff3b3b 0%, var(--carretero-red) 45%, var(--carretero-red-darker) 100%);
+  padding: 48px 32px;
+}
+
+.brand-panel-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  color: var(--carretero-white);
+  max-width: 520px;
+  width: 100%;
+}
+
+.brand-panel-inner app-logo {
+  filter: drop-shadow(0 14px 32px rgba(0, 0, 0, 0.28));
+  display: block;
+}
+
+.brand-panel-inner h2 {
+  color: var(--carretero-white);
+  margin-top: 28px;
+  margin-bottom: 10px;
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.brand-panel-inner p {
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 1rem;
+  line-height: 1.5;
+  margin: 0;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+@media (max-width: 920px) {
+  .login-page {
+    flex-direction: column;
+  }
+
+  .login-panel {
+    flex: none;
+    padding: 36px 18px;
+  }
+
+  .login-card {
+    padding: 32px 24px;
+    border-radius: 18px;
+  }
+
+  .brand-panel {
+    flex: none;
+    padding: 44px 20px 32px;
+    order: -1;
+  }
+
+  .brand-panel-inner h2 {
+    font-size: 1.4rem;
+    margin-top: 18px;
+  }
+}

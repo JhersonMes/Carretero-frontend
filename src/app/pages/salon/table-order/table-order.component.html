@@ -1,0 +1,110 @@
+<div class="order-page" *ngIf="table">
+  <div class="order-header">
+    <a routerLink="/pages/salon" class="back-link">&larr; Salon</a>
+    <div class="order-header-title">
+      <h1>{{ table.name }}</h1>
+      <p class="lead">{{ table.capacity }} personas</p>
+    </div>
+  </div>
+
+  <div class="order-builder-layout">
+    <div class="order-main">
+      <div class="category-tabs">
+        <button
+          type="button"
+          class="category-tab"
+          *ngFor="let category of categories"
+          [class.active]="selectedCategory?.idCategory === category.idCategory"
+          (click)="selectCategory(category)"
+        >
+          {{ category.name }}
+        </button>
+      </div>
+
+      <div class="product-grid">
+        <button type="button" class="product-card" *ngFor="let product of products" (click)="addToCart(product)">
+          <span class="product-name">{{ product.name }}</span>
+          <span class="product-price">S/ {{ product.price.toFixed(2) }}</span>
+        </button>
+
+        <p class="empty-state" *ngIf="products.length === 0">Esta categoria no tiene productos.</p>
+      </div>
+    </div>
+
+    <aside class="cart-panel">
+      <h2>Pedido</h2>
+
+      <div class="sent-section" *ngIf="currentOrder && currentOrder.details && currentOrder.details.length > 0">
+        <span class="section-label">Ya enviado</span>
+        <div class="cart-lines">
+          <div class="cart-line sent" *ngFor="let detail of currentOrder.details">
+            <div class="cart-line-info">
+              <span class="cart-line-name">{{ detail.quantity }}x {{ detail.productName }}</span>
+              <span class="cart-line-flavor" *ngIf="detail.flavorName">{{ detail.flavorName }}</span>
+              <span class="cart-line-price">S/ {{ detail.subtotal.toFixed(2) }}</span>
+            </div>
+            <span class="item-status-badge" [class]="'status-' + (detail.itemStatus || 'PENDIENTE')">
+              {{ detail.itemStatus === 'LISTO' ? 'Listo' : detail.itemStatus === 'EN_PREPARACION' ? 'En preparacion' : 'Pendiente' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="draft-section" *ngIf="draftCart.length > 0">
+        <span class="section-label">Por enviar</span>
+        <div class="cart-lines">
+          <div class="cart-line" *ngFor="let line of draftCart">
+            <div class="cart-line-info">
+              <span class="cart-line-name">{{ line.product.name }}</span>
+              <span class="cart-line-flavor" *ngIf="line.flavor">{{ line.flavor.name }}</span>
+              <span class="cart-line-price">S/ {{ (line.unitPrice * line.quantity).toFixed(2) }}</span>
+            </div>
+            <div class="cart-line-qty">
+              <button type="button" (click)="decrementLine(line)">-</button>
+              <span>{{ line.quantity }}</span>
+              <button type="button" (click)="incrementLine(line)">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p class="cart-empty-msg" *ngIf="!currentOrder && draftCart.length === 0">
+        Aun no has agregado productos.
+      </p>
+
+      <div class="cart-total">
+        <span>Total</span>
+        <span>S/ {{ grandTotal.toFixed(2) }}</span>
+      </div>
+
+      <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+      <button type="button" class="send-btn" [disabled]="draftCart.length === 0 || sending" (click)="sendOrder()">
+        {{ sending ? 'Enviando...' : 'Enviar pedido' }}
+      </button>
+
+      <button
+        type="button"
+        class="charge-btn"
+        *ngIf="currentOrder && canCharge"
+        (click)="openCheckout()"
+      >
+        Cobrar
+      </button>
+    </aside>
+  </div>
+
+  <app-flavor-modal
+    *ngIf="pendingFlavorProduct"
+    [product]="pendingFlavorProduct"
+    (confirmed)="onFlavorChosen($event)"
+    (cancelled)="onFlavorCancelled()"
+  ></app-flavor-modal>
+
+  <app-checkout-modal
+    *ngIf="showCheckout && currentOrder"
+    [order]="currentOrder"
+    (closed)="closeCheckout()"
+    (paid)="onPaid()"
+  ></app-checkout-modal>
+</div>
