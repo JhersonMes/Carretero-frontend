@@ -58,11 +58,26 @@
         <span>S/ {{ total.toFixed(2) }}</span>
       </div>
 
+      <div class="pay-with" *ngIf="paymentMethods.length">
+        <span class="pay-with-label">Cobrar con</span>
+        <div class="method-row">
+          <button
+            type="button"
+            class="method-chip"
+            *ngFor="let method of paymentMethods"
+            [class.active]="selectedMethodId === method.idPaymentMethod"
+            (click)="selectMethod(method)"
+          >
+            {{ method.name }}
+          </button>
+        </div>
+      </div>
+
       <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
       <div class="success-message" *ngIf="successMessage">{{ successMessage }}</div>
 
       <button type="button" class="send-btn" [disabled]="!canSend" (click)="sendOrder()">
-        {{ sending ? 'Enviando...' : 'Enviar pedido' }}
+        {{ sendLabel }}
       </button>
     </aside>
   </div>

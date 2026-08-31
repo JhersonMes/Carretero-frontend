@@ -8,6 +8,7 @@ export * from './product';
 export * from './flavor';
 export * from './price-history';
 export * from './dining-table';
+export * from './table-board';
 export * from './order-detail';
 export * from './order';
 export * from './order-create-request';

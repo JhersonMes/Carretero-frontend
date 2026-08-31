@@ -196,3 +196,134 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+/* --- Cobros pendientes --- */
+.pending-warning {
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  background: #fdecec;
+  border: 1px solid rgba(227, 27, 34, 0.3);
+  border-left: 4px solid var(--carretero-red);
+}
+
+.pending-warning strong {
+  display: block;
+  font-size: 0.88rem;
+  color: var(--carretero-red-darker);
+  margin-bottom: 3px;
+}
+
+.pending-warning p {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-primary);
+}
+
+.pending-group {
+  margin-bottom: 16px;
+}
+
+.pending-group h3 {
+  margin: 0 0 8px;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.pending-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pending-item {
+  width: 100%;
+  margin: 0;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  text-align: left;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  color: var(--text-primary);
+  box-shadow: none;
+}
+
+.pending-item:hover {
+  background: #fdecec;
+  border-color: var(--carretero-red);
+  box-shadow: none;
+}
+
+.pending-name {
+  font-weight: 800;
+  font-size: 0.88rem;
+}
+
+.pending-waiters {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.pending-note {
+  font-size: 0.76rem;
+  font-style: italic;
+  margin-bottom: 16px;
+}
+
+.close-shift-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* --- Reporte del turno cerrado --- */
+.blind-note {
+  margin: 4px 0 20px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--surface-border);
+  font-size: 0.78rem;
+  font-style: italic;
+}
+
+.difference {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  border-left: 4px solid #2f9e58;
+}
+
+.difference.over {
+  border-left-color: #f0a202;
+}
+
+.difference.short {
+  border-left-color: var(--carretero-red);
+}
+
+.difference-label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.difference-value {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}

@@ -2,6 +2,10 @@ import { Routes } from '@angular/router';
 
 export const pagesRoutes: Routes = [
   {
+    path: 'home',
+    loadComponent: () => import('./home/home.component').then((m) => m.HomeComponent),
+  },
+  {
     path: 'dashboard',
     loadComponent: () =>
       import('./dashboard/dashboard.component').then((m) => m.DashboardComponent),
@@ -134,6 +138,11 @@ export const pagesRoutes: Routes = [
   {
     path: 'salon',
     loadComponent: () => import('./salon/salon.component').then((m) => m.SalonComponent),
+  },
+  {
+    path: 'table-layout',
+    loadComponent: () =>
+      import('./table-layout/table-layout.component').then((m) => m.TableLayoutComponent),
   },
   {
     path: 'salon/:id',

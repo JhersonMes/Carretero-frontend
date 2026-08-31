@@ -18,6 +18,7 @@ const ADMIN_NAV: NavItem[] = [
   { path: '/pages/catalog', label: 'Carta' },
   { path: '/pages/product', label: 'Precios' },
   { path: '/pages/client', label: 'Clientes' },
+  { path: '/pages/table-layout', label: 'Distribucion del salon' },
   { path: '/pages/ingredient', label: 'Ingredientes' },
   { path: '/pages/menu', label: 'Menus' },
   { path: '/pages/payment-method', label: 'Metodos de pago' },
@@ -25,12 +26,16 @@ const ADMIN_NAV: NavItem[] = [
 ];
 
 const MESERO_NAV: NavItem[] = [
+  { path: '/pages/home', label: 'Inicio' },
   { path: '/pages/salon', label: 'Salon' },
   { path: '/pages/quick-sale', label: 'Venta rapida' },
   { path: '/pages/cash-shift', label: 'Caja' },
 ];
 
-const KITCHEN_NAV: NavItem[] = [{ path: '/pages/kitchen', label: 'Comandas' }];
+const KITCHEN_NAV: NavItem[] = [
+  { path: '/pages/home', label: 'Inicio' },
+  { path: '/pages/kitchen', label: 'Comandas' },
+];
 
 const STATION_ROLES = ['COCINA', 'PARRILLA', 'BEBIDAS'];
 

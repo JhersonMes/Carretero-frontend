@@ -22,36 +22,99 @@
           <span class="detail-label">Monto inicial</span>
           <span class="detail-value">S/ {{ activeShift.initialAmount.toFixed(2) }}</span>
         </div>
+      </div>
+
+      <p class="blind-note">
+        Caja ciega: las ventas del turno y el efectivo esperado se muestran recien al cerrar,
+        para que el conteo se haga sin saber cuanto deberia haber.
+      </p>
+
+      <div class="pending-warning" *ngIf="hasPending">
+        <strong>Faltan cobros por hacer</strong>
+        <p>
+          Hay {{ pending.length }}
+          {{ pending.length === 1 ? 'mesa sin cobrar' : 'mesas sin cobrar' }} en el salon.
+          Se cobran todas antes de poder cerrar la caja.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="close-shift-btn"
+        [disabled]="checkingPending"
+        (click)="requestClose()"
+      >
+        {{ checkingPending ? 'Verificando cobros...' : 'Cerrar caja' }}
+      </button>
+    </div>
+
+    <!-- Reporte del turno recien cerrado -->
+    <div class="shift-card report" *ngIf="!activeShift && closedShift as report">
+      <div class="shift-status">
+        <span class="status-dot inactive"></span>
+        <span>Turno cerrado</span>
+      </div>
+
+      <div class="shift-details">
+        <div class="detail">
+          <span class="detail-label">Cerrada a las</span>
+          <span class="detail-value">{{ report.closeTime | date: 'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+        <div class="detail">
+          <span class="detail-label">Monto inicial</span>
+          <span class="detail-value">S/ {{ report.initialAmount.toFixed(2) }}</span>
+        </div>
         <div class="detail">
           <span class="detail-label">Efectivo esperado</span>
-          <span class="detail-value">S/ {{ (activeShift.expectedCash ?? 0).toFixed(2) }}</span>
+          <span class="detail-value">S/ {{ (report.expectedCash ?? 0).toFixed(2) }}</span>
         </div>
+        <div class="detail">
+          <span class="detail-label">Efectivo contado</span>
+          <span class="detail-value">S/ {{ (report.actualCash ?? 0).toFixed(2) }}</span>
+        </div>
+      </div>
+
+      <div
+        class="difference"
+        [class.over]="(report.difference ?? 0) > 0"
+        [class.short]="(report.difference ?? 0) < 0"
+      >
+        <span class="difference-label">
+          {{
+            (report.difference ?? 0) === 0
+              ? 'Caja cuadrada'
+              : (report.difference ?? 0) > 0
+                ? 'Sobrante'
+                : 'Faltante'
+          }}
+        </span>
+        <span class="difference-value">S/ {{ absDifference(report).toFixed(2) }}</span>
       </div>
 
       <div class="sales-grid">
         <div class="sale-tile">
           <span class="sale-label">Efectivo</span>
-          <span class="sale-value">S/ {{ (activeShift.cashSales ?? 0).toFixed(2) }}</span>
+          <span class="sale-value">S/ {{ (report.cashSales ?? 0).toFixed(2) }}</span>
         </div>
         <div class="sale-tile">
           <span class="sale-label">Tarjeta</span>
-          <span class="sale-value">S/ {{ (activeShift.cardSales ?? 0).toFixed(2) }}</span>
+          <span class="sale-value">S/ {{ (report.cardSales ?? 0).toFixed(2) }}</span>
         </div>
         <div class="sale-tile">
           <span class="sale-label">Yape</span>
-          <span class="sale-value">S/ {{ (activeShift.yapeSales ?? 0).toFixed(2) }}</span>
+          <span class="sale-value">S/ {{ (report.yapeSales ?? 0).toFixed(2) }}</span>
         </div>
         <div class="sale-tile">
           <span class="sale-label">Plin</span>
-          <span class="sale-value">S/ {{ (activeShift.plinSales ?? 0).toFixed(2) }}</span>
+          <span class="sale-value">S/ {{ (report.plinSales ?? 0).toFixed(2) }}</span>
         </div>
       </div>
 
-      <button type="button" class="close-shift-btn" (click)="openCloseModal()">Cerrar caja</button>
+      <button type="button" class="open-shift-btn" (click)="dismissClosedReport()">Entendido</button>
     </div>
 
     <!-- Sin caja aperturada -->
-    <div class="shift-card closed" *ngIf="!activeShift">
+    <div class="shift-card closed" *ngIf="!activeShift && !closedShift">
       <div class="shift-status">
         <span class="status-dot inactive"></span>
         <span>No hay una caja aperturada</span>
@@ -104,12 +167,59 @@
     </div>
   </div>
 
+  <!-- Modal: cobros pendientes (bloquea el cierre) -->
+  <div class="modal-overlay" *ngIf="showPendingModal" (click)="closePendingModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h2>Primero hay que cobrar</h2>
+      <p class="modal-hint">
+        No se puede cerrar la caja mientras queden mesas sin cobrar. Cobra estas y vuelve a
+        intentarlo.
+      </p>
+
+      <div class="pending-group" *ngIf="myPending.length">
+        <h3>Mesas que atendiste</h3>
+        <ul class="pending-list">
+          <li *ngFor="let item of myPending">
+            <button type="button" class="pending-item" (click)="goToTable(item)">
+              <span class="pending-name">{{ item.label }}</span>
+              <span class="pending-waiters">{{ item.waiters.join(', ') || 'Sin mesero registrado' }}</span>
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <div class="pending-group" *ngIf="otherPending.length">
+        <h3>{{ myPending.length ? 'Otras mesas sin cobrar' : 'Mesas sin cobrar' }}</h3>
+        <ul class="pending-list">
+          <li *ngFor="let item of otherPending">
+            <button type="button" class="pending-item" (click)="goToTable(item)">
+              <span class="pending-name">{{ item.label }}</span>
+              <span class="pending-waiters">{{ item.waiters.join(', ') || 'Sin mesero registrado' }}</span>
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <p class="pending-note">
+        Si varios meseros atendieron la misma mesa, basta con que cualquiera de ellos la cobre.
+      </p>
+
+      <div class="modal-actions">
+        <button type="button" class="secondary" (click)="closePendingModal()">Cerrar</button>
+        <button type="button" class="confirm-btn" [disabled]="checkingPending" (click)="recheckPending()">
+          {{ checkingPending ? 'Verificando...' : 'Ya cobre, verificar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal: cerrar caja -->
   <div class="modal-overlay" *ngIf="showCloseModal" (click)="closeCloseModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <h2>Cerrar caja</h2>
       <p class="modal-hint">
-        Efectivo esperado: <strong>S/ {{ (activeShift?.expectedCash ?? 0).toFixed(2) }}</strong>
+        Cuenta el efectivo que hay en caja y registralo. El resultado del arqueo se muestra
+        al confirmar el cierre.
       </p>
 
       <div class="form-group">

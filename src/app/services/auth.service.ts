@@ -19,10 +19,14 @@ export class AuthService {
     this._currentUser.set(null);
   }
 
+  /**
+   * Pantalla a la que se entra tras iniciar sesion. Salon y produccion caen en
+   * Inicio: da la bienvenida y resume el turno antes de mandarlos a operar.
+   */
   resolveHomeRoute(roleName: string | undefined | null): string {
     const role = (roleName ?? '').toUpperCase();
-    if (role === 'MESERO' || role === 'CAJERO') return '/pages/salon';
-    if (role === 'COCINA' || role === 'PARRILLA' || role === 'BEBIDAS') return '/pages/kitchen';
+    if (role === 'MESERO' || role === 'CAJERO') return '/pages/home';
+    if (role === 'COCINA' || role === 'PARRILLA' || role === 'BEBIDAS') return '/pages/home';
     return '/pages/dashboard';
   }
 }

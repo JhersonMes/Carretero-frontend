@@ -55,3 +55,48 @@
   cursor: not-allowed;
   box-shadow: none;
 }
+
+/* --- Metodo de cobro --- */
+.pay-with {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--surface-border);
+}
+
+.pay-with-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.method-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.method-chip {
+  margin: 0;
+  padding: 7px 12px;
+  font-size: 0.78rem;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1.5px solid var(--surface-border);
+  color: var(--text-primary);
+  box-shadow: none;
+}
+
+.method-chip:hover {
+  background: var(--surface-border);
+  box-shadow: none;
+}
+
+.method-chip.active {
+  background: var(--carretero-red);
+  border-color: var(--carretero-red);
+  color: var(--carretero-white);
+}

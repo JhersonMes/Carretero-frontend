@@ -57,19 +57,21 @@
   font-size: 0.95rem;
 }
 
+/* Tarjetas grandes: la mesa se lee de un vistazo desde el otro lado del salon. */
 .floor-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 20px;
 }
 
 .table-card {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
+  align-items: stretch;
+  gap: 12px;
   margin: 0;
-  padding: 20px;
+  padding: 22px 24px;
+  min-height: 190px;
   background: color-mix(in srgb, var(--status-color) 8%, var(--surface-card));
   border: 2px solid var(--status-color);
   border-radius: var(--radius-md);
@@ -85,21 +87,45 @@
   background: color-mix(in srgb, var(--status-color) 8%, var(--surface-card));
 }
 
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
 .table-name {
   font-weight: 800;
-  font-size: 1.1rem;
+  font-size: 1.6rem;
+  line-height: 1.1;
   color: var(--text-primary);
 }
 
+.card-sub {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: -4px;
+}
+
 .table-capacity {
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   color: var(--text-muted);
   font-weight: 600;
 }
 
+.order-code {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
 .status-badge {
   display: inline-block;
-  padding: 3px 12px;
+  flex-shrink: 0;
+  padding: 4px 13px;
   border-radius: 999px;
   color: var(--carretero-white);
   font-size: 0.66rem;
@@ -108,9 +134,134 @@
   letter-spacing: 0.04em;
 }
 
+/* ---------- Meseros que intervinieron ---------- */
+
+.waiters {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding-top: 10px;
+  border-top: 1px dashed color-mix(in srgb, var(--status-color) 35%, transparent);
+}
+
+.waiters-caption {
+  font-size: 0.63rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+}
+
+.waiter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.waiter-chip {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--status-color) 16%, var(--surface-card));
+  border: 1px solid color-mix(in srgb, var(--status-color) 40%, transparent);
+  color: var(--text-primary);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.waiter-chip.empty {
+  background: transparent;
+  border-style: dashed;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-style: italic;
+}
+
+/* ---------- Estado de cocina y cronometro ---------- */
+
+.kitchen-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: auto;
+  flex-wrap: wrap;
+}
+
+.kitchen-badge {
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.kitchen-badge.preparing {
+  background: #fff2d6;
+  border: 1px solid #f0a202;
+  color: #8a5a00;
+}
+
+.kitchen-badge.dispatched {
+  background: #dff3e5;
+  border: 1px solid #2f9e58;
+  color: #1d6b3a;
+}
+
+.timer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.15;
+}
+
+.timer-caption {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.timer-value {
+  font-size: 1.15rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.timer.fresh .timer-value {
+  color: var(--text-primary);
+}
+
+.timer.warn .timer-value {
+  color: #b57200;
+}
+
+.timer.late .timer-value {
+  color: var(--carretero-red);
+}
+
+/* El cronometro congelado deja de ser una alerta: la mesa ya fue atendida. */
+.timer.frozen .timer-value {
+  color: #1d6b3a;
+}
+
+.free-hint {
+  margin-top: auto;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-style: italic;
+  color: var(--text-muted);
+}
+
 .empty-state {
   grid-column: 1 / -1;
   text-align: center;
   padding: 40px 20px;
   color: var(--text-muted);
+}
+
+@media (max-width: 640px) {
+  .floor-grid {
+    grid-template-columns: 1fr;
+  }
 }
