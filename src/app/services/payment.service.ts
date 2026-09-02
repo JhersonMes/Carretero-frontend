@@ -18,6 +18,14 @@ export class PaymentService extends GenericService<Payment> {
     return this.http.get<Payment[]>(`${this.url}/shift/${idCashShift}`);
   }
 
+  /**
+   * Solo los cobros del usuario conectado en ese turno. El backend resuelve de
+   * quien son a partir de la sesion; aqui no se manda ningun id de usuario.
+   */
+  findMineByShift(idCashShift: number) {
+    return this.http.get<Payment[]>(`${this.url}/shift/${idCashShift}/mine`);
+  }
+
   registerPayments(request: PaymentCreateRequest) {
     return this.http.post<Payment[]>(this.url, request);
   }

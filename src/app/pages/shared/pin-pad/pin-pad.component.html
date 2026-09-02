@@ -1,0 +1,34 @@
+<div class="modal-overlay" (click)="cancel()">
+  <div class="modal-content pin-modal" (click)="$event.stopPropagation()">
+    <h2>PIN de autorizacion</h2>
+    <p class="modal-hint" *ngIf="subtitle">{{ subtitle }}</p>
+
+    <div class="pin-dots">
+      <span class="pin-dot" *ngFor="let filled of dots" [class.filled]="filled"></span>
+    </div>
+
+    <div class="keypad">
+      <button type="button" class="key" *ngFor="let k of keypad" (click)="press(k)">
+        {{ k }}
+      </button>
+      <button type="button" class="key erase" (click)="erase()">Borrar</button>
+      <button type="button" class="key" (click)="press('0')">0</button>
+      <button
+        type="button"
+        class="key ok"
+        [disabled]="verifying || !complete"
+        (click)="submit()"
+      >
+        {{ verifying ? '...' : 'OK' }}
+      </button>
+    </div>
+
+    <p class="keyboard-hint">Tambien puedes usar el teclado numerico: Enter confirma, Esc cancela.</p>
+
+    <div class="error-message" *ngIf="error">{{ error }}</div>
+
+    <div class="modal-actions">
+      <button type="button" class="secondary" (click)="cancel()">Cancelar</button>
+    </div>
+  </div>
+</div>

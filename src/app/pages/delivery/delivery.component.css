@@ -1,0 +1,568 @@
+.page-header h1 {
+  margin-bottom: 2px;
+}
+
+.page-header .lead {
+  margin: 0 0 18px;
+}
+
+.shift-warning {
+  background: #fff4e0;
+  border: 1px solid #f0c988;
+  color: #8a5a00;
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  margin-bottom: 18px;
+}
+
+.shift-warning a {
+  color: #8a5a00;
+  font-weight: 700;
+}
+
+/* --- Pasos --- */
+.steps {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.step {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: var(--surface-card);
+  border: 1.5px solid var(--surface-border);
+  color: var(--text-muted);
+  box-shadow: none;
+}
+
+.step:hover {
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.step:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.step.active {
+  background: var(--carretero-red);
+  border-color: var(--carretero-red);
+  color: var(--carretero-white);
+}
+
+.step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.08);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.step.active .step-num {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.step-sep {
+  flex: 0 0 24px;
+  height: 1.5px;
+  background: var(--surface-border);
+}
+
+/* --- Paso 1: cliente --- */
+.client-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  align-items: start;
+}
+
+.panel {
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 20px;
+}
+
+.panel h2 {
+  font-size: 1.05rem;
+  margin-bottom: 4px;
+}
+
+.panel-hint {
+  font-size: 0.82rem;
+  margin-bottom: 14px;
+}
+
+.chosen-panel {
+  border-color: var(--carretero-red);
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px 12px;
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  color: var(--text-primary);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--carretero-red);
+  box-shadow: 0 0 0 3px rgba(227, 27, 34, 0.15);
+}
+
+.field-hint {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.check-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.check-line input {
+  width: auto;
+  accent-color: var(--carretero-red);
+}
+
+.client-list,
+.address-list {
+  list-style: none;
+  margin: 14px 0;
+  padding: 0;
+  max-height: 320px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.address-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.address-actions {
+  display: flex;
+  gap: 12px;
+  padding: 0 12px 4px;
+}
+
+.address-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.address-badge {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--carretero-red);
+  color: var(--carretero-white);
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.address-ref {
+  font-size: 0.74rem;
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+.edit-block {
+  padding: 14px;
+  margin: 10px 0;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+}
+
+.chosen-doc {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.chosen-actions {
+  display: flex;
+  gap: 14px;
+  margin-top: 4px;
+}
+
+.link-btn.danger {
+  color: var(--carretero-red-darker);
+}
+
+.igv-note {
+  margin: 6px 0 0;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-align: right;
+}
+
+.dni-warning {
+  margin-top: 14px;
+  padding: 10px 12px;
+  background: #fff4e0;
+  border: 1px solid #f0c988;
+  border-radius: var(--radius-sm);
+  color: #8a5a00;
+  font-size: 0.8rem;
+}
+
+.dni-warning .link-btn {
+  display: block;
+  color: #8a5a00;
+}
+
+.receipt-number {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-top: 10px;
+}
+
+.client-row,
+.address-row {
+  width: 100%;
+  margin: 0;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  text-align: left;
+  background: var(--surface);
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  box-shadow: none;
+}
+
+.client-row:hover,
+.address-row:hover {
+  background: #fdecec;
+  box-shadow: none;
+}
+
+.client-row.selected,
+.address-row.selected {
+  border-color: var(--carretero-red);
+  background: #fdecec;
+}
+
+.client-name,
+.address-street {
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+
+.client-phone,
+.address-fee {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.address-fee {
+  font-weight: 700;
+  color: var(--carretero-red);
+}
+
+.no-results {
+  padding: 14px 4px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.link-btn {
+  margin: 0;
+  padding: 4px 0;
+  background: none;
+  border: none;
+  color: var(--carretero-red);
+  font-size: 0.8rem;
+  font-weight: 700;
+  box-shadow: none;
+}
+
+.link-btn:hover {
+  background: none;
+  box-shadow: none;
+  text-decoration: underline;
+}
+
+.panel-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.panel-actions .primary {
+  background: var(--carretero-red);
+  color: var(--carretero-white);
+  border-color: var(--carretero-red);
+}
+
+.panel-actions .primary:hover {
+  background: var(--carretero-red-dark);
+}
+
+.panel-actions .primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.chosen-client {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px;
+  margin-bottom: 14px;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+}
+
+.chosen-name {
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+.chosen-phone {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.addr-title {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-bottom: 0;
+}
+
+.new-address {
+  padding: 12px;
+  margin-bottom: 10px;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+}
+
+.continue-btn {
+  width: 100%;
+  margin: 16px 0 0;
+  padding: 13px;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: var(--carretero-red);
+  color: var(--carretero-white);
+  border-color: var(--carretero-red);
+}
+
+.continue-btn:hover {
+  background: var(--carretero-red-dark);
+}
+
+.continue-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.client-error {
+  color: var(--carretero-red-dark);
+  background: #fdecec;
+  border: 1px solid #f6c8c8;
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  margin-bottom: 16px;
+}
+
+.loading-msg {
+  font-size: 0.85rem;
+}
+
+/* --- Paso 2: datos del reparto dentro del carrito --- */
+.delivery-card {
+  padding: 12px;
+  margin-bottom: 16px;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--carretero-red);
+}
+
+.delivery-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.8rem;
+  padding: 3px 0;
+}
+
+.delivery-row span:first-child {
+  font-weight: 700;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.delivery-row span:last-child {
+  text-align: right;
+  font-weight: 700;
+}
+
+.fee-row input {
+  width: 80px;
+  padding: 5px 8px;
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-align: right;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  color: var(--text-primary);
+}
+
+.fee-row input:focus {
+  outline: none;
+  border-color: var(--carretero-red);
+}
+
+.sub-total {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  padding: 2px 0;
+}
+
+/* --- Cobro y boleta --- */
+.success-message {
+  color: #1f7a35;
+  background: #e9f7ee;
+  border: 1px solid #b9e6c8;
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  margin-top: 14px;
+}
+
+.error-message {
+  color: var(--carretero-red-dark);
+  background: #fdecec;
+  border: 1px solid #f6c8c8;
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  margin-top: 14px;
+}
+
+.send-btn {
+  width: 100%;
+  margin: 14px 0 0;
+  padding: 13px;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: var(--carretero-red);
+  color: var(--carretero-white);
+  border-color: var(--carretero-red);
+}
+
+.send-btn:hover {
+  background: var(--carretero-red-dark);
+}
+
+.send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.receipt-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.boleta-btn {
+  background: var(--carretero-ink);
+  border-color: var(--carretero-ink);
+}
+
+.boleta-btn:hover {
+  background: var(--carretero-charcoal);
+}
+
+/* --- Metodo de cobro --- */
+.pay-with {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--surface-border);
+}
+
+.pay-with-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.method-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.method-chip {
+  margin: 0;
+  padding: 7px 12px;
+  font-size: 0.78rem;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1.5px solid var(--surface-border);
+  color: var(--text-primary);
+  box-shadow: none;
+}
+
+.method-chip:hover {
+  background: var(--surface-border);
+  box-shadow: none;
+}
+
+.method-chip.active {
+  background: var(--carretero-red);
+  border-color: var(--carretero-red);
+  color: var(--carretero-white);
+}

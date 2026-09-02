@@ -1,8 +1,21 @@
-.cash-page h1 {
-  margin-bottom: 20px;
+﻿/* La pantalla se lee de arriba abajo y centrada: titulo, info de la caja y,
+   debajo, el acceso al historial. */
+.page-title {
+  margin: 0 auto 20px;
+  max-width: 560px;
+  padding: 12px 20px;
+  text-align: center;
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  font-size: 1.15rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .shift-card {
+  margin: 0 auto;
   max-width: 560px;
   background: var(--surface-card);
   border: 1px solid var(--surface-border);
@@ -87,6 +100,474 @@
   font-size: 0.9rem;
   color: var(--text-primary);
 }
+
+/* --- Acceso al historial de ventas --- */
+.history-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  margin: 18px auto 0;
+  max-width: 560px;
+  width: 100%;
+  padding: 14px;
+  background: var(--surface-card);
+  border: 1.5px solid var(--surface-border);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: var(--shadow-sm);
+}
+
+.history-btn:hover {
+  background: var(--surface);
+  border-color: var(--carretero-red);
+  color: var(--carretero-red);
+  box-shadow: var(--shadow-sm);
+}
+
+.history-count {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+/* Se usa aqui y en los modales de apertura y cierre, donde estaba sin estilo y
+   se leia como texto suelto. */
+.error-message {
+  color: var(--carretero-red-dark);
+  background: #fdecec;
+  border: 1px solid #f6c8c8;
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  margin-bottom: 12px;
+}
+
+/* --- Ventana del historial ---
+   Va con doble clase a proposito: la regla generica .modal-content aparece mas
+   abajo en el archivo con max-width 380px y, a igual especificidad, ganaba por
+   orden. Eso era lo que dejaba el historial angosto y amontonado. */
+.modal-content.history-modal {
+  max-width: 940px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  max-height: 88vh;
+}
+
+.history-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.close-x {
+  margin: 0;
+  padding: 0 8px;
+  background: none;
+  border: none;
+  box-shadow: none;
+  color: var(--text-muted);
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.close-x:hover {
+  background: none;
+  box-shadow: none;
+  color: var(--carretero-red);
+}
+
+/* La lista a la izquierda y el detalle a la derecha, cada uno con su scroll. */
+.history-body {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 18px;
+  min-height: 0;
+  flex: 1;
+}
+
+.sales-column,
+.detail-column {
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.detail-column {
+  border-left: 1px solid var(--surface-border);
+  padding-left: 18px;
+}
+
+@media (max-width: 860px) {
+  .history-body {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-column {
+    border-left: none;
+    border-top: 1px solid var(--surface-border);
+    padding-left: 0;
+    padding-top: 14px;
+  }
+}
+
+.sales-empty,
+.sales-note {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.sales-note {
+  margin-top: 12px;
+  font-style: italic;
+}
+
+.sales-group + .sales-group {
+  margin-top: 16px;
+}
+
+.sales-group-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.sales-group-head h4 {
+  margin: 0;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--carretero-red);
+}
+
+.sales-group-count {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+/* --- Pestanas por origen de venta --- */
+.sale-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.sale-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  margin: 0;
+  padding: 9px 6px;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  border: 1.5px solid var(--surface-border);
+  color: var(--text-primary);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  box-shadow: none;
+}
+
+.sale-tab:hover {
+  background: var(--surface-border);
+  box-shadow: none;
+}
+
+.sale-tab.active {
+  background: var(--carretero-red);
+  border-color: var(--carretero-red);
+  color: var(--carretero-white);
+}
+
+.sale-tab-count {
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.sale-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sale-item {
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.sale-item:last-child {
+  border-bottom: none;
+}
+
+.sale-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0;
+  padding: 10px 10px;
+  background: none;
+  border: none;
+  border-left: 3px solid transparent;
+  border-radius: var(--radius-sm);
+  box-shadow: none;
+  color: var(--text-primary);
+  text-align: left;
+  font-size: 0.78rem;
+}
+
+.sale-row:hover {
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.sale-row.open {
+  background: var(--surface);
+  border-left-color: var(--carretero-red);
+}
+
+.sale-main {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.sale-code {
+  font-weight: 700;
+  font-size: 0.82rem;
+}
+
+.sale-sub {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+/* --- Detalle a la derecha --- */
+.detail-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 12px;
+}
+
+.detail-code {
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.detail-sub {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+/* Una venta anulada sigue en la lista, pero se lee de un vistazo que no cuenta. */
+.sale-row.cancelled .sale-amount,
+.sale-row.cancelled .sale-order {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+.sale-badge {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--carretero-red);
+  color: var(--carretero-white);
+  font-size: 0.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+}
+
+.detail-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 0 6px;
+}
+
+.detail-actions .mini {
+  margin: 0;
+  padding: 7px 12px;
+  font-size: 0.72rem;
+  background: var(--surface-card);
+  border: 1.5px solid var(--surface-border);
+  color: var(--text-primary);
+  box-shadow: none;
+}
+
+.detail-actions .mini:hover {
+  background: var(--surface-border);
+  box-shadow: none;
+}
+
+.detail-actions .mini.danger {
+  border-color: var(--carretero-red);
+  color: var(--carretero-red);
+}
+
+.detail-actions .mini.danger:hover {
+  background: #fdecec;
+}
+
+.detail-hint {
+  margin: 6px 6px 0;
+  font-size: 0.68rem;
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+.success-message {
+  margin-top: 10px;
+  color: #1f7a35;
+  background: #e9f7ee;
+  border: 1px solid #b9e6c8;
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 0.8rem;
+}
+
+/* La ventana del PIN se abre sobre el historial, que ya es un modal. */
+.pin-overlay {
+  z-index: 110;
+}
+
+/* --- Detalle de una venta --- */
+.sale-detail {
+  padding: 10px 12px 14px;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+}
+
+.detail-msg {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.detail-table {
+  width: 100%;
+  margin: 0 0 10px;
+  box-shadow: none;
+  border-radius: 0;
+  background: none;
+}
+
+.detail-table th {
+  padding: 4px 6px;
+  background: none;
+  color: var(--text-muted);
+  font-size: 0.62rem;
+}
+
+.detail-table td {
+  padding: 6px;
+  font-size: 0.76rem;
+  vertical-align: top;
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.detail-table .qty {
+  width: 34px;
+}
+
+.detail-table .amount {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.detail-option,
+.detail-unit {
+  display: block;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+.detail-option {
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--carretero-red);
+}
+
+.detail-totals {
+  border-top: 1px solid var(--surface-border);
+  padding-top: 8px;
+}
+
+.detail-total-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  padding: 2px 6px;
+}
+
+.detail-total-row.grand {
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px solid var(--surface-border);
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.detail-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 8px;
+  padding: 0 6px;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.sale-time {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.sale-order {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-weight: 700;
+}
+
+.sale-table {
+  font-weight: 400;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.sale-method {
+  text-transform: uppercase;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.sale-amount {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
 
 .close-shift-btn,
 .open-shift-btn {

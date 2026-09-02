@@ -1,5 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DiningTableService } from '../../../services/dining-table.service';
 import { CategoryService } from '../../../services/category.service';
@@ -11,9 +12,11 @@ import { Category } from '../../../model/category';
 import { Product } from '../../../model/product';
 import { Flavor } from '../../../model/flavor';
 import { Order } from '../../../model/order';
+import { OrderDetail } from '../../../model/order-detail';
 import { OrderCreateRequest } from '../../../model/order-create-request';
 import { CheckoutModalComponent } from './checkout-modal/checkout-modal.component';
 import { FlavorModalComponent } from '../../shared/flavor-modal/flavor-modal.component';
+import { PinPadComponent } from '../../shared/pin-pad/pin-pad.component';
 
 interface CartLine {
   product: Product;
@@ -29,7 +32,14 @@ const CASHIER_ROLES = ['MESERO', 'CAJERO', 'ADMIN'];
 @Component({
   selector: 'app-table-order',
   standalone: true,
-  imports: [CommonModule, RouterLink, CheckoutModalComponent, FlavorModalComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterLink,
+    CheckoutModalComponent,
+    FlavorModalComponent,
+    PinPadComponent,
+  ],
   templateUrl: './table-order.component.html',
   styleUrl: './table-order.component.css',
 })
@@ -56,6 +66,16 @@ export class TableOrderComponent implements OnInit {
 
   /** Producto esperando que el mesero elija su sabor. */
   pendingFlavorProduct: Product | null = null;
+
+  /** Plato que se quiere quitar; mientras no sea null se pide el PIN. */
+  itemToRemove: OrderDetail | null = null;
+  /** Plato al que se le esta escribiendo la nota. */
+  itemToNote: OrderDetail | null = null;
+  noteDraft = '';
+  savingNote = false;
+  /** true mientras se pide el PIN para anular el pedido entero. */
+  cancellingOrder = false;
+  itemError = '';
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -193,6 +213,106 @@ export class TableOrderComponent implements OnInit {
       error: (err) => {
         this.errorMessage = err?.message || 'No se pudo enviar el pedido.';
         this.sending = false;
+      },
+    });
+  }
+
+  // ===================== Corregir un pedido ya enviado =====================
+
+  /**
+   * Quitar un plato pide PIN; cambiarle la nota no.
+   *
+   * El PIN protege lo que baja la cuenta: el plato pudo haberse cocinado ya y
+   * quitarlo le resta plata a la mesa. Una nota ("sin aji") no mueve el monto y
+   * suele ser justo lo que hay que corregir a ultimo momento, asi que pedirle un
+   * PIN al mesero solo lo entorpeceria.
+   */
+  askRemoveItem(detail: OrderDetail): void {
+    this.itemToRemove = detail;
+    this.itemError = '';
+  }
+
+  cancelRemoveItem(): void {
+    this.itemToRemove = null;
+  }
+
+  get removeSubtitle(): string {
+    const d = this.itemToRemove;
+    if (!d) return '';
+    return `Quitar ${d.quantity}x ${d.productName} - S/ ${Number(d.subtotal ?? 0).toFixed(2)}`;
+  }
+
+  onRemoveAuthorized(pin: string): void {
+    const detail = this.itemToRemove;
+    if (!detail?.idOrderDetail) return;
+
+    this.itemToRemove = null;
+    this.itemError = '';
+    this.orderService.removeItem(detail.idOrderDetail, pin).subscribe({
+      // El backend devuelve el pedido ya recalculado: el total baja solo.
+      next: (order) => (this.currentOrder = order),
+      error: (err) => {
+        this.itemError = (err as { message?: string })?.message || 'No se pudo quitar el plato.';
+      },
+    });
+  }
+
+  startEditNote(detail: OrderDetail): void {
+    this.itemToNote = detail;
+    this.noteDraft = detail.notes ?? '';
+    this.itemError = '';
+  }
+
+  cancelEditNote(): void {
+    this.itemToNote = null;
+    this.noteDraft = '';
+  }
+
+  saveNote(): void {
+    const detail = this.itemToNote;
+    if (!detail?.idOrderDetail) return;
+
+    this.savingNote = true;
+    this.orderService.updateItemNotes(detail.idOrderDetail, this.noteDraft).subscribe({
+      next: (updated) => {
+        detail.notes = updated.notes;
+        this.savingNote = false;
+        this.cancelEditNote();
+      },
+      error: (err) => {
+        this.savingNote = false;
+        this.itemError = (err as { message?: string })?.message || 'No se pudo guardar la nota.';
+      },
+    });
+  }
+
+  // --- Anular el pedido completo ---
+
+  askCancelOrder(): void {
+    this.cancellingOrder = true;
+    this.itemError = '';
+  }
+
+  cancelCancelOrder(): void {
+    this.cancellingOrder = false;
+  }
+
+  get cancelSubtitle(): string {
+    return `Anular ${this.currentOrder?.orderCode ?? ''} - S/ ${Number(
+      this.currentOrder?.total ?? 0
+    ).toFixed(2)}`;
+  }
+
+  onCancelAuthorized(pin: string): void {
+    const idOrder = this.currentOrder?.idOrder;
+    if (!idOrder) return;
+
+    this.cancellingOrder = false;
+    this.orderService.cancelOrder(idOrder, pin, 'Anulado desde Salon').subscribe({
+      // Anular libera la mesa, asi que ya no hay nada que atender aqui.
+      next: () => this.router.navigate(['/pages/salon']),
+      error: (err) => {
+        this.itemError = (err as { message?: string })?.message || 'No se pudo anular el pedido.';
       },
     });
   }

@@ -20,6 +20,10 @@ export interface Order {
   total?: number;
   notes?: string;
   details?: OrderDetail[];
+  /** Quien anulo la venta, cuando y por que. Vacio si la venta sigue vigente. */
+  cancelledBy?: User;
+  cancelledAt?: string;
+  cancelReason?: string;
   createdAt?: string;
   updatedAt?: string;
 }

@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+﻿import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -10,19 +10,43 @@ import {
   PendingCollection,
   PendingCollectionService,
 } from '../../services/pending-collection.service';
+import { PaymentService } from '../../services/payment.service';
+import { OrderService } from '../../services/order.service';
+import { InvoiceService } from '../../services/invoice.service';
+import { PinPadComponent } from '../shared/pin-pad/pin-pad.component';
 import { CashShift } from '../../model/cash-shift';
+import { InvoiceType, OrderType } from '../../model/enums';
+import { Order } from '../../model/order';
+import { Payment } from '../../model/payment';
 
 const AMOUNT_PRESETS = [100, 200];
+
+/**
+ * Las pestanas del historial, en el orden en que se muestran. Se muestran las
+ * tres siempre, aunque esten vacias, para que la barra no cambie de forma segun
+ * lo que se haya vendido.
+ */
+/** Lo que se puede hacer sobre una venta ya cobrada. Las dos piden PIN. */
+export type SaleAction = 'anular' | 'reemitir';
+
+const SALE_TABS: { key: OrderType; label: string }[] = [
+  { key: 'SALON', label: 'Salon' },
+  { key: 'VENTA_RAPIDA', label: 'Venta rapida' },
+  { key: 'DELIVERY', label: 'Delivery' },
+];
 
 @Component({
   selector: 'app-cash-shift',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PinPadComponent],
   templateUrl: './cash-shift.component.html',
   styleUrl: './cash-shift.component.css',
 })
 export class CashShiftComponent implements OnInit, OnDestroy {
   private cashShiftService = inject(CashShiftService);
+  private paymentService = inject(PaymentService);
+  private orderService = inject(OrderService);
+  private invoiceService = inject(InvoiceService);
   private pendingService = inject(PendingCollectionService);
   private authService = inject(AuthService);
   private kitchenSocket = inject(KitchenSocketService);
@@ -49,6 +73,40 @@ export class CashShiftComponent implements OnInit, OnDestroy {
   closeAmount: number | null = null;
   closeNotes = '';
   closing = false;
+
+  /** Ventas que cobro el usuario conectado en este turno, de la ultima a la primera. */
+  mySales: Payment[] = [];
+  loadingSales = false;
+  /** Por que no se pudo traer el historial. Vacio cuando la consulta salio bien. */
+  salesError = '';
+
+  readonly saleTabs = SALE_TABS;
+  activeTab: OrderType = 'SALON';
+  /** idPayment de la venta cuyo detalle esta desplegado. */
+  expandedSale: number | null = null;
+  /** Pedido de la venta desplegada, con sus items. */
+  saleDetail: Order | null = null;
+  loadingDetail = false;
+  detailError = '';
+
+  /** Accion que espera el PIN. null cuando el teclado esta cerrado. */
+  pendingAction: SaleAction | null = null;
+  /** Accion ya autorizada, con su formulario abierto. */
+  authorizedAction: SaleAction | null = null;
+  /** El PIN ya validado, que acompana a la operacion real. */
+  private authorizedPin = '';
+  actionError = '';
+  pinReason = '';
+  working = false;
+  reissueMessage = '';
+  /** Datos del comprobante a reemitir. Nunca cambia el pedido ni el total. */
+  reissue: { invoiceType: InvoiceType; docNumber: string; clientName: string } = {
+    invoiceType: 'BOLETA',
+    docNumber: '',
+    clientName: '',
+  };
+  /** Ventana del historial. Cerrada por defecto: la pantalla de caja es para abrir y cerrar turno. */
+  showSales = false;
 
   /** Mesas sin cobrar; mientras quede alguna, la caja no cierra. */
   pending: PendingCollection[] = [];
@@ -130,12 +188,267 @@ export class CashShiftComponent implements OnInit, OnDestroy {
       next: (shift) => {
         this.activeShift = shift;
         this.loading = false;
+        this.loadMySales(shift?.idCashShift);
       },
       error: () => {
         this.activeShift = null;
         this.loading = false;
+        if (!this.closedShift) this.mySales = [];
       },
     });
+  }
+
+  // --- Mis ultimas ventas ---
+
+  /**
+   * Ventas que cobro el propio usuario desde que se aperturo esta caja.
+   *
+   * Se consultan por turno y no por fecha: un turno puede cruzar la medianoche, y
+   * dos turnos del mismo dia no deben mezclar sus ventas. Quien las hizo lo
+   * resuelve el backend con la sesion, asi que aqui nunca llegan las de otro.
+   */
+  private loadMySales(idCashShift: number | undefined): void {
+    if (!idCashShift) {
+      this.mySales = [];
+      return;
+    }
+    this.loadingSales = true;
+    this.salesError = '';
+    this.paymentService.findMineByShift(idCashShift).subscribe({
+      next: (payments) => {
+        this.mySales = payments;
+        this.loadingSales = false;
+      },
+      // Sin este aviso, una consulta que falla se veria igual que un turno sin
+      // ventas, y el cajero creeria que sus cobros no se registraron.
+      error: (err) => {
+        this.mySales = [];
+        this.loadingSales = false;
+        this.salesError =
+          (err as { message?: string })?.message ||
+          'No se pudo consultar el historial de ventas.';
+      },
+    });
+  }
+
+  /**
+   * Abre el historial en su propia ventana. Se vuelve a consultar al abrirlo
+   * para no mostrar una lista vieja si se cobro algo desde otra pantalla.
+   */
+  openSales(): void {
+    this.showSales = true;
+    this.expandedSale = null;
+    this.saleDetail = null;
+    this.loadMySales(this.activeShift?.idCashShift ?? this.closedShift?.idCashShift);
+  }
+
+  closeSales(): void {
+    this.showSales = false;
+  }
+
+  selectTab(tab: OrderType): void {
+    this.activeTab = tab;
+    // El detalle abierto pertenece a la pestana que se deja: se cierra al cambiar.
+    this.expandedSale = null;
+    this.saleDetail = null;
+  }
+
+  /** Las ventas de la pestana abierta. */
+  get visibleSales(): Payment[] {
+    return this.mySales.filter((p) => p.saleType === this.activeTab);
+  }
+
+  countOf(tab: OrderType): number {
+    return this.mySales.filter((p) => p.saleType === tab).length;
+  }
+
+  /**
+   * Abre o cierra el detalle de una venta. El pedido se pide al abrirlo y no
+   * junto con la lista: traer el detalle de todas las ventas del turno seria
+   * cargar decenas de pedidos que casi nunca se miran.
+   */
+  toggleSale(payment: Payment): void {
+    if (this.expandedSale === payment.idPayment) {
+      this.expandedSale = null;
+      this.saleDetail = null;
+      return;
+    }
+
+    this.expandedSale = payment.idPayment;
+    this.saleDetail = null;
+    this.detailError = '';
+
+    if (!payment.idOrder) {
+      this.detailError = 'Esta venta no tiene un pedido asociado.';
+      return;
+    }
+
+    this.loadingDetail = true;
+    this.orderService.findById(payment.idOrder).subscribe({
+      next: (order) => {
+        this.saleDetail = order;
+        this.loadingDetail = false;
+      },
+      error: (err) => {
+        this.loadingDetail = false;
+        this.detailError =
+          (err as { message?: string })?.message || 'No se pudo cargar el pedido.';
+      },
+    });
+  }
+
+  get mySalesTotal(): number {
+    return this.mySales.reduce((sum, p) => sum + Number(p.amount ?? 0), 0);
+  }
+
+  /**
+   * El total de lo cobrado se destapa recien con la caja cerrada. El importe de
+   * cada venta si se ve: es una boleta que el mismo acaba de emitir. Lo que la
+   * caja ciega protege es el acumulado, para que el conteo no se cuadre de
+   * antemano.
+   */
+  get showsSalesTotal(): boolean {
+    return !!this.closedShift;
+  }
+
+  /** Nombre de la mesa cuando la venta vino del salon. */
+  tableOf(payment: Payment): string {
+    return payment.saleType === 'SALON' ? payment.tableName || 'Mesa' : '';
+  }
+
+  isCancelled(payment: Payment): boolean {
+    return payment.orderStatus === 'CANCELADO';
+  }
+
+  // --- Anular y reemitir ---
+
+  /** La venta que se esta mirando en el detalle. */
+  get selectedSale(): Payment | null {
+    return this.mySales.find((p) => p.idPayment === this.expandedSale) ?? null;
+  }
+
+  /** Una venta ya anulada no admite ni otra anulacion ni otro comprobante. */
+  get canActOnSale(): boolean {
+    const sale = this.selectedSale;
+    return !!sale && !this.isCancelled(sale);
+  }
+
+  /** Lo que se va a autorizar, para que se lea antes de teclear el PIN. */
+  get pinSubtitle(): string {
+    const sale = this.selectedSale;
+    const what = this.pendingAction === 'anular' ? 'Anular' : 'Editar el comprobante de';
+    return `${what} ${sale?.orderCode ?? ''} - S/ ${Number(sale?.amount ?? 0).toFixed(2)}`;
+  }
+
+  /**
+   * Pide el PIN antes de abrir la accion.
+   *
+   * Va primero y no al confirmar para que nadie llene un formulario entero y
+   * recien ahi se entere de que no tiene autorizacion.
+   */
+  askPin(action: SaleAction): void {
+    this.pendingAction = action;
+    this.authorizedAction = null;
+  }
+
+  cancelPin(): void {
+    this.pendingAction = null;
+  }
+
+  /** El teclado ya comprobo el PIN; la operacion lo vuelve a validar al usarlo. */
+  onPinAuthorized(pin: string): void {
+    this.authorizedPin = pin;
+    this.authorizedAction = this.pendingAction;
+    this.pendingAction = null;
+    this.openActionForm();
+  }
+
+  private openActionForm(): void {
+    this.actionError = '';
+    this.pinReason = '';
+    this.working = false;
+    // Al reemitir se parte de lo que ya tiene la venta y se corrige encima.
+    this.reissue = {
+      invoiceType: 'BOLETA',
+      docNumber: this.saleDetail?.client?.docNumber ?? '',
+      clientName: this.saleDetail?.client?.name ?? '',
+    };
+  }
+
+  cancelAction(): void {
+    this.authorizedAction = null;
+    this.authorizedPin = '';
+    this.actionError = '';
+  }
+
+  confirmAction(): void {
+    if (this.authorizedAction === 'anular') this.doCancel();
+    else if (this.authorizedAction === 'reemitir') this.doReissue();
+  }
+
+  private doCancel(): void {
+    const sale = this.selectedSale;
+    if (!sale?.idOrder) {
+      this.actionError = 'Esta venta no tiene un pedido asociado.';
+      return;
+    }
+
+    this.working = true;
+    this.actionError = '';
+    this.orderService.cancelOrder(sale.idOrder, this.authorizedPin, this.pinReason).subscribe({
+      next: () => {
+        this.working = false;
+        this.cancelAction();
+        this.expandedSale = null;
+        this.saleDetail = null;
+        // La anulacion cambia los totales del turno: se recargan turno y ventas.
+        this.loadShift(true);
+      },
+      error: (err) => {
+        this.working = false;
+        this.actionError = (err as { message?: string })?.message || 'No se pudo anular la venta.';
+      },
+    });
+  }
+
+  private doReissue(): void {
+    const sale = this.selectedSale;
+    if (!sale?.idOrder) {
+      this.actionError = 'Esta venta no tiene un pedido asociado.';
+      return;
+    }
+
+    const doc = this.reissue.docNumber.trim();
+    if (this.reissue.invoiceType === 'FACTURA' && doc.length !== 11) {
+      this.actionError = 'Para emitir una factura se necesita un RUC de 11 digitos.';
+      return;
+    }
+
+    this.working = true;
+    this.actionError = '';
+    this.invoiceService
+      .reissueInvoice(
+        {
+          idOrder: sale.idOrder,
+          invoiceType: this.reissue.invoiceType,
+          docType: this.reissue.invoiceType === 'FACTURA' ? 'RUC' : doc ? 'DNI' : 'SIN_DOC',
+          docNumber: doc || undefined,
+          clientName: this.reissue.clientName.trim() || undefined,
+        },
+        this.authorizedPin
+      )
+      .subscribe({
+        next: (invoice) => {
+          this.working = false;
+          this.cancelAction();
+          this.reissueMessage = `Comprobante reemitido: ${invoice.fullNumber}.`;
+        },
+        error: (err) => {
+          this.working = false;
+          this.actionError =
+            (err as { message?: string })?.message || 'No se pudo reemitir el comprobante.';
+        },
+      });
   }
 
   // --- Apertura de caja ---
@@ -148,6 +461,8 @@ export class CashShiftComponent implements OnInit, OnDestroy {
   /** Descarta el reporte del cierre para volver a la pantalla normal de caja. */
   dismissClosedReport(): void {
     this.closedShift = null;
+    this.mySales = [];
+    this.showSales = false;
   }
 
   openOpenModal(): void {
@@ -235,6 +550,9 @@ export class CashShiftComponent implements OnInit, OnDestroy {
           this.closedShift = closed;
           this.closing = false;
           this.showCloseModal = false;
+          // Con la caja cerrada el detalle ya puede mostrar importes, asi que se
+          // vuelve a pedir por si entro algun cobro entre la carga y el cierre.
+          this.loadMySales(closed.idCashShift);
         },
         error: (err) => {
           this.errorMessage = err?.message || 'No se pudo cerrar la caja.';

@@ -32,6 +32,15 @@ const MESERO_NAV: NavItem[] = [
   { path: '/pages/cash-shift', label: 'Caja' },
 ];
 
+/**
+ * El cajero ve lo mismo que el mesero mas Delivery: los pedidos por telefono
+ * entran por caja, que es quien tiene el padron de clientes y cobra el reparto.
+ */
+const CAJERO_NAV: NavItem[] = [
+  ...MESERO_NAV,
+  { path: '/pages/delivery', label: 'Delivery' },
+];
+
 const KITCHEN_NAV: NavItem[] = [
   { path: '/pages/home', label: 'Inicio' },
   { path: '/pages/kitchen', label: 'Comandas' },
@@ -55,7 +64,8 @@ export class LayoutComponent {
 
   get navItems(): NavItem[] {
     const role = this.authService.roleName().toUpperCase();
-    if (role === 'MESERO' || role === 'CAJERO') return MESERO_NAV;
+    if (role === 'CAJERO') return CAJERO_NAV;
+    if (role === 'MESERO') return MESERO_NAV;
     if (STATION_ROLES.includes(role)) return KITCHEN_NAV;
     return ADMIN_NAV;
   }

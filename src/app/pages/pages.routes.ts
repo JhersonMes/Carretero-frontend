@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { cashierOnlyGuard } from '../guards/cashier-only.guard';
 
 export const pagesRoutes: Routes = [
   {
@@ -153,6 +154,12 @@ export const pagesRoutes: Routes = [
     path: 'quick-sale',
     loadComponent: () =>
       import('./quick-sale/quick-sale.component').then((m) => m.QuickSaleComponent),
+  },
+  {
+    path: 'delivery',
+    canActivate: [cashierOnlyGuard],
+    loadComponent: () =>
+      import('./delivery/delivery.component').then((m) => m.DeliveryComponent),
   },
   {
     path: 'cash-shift',

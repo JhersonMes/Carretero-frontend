@@ -1,0 +1,144 @@
+<div class="layout-page">
+  <div class="layout-header">
+    <div>
+      <h1>Distribución del salón</h1>
+      <p class="lead">
+        Agrega las mesas de tu local y arrástralas para dejarlas en el mismo orden en que están
+        físicamente. Los meseros verán la pantalla de Salón exactamente en este orden.
+      </p>
+    </div>
+  </div>
+
+  <!-- Alta de mesa -->
+  <form class="new-table-card" (ngSubmit)="createTable()">
+    <div class="field">
+      <label for="newName">Nombre de la mesa</label>
+      <input
+        id="newName"
+        type="text"
+        [(ngModel)]="newName"
+        name="newName"
+        placeholder="Ej. Mesa 7, Barra 3, Terraza 1"
+        maxlength="50"
+        autocomplete="off"
+      />
+    </div>
+
+    <div class="field capacity">
+      <label for="newCapacity">Capacidad</label>
+      <input
+        id="newCapacity"
+        type="number"
+        [(ngModel)]="newCapacity"
+        name="newCapacity"
+        min="1"
+        max="50"
+      />
+    </div>
+
+    <button type="submit" class="primary-btn" [disabled]="!newName.trim() || busy">
+      Agregar mesa
+    </button>
+  </form>
+
+  <p class="feedback ok" *ngIf="message">{{ message }}</p>
+  <p class="feedback err" *ngIf="error">{{ error }}</p>
+
+  <!-- Plano arrastrable -->
+  <div class="plan-header">
+    <h2>Plano del salón</h2>
+    <div class="header-actions" *ngIf="tables.length > 0 && !loadError">
+      <span class="pending-hint" *ngIf="dirty">Tienes cambios sin guardar</span>
+      <button type="button" class="ghost-btn" (click)="discardOrder()" [disabled]="!dirty || saving">
+        Descartar
+      </button>
+      <button type="button" class="primary-btn" (click)="saveOrder()" [disabled]="!dirty || saving">
+        {{ saving ? 'Guardando...' : 'Guardar orden' }}
+      </button>
+    </div>
+  </div>
+
+  <p class="loading" *ngIf="loading">Cargando plano del salón...</p>
+
+  <!-- Si la carga fallo no sabemos que mesas hay: se ofrece reintentar en vez de
+       dar a entender que el salon esta vacio. -->
+  <div class="load-error-box" *ngIf="!loading && loadError">
+    <p class="load-error-text">{{ loadError }}</p>
+    <button type="button" class="primary-btn" (click)="retryLoad()">Reintentar</button>
+  </div>
+
+  <div
+    class="layout-grid"
+    cdkDropList
+    cdkDropListOrientation="mixed"
+    (cdkDropListDropped)="drop($event)"
+    *ngIf="!loading && !loadError"
+  >
+    <div
+      class="layout-card"
+      *ngFor="let table of tables; let i = index; trackBy: trackByTable"
+      cdkDrag
+      [cdkDragDisabled]="editingId === table.idTable"
+    >
+      <div class="drag-placeholder" *cdkDragPlaceholder></div>
+
+      <!-- Vista normal -->
+      <ng-container *ngIf="editingId !== table.idTable">
+        <span class="position-badge">{{ position(i) }}</span>
+
+        <div class="card-body">
+          <span class="table-name">{{ table.name }}</span>
+          <span class="table-capacity">{{ table.capacity }} personas</span>
+        </div>
+
+        <div class="card-actions">
+          <button type="button" class="icon-btn" title="Editar" (click)="startEdit(table)" [disabled]="busy">
+            Editar
+          </button>
+          <button type="button" class="icon-btn danger" title="Dar de baja" (click)="deactivate(table)" [disabled]="busy">
+            Baja
+          </button>
+        </div>
+
+        <span class="drag-handle" title="Arrastrar" aria-hidden="true">⠿</span>
+      </ng-container>
+
+      <!-- Edicion en linea -->
+      <ng-container *ngIf="editingId === table.idTable">
+        <div class="edit-body">
+          <input type="text" [(ngModel)]="editName" name="editName" maxlength="50" placeholder="Nombre" />
+          <input type="number" [(ngModel)]="editCapacity" name="editCapacity" min="1" max="50" />
+          <div class="edit-actions">
+            <button type="button" class="primary-btn small" (click)="saveEdit()" [disabled]="!editName.trim() || busy">
+              Guardar
+            </button>
+            <button type="button" class="ghost-btn small" (click)="cancelEdit()" [disabled]="busy">
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+
+    <p class="empty-state" *ngIf="tables.length === 0">
+      Todavía no hay mesas en el salón. Agrega la primera con el formulario de arriba.
+    </p>
+  </div>
+
+  <!-- Mesas dadas de baja -->
+  <div class="inactive-section" *ngIf="inactiveTables.length > 0">
+    <button type="button" class="inactive-toggle" (click)="toggleInactive()">
+      {{ showInactive ? '▾' : '▸' }} Mesas dadas de baja ({{ inactiveTables.length }})
+    </button>
+
+    <div class="inactive-list" *ngIf="showInactive">
+      <div class="inactive-row" *ngFor="let table of inactiveTables; trackBy: trackByTable">
+        <span class="table-name">{{ table.name }}</span>
+        <span class="table-capacity">{{ table.capacity }} personas</span>
+        <button type="button" class="ghost-btn small" (click)="activate(table)" [disabled]="busy">
+          Reactivar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

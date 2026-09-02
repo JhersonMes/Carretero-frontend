@@ -1,5 +1,5 @@
-<div class="cash-page">
-  <h1>Caja</h1>
+﻿<div class="cash-page">
+  <h1 class="page-title">Caja</h1>
 
   <div *ngIf="!loading">
     <!-- Caja aperturada -->
@@ -124,7 +124,253 @@
       </p>
       <button type="button" class="open-shift-btn" (click)="openOpenModal()">Aperturar caja</button>
     </div>
+    <!--
+      Historial de ventas: fuera de la tarjeta y debajo de ella. Se abre en una
+      ventana aparte para no alargar la pantalla de caja, que es donde se apertura
+      y se cierra el turno.
+    -->
+    <button
+      type="button"
+      class="history-btn"
+      *ngIf="activeShift || closedShift"
+      (click)="openSales()"
+    >
+      Historial de ventas
+      <span class="history-count">
+        {{ mySales.length }} {{ mySales.length === 1 ? 'venta' : 'ventas' }}
+      </span>
+    </button>
   </div>
+
+  <!--
+    Ventana del historial: la lista a la izquierda y el detalle de la venta
+    elegida a la derecha. Desplegar el detalle hacia abajo empujaba la lista y
+    obligaba a rebuscar la venta despues de mirarla.
+  -->
+  <div class="modal-overlay" *ngIf="showSales" (click)="closeSales()">
+    <div class="modal-content history-modal" (click)="$event.stopPropagation()">
+      <div class="history-head">
+        <div>
+          <h2>Historial de ventas</h2>
+          <p class="modal-hint">
+            Tus ventas desde que se aperturo esta caja.
+            <ng-container *ngIf="showsSalesTotal">
+              Total: S/ {{ mySalesTotal.toFixed(2) }}.
+            </ng-container>
+          </p>
+        </div>
+        <button type="button" class="close-x" (click)="closeSales()">&times;</button>
+      </div>
+
+      <!-- Una pestana por origen de venta -->
+      <div class="sale-tabs">
+        <button
+          type="button"
+          class="sale-tab"
+          *ngFor="let tab of saleTabs"
+          [class.active]="activeTab === tab.key"
+          (click)="selectTab(tab.key)"
+        >
+          {{ tab.label }}
+          <span class="sale-tab-count">{{ countOf(tab.key) }}</span>
+        </button>
+      </div>
+
+      <div class="history-body">
+        <!-- Columna izquierda: las ventas de la pestana -->
+        <div class="sales-column">
+          <p class="sales-empty" *ngIf="loadingSales">Cargando tus ventas...</p>
+          <div class="error-message" *ngIf="!loadingSales && salesError">{{ salesError }}</div>
+          <p class="sales-empty" *ngIf="!loadingSales && !salesError && visibleSales.length === 0">
+            No tienes ventas de este tipo en el turno.
+          </p>
+
+          <ul class="sale-list">
+            <li *ngFor="let p of visibleSales">
+              <button
+                type="button"
+                class="sale-row"
+                [class.open]="expandedSale === p.idPayment"
+                [class.cancelled]="isCancelled(p)"
+                (click)="toggleSale(p)"
+              >
+                <span class="sale-main">
+                  <span class="sale-code">
+                    {{ p.orderCode }}
+                    <span class="sale-badge" *ngIf="isCancelled(p)">Anulada</span>
+                  </span>
+                  <span class="sale-sub">
+                    {{ p.paymentDate | date: 'HH:mm' }}
+                    <ng-container *ngIf="tableOf(p)"> &middot; {{ tableOf(p) }}</ng-container>
+                    &middot; {{ p.paymentMethod.name }}
+                  </span>
+                </span>
+                <span class="sale-amount">S/ {{ p.amount.toFixed(2) }}</span>
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Columna derecha: el detalle de la venta elegida -->
+        <div class="detail-column">
+          <p class="detail-msg" *ngIf="!expandedSale">
+            Elige una venta de la izquierda para ver su detalle.
+          </p>
+          <p class="detail-msg" *ngIf="expandedSale && loadingDetail">Cargando el pedido...</p>
+          <div class="error-message" *ngIf="expandedSale && !loadingDetail && detailError">
+            {{ detailError }}
+          </div>
+
+          <ng-container *ngIf="expandedSale && !loadingDetail && !detailError && saleDetail as order">
+            <div class="detail-head">
+              <span class="detail-code">{{ order.orderCode }}</span>
+              <span class="detail-sub">
+                {{ selectedSale?.paymentDate | date: 'dd/MM/yyyy HH:mm' }}
+                &middot; {{ selectedSale?.paymentMethod?.name }}
+              </span>
+            </div>
+
+            <table class="detail-table">
+              <thead>
+                <tr>
+                  <th class="qty">Cant</th>
+                  <th>Producto</th>
+                  <th class="amount">Importe</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let d of order.details">
+                  <td class="qty">{{ d.quantity }}</td>
+                  <td>
+                    {{ d.productName }}
+                    <span class="detail-option" *ngIf="d.flavorName">{{ d.flavorName }}</span>
+                    <span class="detail-unit">S/ {{ d.unitPrice.toFixed(2) }} c/u</span>
+                  </td>
+                  <td class="amount">S/ {{ d.subtotal.toFixed(2) }}</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="detail-totals">
+              <div class="detail-total-row">
+                <span>Consumo</span><span>S/ {{ (order.subtotal ?? 0).toFixed(2) }}</span>
+              </div>
+              <div class="detail-total-row" *ngIf="order.deliveryFee">
+                <span>Delivery</span><span>S/ {{ order.deliveryFee.toFixed(2) }}</span>
+              </div>
+              <div class="detail-total-row grand">
+                <span>Total</span><span>S/ {{ (order.total ?? 0).toFixed(2) }}</span>
+              </div>
+            </div>
+
+            <div class="detail-meta">
+              <span *ngIf="order.client">Cliente: {{ order.client.name }}</span>
+              <span *ngIf="order.deliveryAddress">
+                Direccion: {{ order.deliveryAddress.street }}
+              </span>
+              <span>Estado: {{ order.status }}</span>
+              <span *ngIf="order.cancelledBy">
+                Anulada por {{ order.cancelledBy.fullName || order.cancelledBy.username }}
+                el {{ order.cancelledAt | date: 'dd/MM/yyyy HH:mm' }}
+              </span>
+              <span *ngIf="order.cancelReason">Motivo: {{ order.cancelReason }}</span>
+            </div>
+
+            <div class="success-message" *ngIf="reissueMessage">{{ reissueMessage }}</div>
+
+            <!--
+              Editar aqui es reemitir el comprobante: cambia el documento, no lo
+              vendido. Las dos acciones piden el PIN antes de abrir el formulario.
+            -->
+            <div class="detail-actions" *ngIf="canActOnSale">
+              <button type="button" class="mini" (click)="askPin('reemitir')">
+                Editar comprobante
+              </button>
+              <button type="button" class="mini danger" (click)="askPin('anular')">
+                Anular venta
+              </button>
+            </div>
+            <p class="detail-hint" *ngIf="canActOnSale">
+              Para cambiar lo pedido hay que anular y volver a tomar la orden.
+            </p>
+          </ng-container>
+        </div>
+      </div>
+
+      <p class="sales-note" *ngIf="!showsSalesTotal && mySales.length">
+        Solo se ven tus ventas. El total del turno aparece al cerrar la caja.
+      </p>
+      <p class="sales-note" *ngIf="showsSalesTotal && mySales.length">
+        Solo se ven tus ventas; las de los demas quedan en su propia caja.
+      </p>
+    </div>
+  </div>
+
+  <!-- El PIN se pide antes de abrir la accion, con el teclado compartido. -->
+  <app-pin-pad
+    *ngIf="pendingAction"
+    [subtitle]="pinSubtitle"
+    (authorized)="onPinAuthorized($event)"
+    (cancelled)="cancelPin()"
+  ></app-pin-pad>
+
+
+  <!-- Ventana: la accion, ya autorizada por el PIN -->
+  <div class="modal-overlay pin-overlay" *ngIf="authorizedAction" (click)="cancelAction()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h2>{{ authorizedAction === 'anular' ? 'Anular venta' : 'Editar comprobante' }}</h2>
+      <p class="modal-hint">
+        {{ selectedSale?.orderCode }} &middot; S/ {{ (selectedSale?.amount ?? 0).toFixed(2) }}.
+        <ng-container *ngIf="authorizedAction === 'anular'">
+          La venta queda registrada como anulada y deja de sumar a la caja.
+        </ng-container>
+        <ng-container *ngIf="authorizedAction === 'reemitir'">
+          Se anula el comprobante actual y se emite uno nuevo por el mismo total.
+        </ng-container>
+      </p>
+
+      <ng-container *ngIf="authorizedAction === 'reemitir'">
+        <div class="form-group">
+          <label for="tipoComprobante">Tipo de comprobante</label>
+          <select id="tipoComprobante" [(ngModel)]="reissue.invoiceType">
+            <option value="BOLETA">Boleta</option>
+            <option value="FACTURA">Factura</option>
+            <option value="NOTA_VENTA">Nota de venta</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="docComprobante">
+            {{ reissue.invoiceType === 'FACTURA' ? 'RUC (11 digitos)' : 'DNI (opcional)' }}
+          </label>
+          <input id="docComprobante" type="text" inputmode="numeric" [(ngModel)]="reissue.docNumber" />
+        </div>
+        <div class="form-group">
+          <label for="nombreComprobante">Nombre o razon social</label>
+          <input id="nombreComprobante" type="text" [(ngModel)]="reissue.clientName" />
+        </div>
+      </ng-container>
+
+      <div class="form-group" *ngIf="authorizedAction === 'anular'">
+        <label for="motivoAnulacion">Motivo (opcional)</label>
+        <input
+          id="motivoAnulacion"
+          type="text"
+          [(ngModel)]="pinReason"
+          placeholder="Ej. el cliente ya no quiso el pedido"
+        />
+      </div>
+
+      <div class="error-message" *ngIf="actionError">{{ actionError }}</div>
+
+      <div class="modal-actions">
+        <button type="button" class="secondary" (click)="cancelAction()">Cancelar</button>
+        <button type="button" class="confirm-btn" [disabled]="working" (click)="confirmAction()">
+          {{ working ? 'Procesando...' : (authorizedAction === 'anular' ? 'Anular' : 'Reemitir') }}
+        </button>
+      </div>
+    </div>
+  </div>
+
 
   <!-- Modal: aperturar caja -->
   <div class="modal-overlay" *ngIf="showOpenModal" (click)="closeOpenModal()">
@@ -153,7 +399,7 @@
 
       <div class="form-group">
         <label for="openNotes">Notas (opcional)</label>
-        <input type="text" id="openNotes" [(ngModel)]="openNotes" placeholder="Ej. turno mañana" />
+        <input type="text" id="openNotes" [(ngModel)]="openNotes" placeholder="Ej. turno maÃ±ana" />
       </div>
 
       <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>

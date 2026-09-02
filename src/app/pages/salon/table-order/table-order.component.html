@@ -1,4 +1,4 @@
-<div class="order-page" *ngIf="table">
+﻿<div class="order-page" *ngIf="table">
   <div class="order-header">
     <a routerLink="/pages/salon" class="back-link">&larr; Salon</a>
     <div class="order-header-title">
@@ -41,13 +41,33 @@
             <div class="cart-line-info">
               <span class="cart-line-name">{{ detail.quantity }}x {{ detail.productName }}</span>
               <span class="cart-line-flavor" *ngIf="detail.flavorName">{{ detail.flavorName }}</span>
+              <span class="cart-line-note" *ngIf="detail.notes">{{ detail.notes }}</span>
               <span class="cart-line-price">S/ {{ detail.subtotal.toFixed(2) }}</span>
+
+              <!--
+                Corregir una comanda: la nota no mueve el monto y va libre; quitar
+                el plato si lo mueve, y por eso pide PIN.
+              -->
+              <span class="line-actions">
+                <button type="button" class="line-btn" (click)="startEditNote(detail)">
+                  {{ detail.notes ? 'Editar nota' : 'Agregar nota' }}
+                </button>
+                <button type="button" class="line-btn danger" (click)="askRemoveItem(detail)">
+                  Quitar
+                </button>
+              </span>
             </div>
             <span class="item-status-badge" [class]="'status-' + (detail.itemStatus || 'PENDIENTE')">
               {{ detail.itemStatus === 'LISTO' ? 'Listo' : detail.itemStatus === 'EN_PREPARACION' ? 'En preparacion' : 'Pendiente' }}
             </span>
           </div>
         </div>
+
+        <div class="error-message" *ngIf="itemError">{{ itemError }}</div>
+
+        <button type="button" class="cancel-order-btn" (click)="askCancelOrder()">
+          Anular todo el pedido
+        </button>
       </div>
 
       <div class="draft-section" *ngIf="draftCart.length > 0">
@@ -107,4 +127,47 @@
     (closed)="closeCheckout()"
     (paid)="onPaid()"
   ></app-checkout-modal>
+  <!-- Quitar un plato: pide PIN porque le baja el monto a la cuenta -->
+  <app-pin-pad
+    *ngIf="itemToRemove"
+    [subtitle]="removeSubtitle"
+    (authorized)="onRemoveAuthorized($event)"
+    (cancelled)="cancelRemoveItem()"
+  ></app-pin-pad>
+
+  <!-- Anular el pedido entero -->
+  <app-pin-pad
+    *ngIf="cancellingOrder"
+    [subtitle]="cancelSubtitle"
+    (authorized)="onCancelAuthorized($event)"
+    (cancelled)="cancelCancelOrder()"
+  ></app-pin-pad>
+
+  <!-- Nota del plato: no mueve el monto, no pide PIN -->
+  <div class="modal-overlay" *ngIf="itemToNote" (click)="cancelEditNote()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h2>Nota del plato</h2>
+      <p class="modal-hint">
+        {{ itemToNote.quantity }}x {{ itemToNote.productName }}. La cocina la ve en su comanda.
+      </p>
+
+      <div class="form-group">
+        <label for="notaPlato">Indicacion</label>
+        <input
+          id="notaPlato"
+          type="text"
+          [(ngModel)]="noteDraft"
+          placeholder="Ej. sin aji, para llevar, bien cocido"
+        />
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="secondary" (click)="cancelEditNote()">Cancelar</button>
+        <button type="button" class="confirm-btn" [disabled]="savingNote" (click)="saveNote()">
+          {{ savingNote ? 'Guardando...' : 'Guardar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
 </div>
