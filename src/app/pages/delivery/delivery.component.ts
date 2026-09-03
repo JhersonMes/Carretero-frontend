@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+﻿import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -10,10 +10,10 @@ import { CategoryService } from '../../services/category.service';
 import { ClientService } from '../../services/client.service';
 import {
   BOLETA_DNI_THRESHOLD,
-  DeliveryReceiptData,
-  DeliveryReceiptService,
+  ReceiptData,
+  ReceiptService,
   ReceiptLine,
-} from '../../services/delivery-receipt.service';
+} from '../../services/receipt.service';
 import { AddressService } from '../../services/address.service';
 import { InvoiceService } from '../../services/invoice.service';
 import { OrderService } from '../../services/order.service';
@@ -86,7 +86,7 @@ export class DeliveryComponent implements OnInit {
   private paymentMethodService = inject(PaymentMethodService);
   private paymentService = inject(PaymentService);
   private businessConfigService = inject(BusinessConfigService);
-  private receiptService = inject(DeliveryReceiptService);
+  private receiptService = inject(ReceiptService);
   private authService = inject(AuthService);
 
   readonly phoneMaxDigits = PHONE_MAX_DIGITS;
@@ -149,7 +149,7 @@ export class DeliveryComponent implements OnInit {
   successMessage = '';
 
   /** Boleta del ultimo pedido cobrado, lista para imprimirse en PDF. */
-  receipt: DeliveryReceiptData | null = null;
+  receipt: ReceiptData | null = null;
   private businessConfig: BusinessConfig | null = null;
 
   /**
@@ -904,7 +904,7 @@ export class DeliveryComponent implements OnInit {
       });
   }
 
-  private buildReceipt(order: Order, amount: number, invoice: Invoice | null): DeliveryReceiptData {
+  private buildReceipt(order: Order, amount: number, invoice: Invoice | null): ReceiptData {
     const fee = Number(order.deliveryFee ?? this.deliveryFee ?? 0);
     const method = this.paymentMethods.find(
       (m) => m.idPaymentMethod === this.selectedMethodId
@@ -920,6 +920,7 @@ export class DeliveryComponent implements OnInit {
       business: this.businessConfig,
       invoiceNumber: invoice?.fullNumber,
       orderCode: order.orderCode ?? '',
+      origin: 'Delivery',
       issuedAt: invoice?.issueDate ? new Date(invoice.issueDate) : new Date(),
       clientName: this.selectedClient?.name ?? '',
       clientDocType: this.selectedClient?.docNumber ? this.selectedClient.docType : undefined,

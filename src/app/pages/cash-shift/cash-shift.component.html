@@ -263,8 +263,34 @@
               </div>
             </div>
 
+            <!-- Comprobante y comprador: salen del comprobante vigente, que es
+                 lo que refleja una reemision -->
+            <div class="detail-invoice" *ngIf="saleInvoice as inv">
+              <div class="detail-invoice-head">
+                <span class="detail-invoice-number">{{ inv.fullNumber }}</span>
+                <span class="detail-invoice-type">{{ inv.invoiceType }}</span>
+                <span class="sunat-badge" [ngClass]="sunatClass(inv.sunatStatus)">
+                  {{ sunatLabel(inv.sunatStatus) }}
+                </span>
+              </div>
+              <!-- El motivo importa sobre todo cuando el comprobante no esta
+                   declarado: es lo que dice si falta enviarlo o si lo rechazaron -->
+              <span class="sunat-note" *ngIf="inv.sunatDescription">
+                {{ inv.sunatDescription }}
+              </span>
+              <span *ngIf="inv.client">
+                {{ inv.client.name }}
+                <ng-container *ngIf="inv.client.docNumber">
+                  &middot; {{ inv.client.docType }} {{ inv.client.docNumber }}
+                </ng-container>
+              </span>
+              <span *ngIf="!inv.client">Sin datos del comprador</span>
+              <span>Gravada S/ {{ (inv.taxableAmount ?? 0).toFixed(2) }} &middot; IGV S/ {{ (inv.igvAmount ?? 0).toFixed(2) }}</span>
+            </div>
+            <p class="detail-msg" *ngIf="!saleInvoice">Esta venta no tiene comprobante vigente.</p>
+
             <div class="detail-meta">
-              <span *ngIf="order.client">Cliente: {{ order.client.name }}</span>
+              <span *ngIf="order.client">Cliente del pedido: {{ order.client.name }}</span>
               <span *ngIf="order.deliveryAddress">
                 Direccion: {{ order.deliveryAddress.street }}
               </span>
@@ -282,13 +308,18 @@
               Editar aqui es reemitir el comprobante: cambia el documento, no lo
               vendido. Las dos acciones piden el PIN antes de abrir el formulario.
             -->
-            <div class="detail-actions" *ngIf="canActOnSale">
-              <button type="button" class="mini" (click)="askPin('reemitir')">
-                Editar comprobante
+            <div class="detail-actions">
+              <button type="button" class="mini strong" (click)="downloadReceipt()">
+                Descargar boleta
               </button>
-              <button type="button" class="mini danger" (click)="askPin('anular')">
-                Anular venta
-              </button>
+              <ng-container *ngIf="canActOnSale">
+                <button type="button" class="mini" (click)="askPin('reemitir')">
+                  Editar comprobante
+                </button>
+                <button type="button" class="mini danger" (click)="askPin('anular')">
+                  Anular venta
+                </button>
+              </ng-container>
             </div>
             <p class="detail-hint" *ngIf="canActOnSale">
               Para cambiar lo pedido hay que anular y volver a tomar la orden.

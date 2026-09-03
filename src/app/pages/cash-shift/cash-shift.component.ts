@@ -13,9 +13,13 @@ import {
 import { PaymentService } from '../../services/payment.service';
 import { OrderService } from '../../services/order.service';
 import { InvoiceService } from '../../services/invoice.service';
+import { BusinessConfigService } from '../../services/business-config.service';
+import { ReceiptService } from '../../services/receipt.service';
+import { BusinessConfig } from '../../model/business-config';
+import { Invoice } from '../../model/invoice';
 import { PinPadComponent } from '../shared/pin-pad/pin-pad.component';
 import { CashShift } from '../../model/cash-shift';
-import { InvoiceType, OrderType } from '../../model/enums';
+import { InvoiceType, OrderType, SunatStatus } from '../../model/enums';
 import { Order } from '../../model/order';
 import { Payment } from '../../model/payment';
 
@@ -47,6 +51,8 @@ export class CashShiftComponent implements OnInit, OnDestroy {
   private paymentService = inject(PaymentService);
   private orderService = inject(OrderService);
   private invoiceService = inject(InvoiceService);
+  private businessConfigService = inject(BusinessConfigService);
+  private receiptService = inject(ReceiptService);
   private pendingService = inject(PendingCollectionService);
   private authService = inject(AuthService);
   private kitchenSocket = inject(KitchenSocketService);
@@ -86,8 +92,11 @@ export class CashShiftComponent implements OnInit, OnDestroy {
   expandedSale: number | null = null;
   /** Pedido de la venta desplegada, con sus items. */
   saleDetail: Order | null = null;
+  /** Comprobante vigente de la venta abierta; null si esta anulada o no se emitio. */
+  saleInvoice: Invoice | null = null;
   loadingDetail = false;
   detailError = '';
+  private businessConfig: BusinessConfig | null = null;
 
   /** Accion que espera el PIN. null cuando el teclado esta cerrado. */
   pendingAction: SaleAction | null = null;
@@ -118,6 +127,12 @@ export class CashShiftComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadShift();
     this.refreshPending();
+
+    // La cabecera de la boleta sale de la configuracion del negocio.
+    this.businessConfigService.getConfig().subscribe({
+      next: (config) => (this.businessConfig = config),
+      error: () => (this.businessConfig = null),
+    });
 
     // Cobrar una mesa emite el mismo evento que refresca el salon. Escucharlo
     // mantiene la lista al dia sin que el mesero tenga que recargar: si otro de
@@ -283,8 +298,21 @@ export class CashShiftComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.loadDetail(payment.idOrder);
+  }
+
+  /**
+   * Trae el pedido y su comprobante vigente.
+   *
+   * Los datos del comprador se leen del comprobante y no del pedido: si la venta
+   * se reemitio para agregarle el DNI o pasarla a factura, el pedido sigue igual
+   * y solo el comprobante refleja la correccion.
+   */
+  private loadDetail(idOrder: number): void {
     this.loadingDetail = true;
-    this.orderService.findById(payment.idOrder).subscribe({
+    this.saleInvoice = null;
+
+    this.orderService.findById(idOrder).subscribe({
       next: (order) => {
         this.saleDetail = order;
         this.loadingDetail = false;
@@ -295,6 +323,77 @@ export class CashShiftComponent implements OnInit, OnDestroy {
           (err as { message?: string })?.message || 'No se pudo cargar el pedido.';
       },
     });
+
+    // Una venta anulada, o una que fallo al emitir, puede no tener comprobante
+    // vigente: eso no es un error del detalle.
+    this.invoiceService.findByOrder(idOrder).subscribe({
+      next: (invoice) => (this.saleInvoice = invoice),
+      error: () => (this.saleInvoice = null),
+    });
+  }
+
+  /** Vuelve a leer el detalle abierto; se usa despues de reemitir. */
+  private reloadDetail(): void {
+    const idOrder = this.selectedSale?.idOrder;
+    if (idOrder) this.loadDetail(idOrder);
+  }
+
+  /**
+   * Descarga la boleta de una venta ya cobrada, se haya generado o no en su
+   * momento: se abre en su propia pagina con el boton de guardar en PDF.
+   */
+  downloadReceipt(): void {
+    if (!this.saleDetail) return;
+    const sale = this.selectedSale;
+    const user = this.authService.currentUser();
+
+    this.receiptService.open(
+      this.receiptService.buildFromOrder({
+        business: this.businessConfig,
+        order: this.saleDetail,
+        invoice: this.saleInvoice,
+        paymentMethod: sale?.paymentMethod?.name,
+        cashier: user?.fullName || user?.username,
+      })
+    );
+  }
+
+  /**
+   * Rotulo del estado SUNAT del comprobante.
+   *
+   * Se escriben en el idioma del cajero, no con el nombre del enum: quien mira
+   * esta pantalla necesita saber si el documento esta declarado, y "SIMULADO"
+   * a secas no se lo dice.
+   */
+  private readonly sunatLabels: Record<SunatStatus, string> = {
+    NO_ENVIADO: 'Sin enviar',
+    SIMULADO: 'No enviado a SUNAT',
+    PENDIENTE: 'Pendiente de envio',
+    ACEPTADO: 'Aceptado por SUNAT',
+    RECHAZADO: 'Rechazado por SUNAT',
+    ANULADO: 'Anulado',
+  };
+
+  sunatLabel(status?: SunatStatus): string {
+    return status ? this.sunatLabels[status] : 'Sin estado';
+  }
+
+  /**
+   * Color del distintivo. Solo ACEPTADO va en verde: es el unico estado en el
+   * que SUNAT respondio conforme. Todo lo demas queda en gris o en rojo para que
+   * un comprobante sin declarar no se lea como uno resuelto.
+   */
+  sunatClass(status?: SunatStatus): string {
+    switch (status) {
+      case 'ACEPTADO':
+        return 'ok';
+      case 'RECHAZADO':
+        return 'bad';
+      case 'PENDIENTE':
+        return 'wait';
+      default:
+        return 'idle';
+    }
   }
 
   get mySalesTotal(): number {
@@ -442,6 +541,9 @@ export class CashShiftComponent implements OnInit, OnDestroy {
           this.working = false;
           this.cancelAction();
           this.reissueMessage = `Comprobante reemitido: ${invoice.fullNumber}.`;
+          // El detalle en pantalla quedo con el comprobante viejo: se relee para
+          // que se vea el nuevo numero y el cliente corregido.
+          this.reloadDetail();
         },
         error: (err) => {
           this.working = false;

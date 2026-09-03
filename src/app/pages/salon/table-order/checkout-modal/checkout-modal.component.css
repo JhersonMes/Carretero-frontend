@@ -237,6 +237,34 @@
   margin-bottom: 14px;
 }
 
+/* --- Paso: boleta virtual --- */
+.virtual-ask {
+  padding: 16px;
+  margin-bottom: 16px;
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+.virtual-ask strong {
+  display: block;
+  font-size: 0.85rem;
+  color: #1f7a35;
+  margin-bottom: 8px;
+}
+
+.virtual-ask p {
+  margin: 0 0 6px;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.virtual-hint {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
 .success-message {
   color: #1f7a35;
   background: #e9f7ee;

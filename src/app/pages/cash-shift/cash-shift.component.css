@@ -394,6 +394,92 @@
   text-decoration: none;
 }
 
+/* --- Comprobante de la venta --- */
+.detail-invoice {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border-left: 3px solid var(--carretero-red);
+  border-radius: var(--radius-sm);
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+.detail-invoice-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.detail-invoice-number {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.detail-invoice-type {
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--carretero-red);
+}
+
+/*
+  Distintivo del estado SUNAT. Solo el verde dice "declarado"; el gris y el rojo
+  existen para que un comprobante que nadie envio no se lea igual que uno que
+  SUNAT acepto.
+*/
+.sunat-badge {
+  margin-left: auto;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.58rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.sunat-badge.ok {
+  background: rgba(47, 158, 88, 0.14);
+  color: #1f7040;
+}
+
+.sunat-badge.wait {
+  background: rgba(247, 221, 16, 0.28);
+  color: #7a6300;
+}
+
+.sunat-badge.bad {
+  background: rgba(227, 27, 34, 0.12);
+  color: var(--carretero-red-darker);
+}
+
+.sunat-badge.idle {
+  background: rgba(107, 100, 98, 0.14);
+  color: var(--text-muted);
+}
+
+.sunat-note {
+  font-size: 0.68rem;
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+.detail-actions .mini.strong {
+  background: var(--carretero-red);
+  border-color: var(--carretero-red);
+  color: var(--carretero-white);
+}
+
+.detail-actions .mini.strong:hover {
+  background: var(--carretero-red-dark);
+}
+
 .detail-actions {
   display: flex;
   gap: 8px;
