@@ -132,8 +132,12 @@ export class HomeComponent implements OnInit, OnDestroy {
    * Si el cajero pudiera ver cuanto lleva vendido, sabria de antemano si su
    * arqueo va a salir sobrado o faltante y podria cuadrarlo antes de contar.
    * Los montos recien aparecen cuando la caja ya esta cerrada.
+   *
+   * Una estacion no ve importes nunca: lo que se vendio es asunto de quien
+   * cobra, y a cocina o parrilla solo le toca lo que despacho.
    */
   get showsAmounts(): boolean {
+    if (this.isStation) return false;
     return !!this.stats?.shift && !this.stats.isOpen;
   }
 
@@ -141,8 +145,18 @@ export class HomeComponent implements OnInit, OnDestroy {
     return !!this.stats?.rankings.some((group) => group.items.length > 0);
   }
 
-  /** Texto del estado de caja que encabeza el resumen del turno. */
+  /**
+   * Texto que encabeza el resumen del turno.
+   *
+   * Una estacion ve su turno, no el estado de la caja: si esta abierta o cerrada
+   * es cosa de quien cobra, no le sirve a cocina y ademas le muestra el pulso de
+   * una caja que no es suya.
+   */
   get shiftStateLabel(): string {
+    if (this.isStation) {
+      if (!this.stats?.shift) return 'Sin movimiento todavia';
+      return this.stats.isOpen ? 'Turno en curso' : 'Turno cerrado';
+    }
     if (!this.stats?.shift) return 'Caja sin aperturar';
     return this.stats.isOpen ? 'Caja abierta' : 'Caja cerrada';
   }

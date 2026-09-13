@@ -8,11 +8,6 @@
       <span class="welcome-date">{{ todayLabel }}</span>
       <h1>{{ greeting }}</h1>
       <p class="welcome-subtitle">{{ subtitle }}</p>
-      <span class="welcome-role">
-        <strong>{{ roleDisplay(user.role.name).label }}</strong>
-        &middot; Area: {{ roleDisplay(user.role.name).group }}
-        &middot; Usuario: {{ user.username }}
-      </span>
     </div>
   </section>
 
@@ -46,14 +41,15 @@
         </div>
       </div>
 
-      <p class="blind-note" *ngIf="data.isOpen">
+      <!-- La caja ciega es asunto de quien cobra; a una estacion no le dice nada. -->
+      <p class="blind-note" *ngIf="data.isOpen && !isStation">
         Caja ciega: los montos de tu turno se muestran recien al cerrar la caja.
       </p>
 
       <ng-template #noShift>
         <p class="shift-empty" *ngIf="isStation; else salonEmpty">
-          Todavia no se ha aperturado la caja del local. Cuando se abra, aqui vas a ver lo mas
-          despachado por {{ areaLabel }}.
+          Todavia no hay movimiento en este turno. Cuando empiecen a entrar pedidos, aqui vas a
+          ver lo mas despachado por {{ areaLabel }}.
         </p>
         <ng-template #salonEmpty>
           <p class="shift-empty">

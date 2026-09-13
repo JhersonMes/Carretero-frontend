@@ -121,6 +121,13 @@
     (cancelled)="onFlavorCancelled()"
   ></app-flavor-modal>
 
+  <app-station-modal
+    *ngIf="pendingStationProduct"
+    [product]="pendingStationProduct"
+    (confirmed)="onStationChosen($event)"
+    (cancelled)="onStationCancelled()"
+  ></app-station-modal>
+
   <app-checkout-modal
     *ngIf="showCheckout && currentOrder"
     [order]="currentOrder"

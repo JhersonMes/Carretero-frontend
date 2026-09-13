@@ -1,10 +1,12 @@
-import { OrderType } from './enums';
+import { KitchenStation, OrderType } from './enums';
 
 export interface OrderItemRequest {
   idProduct: number;
   quantity: number;
   idFlavor?: number;
   flavorName?: string;
+  /** Area elegida para esta linea. Vacio deja la del producto. */
+  station?: KitchenStation;
   notes?: string;
 }
 

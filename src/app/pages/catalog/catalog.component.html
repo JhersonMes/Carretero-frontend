@@ -20,9 +20,18 @@
         >
           <button type="button" class="entity-pick" (click)="selectCategory(c)">
             <span class="entity-name">{{ c.name }}</span>
-            <span class="entity-meta">{{ c.station }}</span>
           </button>
           <div class="row-actions">
+            <!-- El area se corrige aqui mismo: es el dato que decide a que
+                 estacion sale la comanda. -->
+            <select
+              class="station-select"
+              [ngModel]="c.station"
+              (ngModelChange)="changeCategoryStation(c, $event)"
+              title="Area a la que salen sus comandas"
+            >
+              <option *ngFor="let s of stations" [ngValue]="s">{{ s }}</option>
+            </select>
             <button type="button" class="mini" (click)="toggleCategoryActive(c)">
               {{ c.active === false ? 'Activar' : 'Desactivar' }}
             </button>
@@ -63,9 +72,20 @@
                 <span class="warn-price" *ngIf="p.price <= 0">sin precio</span>
                 <span *ngIf="p.price > 0">S/ {{ p.price.toFixed(2) }}</span>
                 <span class="tag" *ngIf="p.requiresFlavor">pide opcion</span>
+                <span class="tag" *ngIf="p.requiresStation">pide area</span>
               </span>
             </button>
             <div class="row-actions stacked">
+              <!-- Se puede activar despues: un adicional que hoy va solo a cocina
+                   puede empezar a acompanar platos de parrilla. -->
+              <label class="check inline">
+                <input
+                  type="checkbox"
+                  [ngModel]="p.requiresStation"
+                  (ngModelChange)="setRequiresStation(p, $event)"
+                />
+                Area al pedir
+              </label>
               <input
                 type="number"
                 min="0.10"
@@ -92,6 +112,11 @@
           <label class="check">
             <input type="checkbox" [(ngModel)]="newProduct.requiresFlavor" />
             Pide elegir una opcion
+          </label>
+          <!-- Para los adicionales: el area la decide el mesero segun con que plato va. -->
+          <label class="check">
+            <input type="checkbox" [(ngModel)]="newProduct.requiresStation" />
+            El area se elige al pedirlo
           </label>
           <button type="button" class="primary" (click)="createProduct()">Agregar producto</button>
         </div>

@@ -1,4 +1,4 @@
-﻿import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -32,12 +32,16 @@ import { OrderCreateRequest } from '../../model/order-create-request';
 import { PaymentMethod } from '../../model/payment-method';
 import { Product } from '../../model/product';
 import { FlavorModalComponent } from '../shared/flavor-modal/flavor-modal.component';
+import { StationModalComponent } from '../shared/station-modal/station-modal.component';
+import { KitchenStation } from '../../model/enums';
 
 interface CartLine {
   product: Product;
   quantity: number;
   /** Opcion elegida; dos lineas del mismo producto con distinta opcion no se agrupan. */
   flavor?: Flavor;
+  /** Area elegida para esta linea, cuando el producto no la trae fija. */
+  station?: KitchenStation;
   /** Precio unitario ya con el ajuste de la opcion aplicado. */
   unitPrice: number;
 }
@@ -71,7 +75,7 @@ const DNI_DIGITS = 8;
 @Component({
   selector: 'app-delivery',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, FlavorModalComponent],
+  imports: [CommonModule, FormsModule, RouterLink, FlavorModalComponent, StationModalComponent],
   templateUrl: './delivery.component.html',
   styleUrl: './delivery.component.css',
 })
@@ -130,6 +134,10 @@ export class DeliveryComponent implements OnInit {
   selectedCategory: Category | null = null;
   cart: CartLine[] = [];
   pendingFlavorProduct: Product | null = null;
+  /** Producto esperando que se elija el area que lo prepara. */
+  pendingStationProduct: Product | null = null;
+  /** Sabor ya elegido, guardado mientras se elige tambien el area. */
+  private pendingStationFlavor?: Flavor;
   /** Lo que se cobra por el reparto en esta venta; arranca en la tarifa del jiron. */
   deliveryFee = 0;
 
@@ -689,23 +697,52 @@ export class DeliveryComponent implements OnInit {
       this.pendingFlavorProduct = product;
       return;
     }
+    if (product.requiresStation) {
+      this.pendingStationProduct = product;
+      return;
+    }
     this.pushToCart(product);
   }
 
+  /** Un producto puede pedir las dos cosas: primero el sabor, despues el area. */
   onFlavorChosen(flavor: Flavor): void {
-    if (this.pendingFlavorProduct) {
-      this.pushToCart(this.pendingFlavorProduct, flavor);
-    }
+    const product = this.pendingFlavorProduct;
     this.pendingFlavorProduct = null;
+    if (!product) return;
+
+    if (product.requiresStation) {
+      this.pendingStationProduct = product;
+      this.pendingStationFlavor = flavor;
+      return;
+    }
+    this.pushToCart(product, flavor);
   }
 
   onFlavorCancelled(): void {
     this.pendingFlavorProduct = null;
   }
 
-  private pushToCart(product: Product, flavor?: Flavor): void {
+  onStationChosen(station: KitchenStation): void {
+    const product = this.pendingStationProduct;
+    const flavor = this.pendingStationFlavor;
+    this.pendingStationProduct = null;
+    this.pendingStationFlavor = undefined;
+    if (product) this.pushToCart(product, flavor, station);
+  }
+
+  onStationCancelled(): void {
+    this.pendingStationProduct = null;
+    this.pendingStationFlavor = undefined;
+  }
+
+  private pushToCart(product: Product, flavor?: Flavor, station?: KitchenStation): void {
+    // Dos lineas del mismo producto con distinta area no se agrupan: cada una
+    // sale a una estacion diferente y deben viajar por separado.
     const line = this.cart.find(
-      (l) => l.product.idProduct === product.idProduct && l.flavor?.idFlavor === flavor?.idFlavor
+      (l) =>
+        l.product.idProduct === product.idProduct &&
+        l.flavor?.idFlavor === flavor?.idFlavor &&
+        l.station === station
     );
     if (line) {
       line.quantity++;
@@ -715,6 +752,7 @@ export class DeliveryComponent implements OnInit {
       product,
       quantity: 1,
       flavor,
+      station,
       unitPrice: product.price + (flavor?.priceDelta ?? 0),
     });
   }
@@ -823,6 +861,7 @@ export class DeliveryComponent implements OnInit {
         quantity: l.quantity,
         idFlavor: l.flavor?.idFlavor,
         flavorName: l.flavor?.name,
+        station: l.station,
       })),
     };
 

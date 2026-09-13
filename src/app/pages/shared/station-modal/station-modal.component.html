@@ -1,0 +1,26 @@
+<div class="modal-overlay" (click)="cancel()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <h2>Que area lo prepara?</h2>
+    <p class="modal-hint">{{ product.name }} &middot; sale solo en la comanda del area que elijas.</p>
+
+    <div class="station-list">
+      <button
+        type="button"
+        class="station-option"
+        *ngFor="let s of stations"
+        [class.selected]="selected === s.key"
+        (click)="select(s.key)"
+      >
+        <span class="station-name">{{ s.label }}</span>
+        <span class="station-hint">{{ s.hint }}</span>
+      </button>
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="secondary" (click)="cancel()">Cancelar</button>
+      <button type="button" class="confirm-btn" [disabled]="!selected" (click)="confirm()">
+        Agregar
+      </button>
+    </div>
+  </div>
+</div>

@@ -440,5 +440,12 @@
       (confirmed)="onFlavorChosen($event)"
       (cancelled)="onFlavorCancelled()"
     ></app-flavor-modal>
+
+    <app-station-modal
+      *ngIf="pendingStationProduct"
+      [product]="pendingStationProduct"
+      (confirmed)="onStationChosen($event)"
+      (cancelled)="onStationCancelled()"
+    ></app-station-modal>
   </section>
 </div>

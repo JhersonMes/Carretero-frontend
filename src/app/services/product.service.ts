@@ -30,6 +30,15 @@ export class ProductService extends GenericService<Product> {
     });
   }
 
+  /**
+   * Unidades vendidas por producto, como {idProduct: unidades}. Se pide una sola
+   * vez para ordenar las sugerencias del buscador sin volver al servidor por
+   * cada tecla.
+   */
+  getSoldUnits() {
+    return this.http.get<Record<string, number>>(`${this.url}/sold-units`);
+  }
+
   getPriceHistory(idProduct: number) {
     return this.http.get<PriceHistory[]>(
       `${this.url}/${idProduct}/price-history`

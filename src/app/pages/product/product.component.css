@@ -17,9 +17,63 @@
   font-weight: 600;
 }
 
+/* --- Buscador --- */
+.search-box {
+  position: relative;
+  flex: 1;
+  min-width: 240px;
+  max-width: 460px;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 9px 30px 9px 12px;
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  color: var(--text-primary);
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: var(--carretero-red);
+  box-shadow: 0 0 0 3px rgba(227, 27, 34, 0.15);
+}
+
+.clear-query {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  transform: translateY(-50%);
+  margin: 0;
+  padding: 0 8px;
+  background: none;
+  border: none;
+  box-shadow: none;
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.clear-query:hover {
+  background: none;
+  box-shadow: none;
+  color: var(--carretero-red);
+}
+
+.result-count {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
 .filter-bar {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 16px;
 }
