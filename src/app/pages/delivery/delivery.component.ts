@@ -32,7 +32,12 @@ import { OrderCreateRequest } from '../../model/order-create-request';
 import { PaymentMethod } from '../../model/payment-method';
 import { Product } from '../../model/product';
 import { FlavorModalComponent } from '../shared/flavor-modal/flavor-modal.component';
-import { StationModalComponent } from '../shared/station-modal/station-modal.component';
+import {
+  areasOf,
+  DishOption,
+  StationModalComponent,
+  toDishOptions,
+} from '../shared/station-modal/station-modal.component';
 import { KitchenStation } from '../../model/enums';
 
 interface CartLine {
@@ -134,8 +139,10 @@ export class DeliveryComponent implements OnInit {
   selectedCategory: Category | null = null;
   cart: CartLine[] = [];
   pendingFlavorProduct: Product | null = null;
-  /** Producto esperando que se elija el area que lo prepara. */
+  /** Producto esperando que se elija el plato al que acompana. */
   pendingStationProduct: Product | null = null;
+  /** Platos que se le ofrecen para elegir. */
+  stationDishes: DishOption[] = [];
   /** Sabor ya elegido, guardado mientras se elige tambien el area. */
   private pendingStationFlavor?: Flavor;
   /** Lo que se cobra por el reparto en esta venta; arranca en la tarifa del jiron. */
@@ -698,10 +705,35 @@ export class DeliveryComponent implements OnInit {
       return;
     }
     if (product.requiresStation) {
-      this.pendingStationProduct = product;
+      this.askStation(product);
       return;
     }
     this.pushToCart(product);
+  }
+
+  /** Platos del carrito a los que puede acompanar un adicional. */
+  private get dishOptions(): DishOption[] {
+    return toDishOptions(
+      this.cart.map((l) => ({ name: l.product.name, station: l.station ?? l.product.station }))
+    );
+  }
+
+  /**
+   * Si todo el pedido va a una sola area, no hay nada que preguntar: el
+   * adicional va ahi. Preguntar igual seria hacer elegir entre una sola opcion.
+   */
+  private askStation(product: Product, flavor?: Flavor): void {
+    const dishes = this.dishOptions;
+    const areas = areasOf(dishes);
+
+    if (areas.length === 1) {
+      this.pushToCart(product, flavor, areas[0]);
+      return;
+    }
+
+    this.stationDishes = dishes;
+    this.pendingStationProduct = product;
+    this.pendingStationFlavor = flavor;
   }
 
   /** Un producto puede pedir las dos cosas: primero el sabor, despues el area. */
@@ -711,8 +743,7 @@ export class DeliveryComponent implements OnInit {
     if (!product) return;
 
     if (product.requiresStation) {
-      this.pendingStationProduct = product;
-      this.pendingStationFlavor = flavor;
+      this.askStation(product, flavor);
       return;
     }
     this.pushToCart(product, flavor);

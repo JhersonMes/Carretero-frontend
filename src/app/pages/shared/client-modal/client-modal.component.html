@@ -1,0 +1,119 @@
+<div class="modal-backdrop" (click)="close()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <header class="modal-header">
+      <div class="modal-title-group">
+        <svg class="modal-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        <h3>{{ creating ? 'Registrar nuevo cliente' : 'Selecciona un cliente' }}</h3>
+      </div>
+      <button type="button" class="close-btn" (click)="close()">&times;</button>
+    </header>
+
+    <div class="modal-body" *ngIf="!creating">
+      <div class="search-box">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input
+          type="text"
+          class="search-input"
+          [(ngModel)]="searchQuery"
+          (input)="onSearch()"
+          placeholder="Buscar por DNI, RUC, celular o nombre..."
+          autofocus
+        />
+        <button type="button" class="clear-search-btn" *ngIf="searchQuery" (click)="searchQuery = ''; onSearch()">
+          &times;
+        </button>
+      </div>
+
+      <div class="quick-options">
+        <button type="button" class="quick-btn" (click)="select(null)">
+          <span>Consumidor Final (Sin cliente)</span>
+        </button>
+        <button type="button" class="create-toggle-btn" (click)="toggleCreate()">
+          + Nuevo Cliente
+        </button>
+      </div>
+
+      <div class="client-list">
+        <div class="loading-state" *ngIf="loading">Cargando clientes...</div>
+
+        <button
+          type="button"
+          class="client-item"
+          *ngFor="let c of filteredClients"
+          [class.active]="currentClient?.idClient === c.idClient"
+          (click)="select(c)"
+        >
+          <div class="client-info">
+            <span class="client-name">{{ c.name }}</span>
+            <span class="client-meta">
+              <span class="doc-badge" *ngIf="c.docNumber">{{ c.docType }}: {{ c.docNumber }}</span>
+              <span class="phone-badge" *ngIf="c.phone">Tel: {{ c.phone }}</span>
+            </span>
+          </div>
+          <span class="select-indicator" *ngIf="currentClient?.idClient === c.idClient">Seleccionado</span>
+        </button>
+
+        <div class="empty-results" *ngIf="!loading && filteredClients.length === 0">
+          <p>No se encontraron clientes para "{{ searchQuery }}".</p>
+          <button type="button" class="create-direct-btn" (click)="toggleCreate()">
+            + Registrar "{{ searchQuery }}" como nuevo cliente
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulario para crear nuevo cliente -->
+    <div class="modal-body" *ngIf="creating">
+      <div class="alert-error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+      <div class="form-row">
+        <div class="form-field doc-type-field">
+          <label>Tipo Doc.</label>
+          <select [(ngModel)]="newClient.docType">
+            <option *ngFor="let dt of docTypes" [value]="dt">{{ dt }}</option>
+          </select>
+        </div>
+        <div class="form-field doc-num-field">
+          <label>N° Documento</label>
+          <input
+            type="text"
+            [(ngModel)]="newClient.docNumber"
+            placeholder="DNI o RUC"
+          />
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label>Nombre o Razón Social *</label>
+        <input
+          type="text"
+          [(ngModel)]="newClient.name"
+          placeholder="Ej. Juan Pérez / Empresa SAC"
+          required
+        />
+      </div>
+
+      <div class="form-field">
+        <label>Teléfono / Celular</label>
+        <input
+          type="tel"
+          [(ngModel)]="newClient.phone"
+          placeholder="Ej. 987654321"
+        />
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="cancel-btn" (click)="toggleCreate()">Volver a búsqueda</button>
+        <button type="button" class="submit-btn" [disabled]="loading" (click)="saveNewClient()">
+          {{ loading ? 'Guardando...' : 'Guardar y Seleccionar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

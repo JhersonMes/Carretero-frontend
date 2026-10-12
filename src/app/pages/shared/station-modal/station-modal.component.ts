@@ -3,19 +3,29 @@ import { CommonModule } from '@angular/common';
 import { KitchenStation } from '../../../model/enums';
 import { Product } from '../../../model/product';
 
-/** Areas entre las que puede repartirse un adicional. */
-const STATIONS: { key: KitchenStation; label: string; hint: string }[] = [
-  { key: 'COCINA', label: 'Cocina', hint: 'Va con alitas, broaster o salchipapas' },
-  { key: 'PARRILLA', label: 'Parrilla', hint: 'Va con hamburguesas o carnes a la brasa' },
-  { key: 'BEBIDAS', label: 'Bebidas', hint: 'Lo prepara la barra' },
+/** Un plato del pedido y el area que lo prepara. */
+export interface DishOption {
+  name: string;
+  station: KitchenStation;
+}
+
+/** Areas, para cuando el pedido todavia no tiene ningun plato al que engancharse. */
+const STATIONS: { key: KitchenStation; label: string }[] = [
+  { key: 'COCINA', label: 'Cocina' },
+  { key: 'PARRILLA', label: 'Parrilla' },
+  { key: 'BEBIDAS', label: 'Bebidas' },
 ];
 
 /**
- * Pregunta que area prepara un producto cuyo destino no esta fijado, como los
- * adicionales: un platano acompana tanto a unas alitas como a una hamburguesa.
+ * Pregunta a que plato acompana un adicional, y de ahi sale el area.
  *
- * Se elige una sola area, no las dos. Si el item saliera en las dos pantallas,
- * o lo preparan ambas estaciones o ninguna, esperando que lo haga la otra.
+ * Se pregunta por el plato y no por la estacion porque es lo que el mesero
+ * tiene en la cabeza: sabe que el platano va con la hamburguesa, no que "va a
+ * parrilla". El area es una consecuencia, y traducirla mentalmente en cada
+ * adicional es justo el paso tedioso que hay que evitar.
+ *
+ * Si el pedido todavia no tiene platos, no hay a que engancharse y recien ahi
+ * se ofrecen las areas directamente.
  */
 @Component({
   selector: 'app-station-modal',
@@ -27,14 +37,33 @@ const STATIONS: { key: KitchenStation; label: string; hint: string }[] = [
 export class StationModalComponent {
   @Input({ required: true }) product!: Product;
 
+  /** Platos del pedido, ya sin repetidos. Vacio = se eligen areas. */
+  @Input() dishes: DishOption[] = [];
+
   @Output() confirmed = new EventEmitter<KitchenStation>();
   @Output() cancelled = new EventEmitter<void>();
 
   readonly stations = STATIONS;
   selected: KitchenStation | null = null;
+  /** Nombre del plato elegido, solo para marcarlo en la lista. */
+  selectedDish: string | null = null;
 
-  select(station: KitchenStation): void {
+  get hasDishes(): boolean {
+    return this.dishes.length > 0;
+  }
+
+  selectDish(dish: DishOption): void {
+    this.selected = dish.station;
+    this.selectedDish = dish.name;
+  }
+
+  selectStation(station: KitchenStation): void {
     this.selected = station;
+    this.selectedDish = null;
+  }
+
+  labelOf(station: KitchenStation): string {
+    return STATIONS.find((s) => s.key === station)?.label ?? station;
   }
 
   confirm(): void {
@@ -45,4 +74,28 @@ export class StationModalComponent {
   cancel(): void {
     this.cancelled.emit();
   }
+}
+
+/**
+ * Quita los platos repetidos y los que no tienen area.
+ *
+ * Lo usan las tres pantallas de venta para armar la lista con la misma regla:
+ * si cada una dedujera los platos a su manera, el mismo pedido ofreceria
+ * opciones distintas segun donde se tome.
+ */
+export function toDishOptions(
+  entries: { name: string; station?: KitchenStation | null }[]
+): DishOption[] {
+  const seen = new Map<string, DishOption>();
+  for (const entry of entries) {
+    if (!entry.station) continue;
+    const key = `${entry.name}|${entry.station}`;
+    if (!seen.has(key)) seen.set(key, { name: entry.name, station: entry.station });
+  }
+  return [...seen.values()];
+}
+
+/** Las areas distintas a las que va el pedido. */
+export function areasOf(dishes: DishOption[]): KitchenStation[] {
+  return [...new Set(dishes.map((d) => d.station))];
 }

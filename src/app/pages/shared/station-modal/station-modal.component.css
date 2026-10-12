@@ -28,18 +28,20 @@
   margin-bottom: 18px;
 }
 
-.station-list {
+.dish-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
   margin-bottom: 18px;
+  max-height: 46vh;
+  overflow-y: auto;
 }
 
-.station-option {
+.dish-option {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   margin: 0;
   padding: 12px 14px;
   text-align: left;
@@ -50,26 +52,33 @@
   box-shadow: none;
 }
 
-.station-option:hover {
+.dish-option:hover {
   background: #fdecec;
   box-shadow: none;
 }
 
-.station-option.selected {
+.dish-option.selected {
   border-color: var(--carretero-red);
   background: #fdecec;
 }
 
-.station-name {
-  font-weight: 800;
-  font-size: 0.92rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+.dish-name {
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-align: left;
 }
 
-.station-hint {
-  font-size: 0.72rem;
+/* El area va como dato secundario: se elige el plato, no la estacion. */
+.dish-area {
+  flex-shrink: 0;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--surface-border);
   color: var(--text-muted);
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .modal-actions {

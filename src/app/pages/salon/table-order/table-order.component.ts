@@ -7,6 +7,8 @@ import { CategoryService } from '../../../services/category.service';
 import { ProductService } from '../../../services/product.service';
 import { OrderService } from '../../../services/order.service';
 import { AuthService } from '../../../services/auth.service';
+import { ClientService } from '../../../services/client.service';
+import { PrinterService } from '../../../services/printer.service';
 import { DiningTable } from '../../../model/dining-table';
 import { Category } from '../../../model/category';
 import { Product } from '../../../model/product';
@@ -14,10 +16,12 @@ import { Flavor } from '../../../model/flavor';
 import { Order } from '../../../model/order';
 import { OrderDetail } from '../../../model/order-detail';
 import { OrderCreateRequest } from '../../../model/order-create-request';
+import { Client } from '../../../model/client';
 import { CheckoutModalComponent } from './checkout-modal/checkout-modal.component';
 import { FlavorModalComponent } from '../../shared/flavor-modal/flavor-modal.component';
 import { PinPadComponent } from '../../shared/pin-pad/pin-pad.component';
-import { StationModalComponent } from '../../shared/station-modal/station-modal.component';
+import { StationModalComponent, areasOf, DishOption, toDishOptions } from '../../shared/station-modal/station-modal.component';
+import { ClientModalComponent } from '../../shared/client-modal/client-modal.component';
 import { KitchenStation } from '../../../model/enums';
 
 interface CartLine {
@@ -44,6 +48,7 @@ const CASHIER_ROLES = ['MESERO', 'CAJERO', 'ADMIN'];
     FlavorModalComponent,
     PinPadComponent,
     StationModalComponent,
+    ClientModalComponent,
   ],
   templateUrl: './table-order.component.html',
   styleUrl: './table-order.component.css',
@@ -55,24 +60,47 @@ export class TableOrderComponent implements OnInit {
   private categoryService = inject(CategoryService);
   private productService = inject(ProductService);
   private orderService = inject(OrderService);
-  private authService = inject(AuthService);
+  public authService = inject(AuthService);
+  private clientService = inject(ClientService);
+  private printerService = inject(PrinterService);
 
   table: DiningTable | null = null;
   categories: Category[] = [];
+  allProducts: Product[] = [];
   products: Product[] = [];
   selectedCategory: Category | null = null;
+  productCounts: Record<number, number> = {};
 
   currentOrder: Order | null = null;
   draftCart: CartLine[] = [];
 
   sending = false;
   errorMessage = '';
+  feedbackMessage = '';
   showCheckout = false;
+
+  // Cliente y modal
+  selectedClient: Client | null = null;
+  showClientModal = false;
+
+  // Toggle por posición (conmutador en la cabecera)
+  byPosition = false;
+
+  // Pestañas del catálogo derecho
+  activeTab: 'categoria' | 'menu' | 'busqueda' | 'favoritos' = 'categoria';
+  searchQuery = '';
+  searchResults: Product[] = [];
+  favoriteProducts: Product[] = [];
+
+  // Toggle de detalle por fila (Ver detalle)
+  expandedDetails = new Set<number>();
 
   /** Producto esperando que el mesero elija su sabor. */
   pendingFlavorProduct: Product | null = null;
-  /** Producto esperando que se elija el area que lo prepara. */
+  /** Producto esperando que se elija el plato al que acompana. */
   pendingStationProduct: Product | null = null;
+  /** Platos que se le ofrecen para elegir. */
+  stationDishes: DishOption[] = [];
   /** Sabor ya elegido, guardado mientras se elige tambien el area. */
   private pendingStationFlavor?: Flavor;
 
@@ -99,10 +127,35 @@ export class TableOrderComponent implements OnInit {
         this.selectCategory(data[0]);
       }
     });
+
+    this.loadAllProducts();
+  }
+
+  loadAllProducts(): void {
+    this.productService.findAll().subscribe({
+      next: (all) => {
+        this.allProducts = all;
+        this.productCounts = {};
+        all.forEach((p) => {
+          const cid = p.category?.idCategory;
+          if (cid) {
+            this.productCounts[cid] = (this.productCounts[cid] || 0) + 1;
+          }
+        });
+        this.favoriteProducts = all.slice(0, 12);
+        this.onSearchChange();
+      },
+      error: () => {},
+    });
   }
 
   get canCharge(): boolean {
     return CASHIER_ROLES.includes(this.authService.roleName().toUpperCase());
+  }
+
+  get currentWaiterName(): string {
+    const user = this.authService.currentUser();
+    return user?.fullName || user?.username || 'Luis Subero';
   }
 
   loadActiveOrder(idTable: number): void {
@@ -110,12 +163,25 @@ export class TableOrderComponent implements OnInit {
       next: (order) => {
         this.currentOrder = order;
         this.errorMessage = '';
+        if (order?.client) {
+          this.selectedClient = order.client;
+        }
       },
       error: (err) => {
         this.currentOrder = null;
         this.errorMessage = err?.message || 'No se pudo cargar el pedido de esta mesa. Intenta recargar la pagina.';
       },
     });
+  }
+
+  // --- Navegación entre pestañas ---
+  setTab(tab: 'categoria' | 'menu' | 'busqueda' | 'favoritos'): void {
+    this.activeTab = tab;
+  }
+
+  selectCategoryAndOpenMenu(category: Category): void {
+    this.selectCategory(category);
+    this.activeTab = 'menu';
   }
 
   selectCategory(category: Category): void {
@@ -126,27 +192,95 @@ export class TableOrderComponent implements OnInit {
     });
   }
 
+  onSearchChange(): void {
+    const q = this.searchQuery.trim().toLowerCase();
+    if (!q) {
+      this.searchResults = this.allProducts.slice(0, 24);
+      return;
+    }
+    this.searchResults = this.allProducts.filter(
+      (p) =>
+        p.name.toLowerCase().includes(q) ||
+        (p.description && p.description.toLowerCase().includes(q)) ||
+        (p.category?.name && p.category.name.toLowerCase().includes(q))
+    );
+  }
+
+  // --- Cliente ---
+  openClientModal(): void {
+    this.showClientModal = true;
+  }
+
+  closeClientModal(): void {
+    this.showClientModal = false;
+  }
+
+  onClientSelected(client: Client | null): void {
+    this.selectedClient = client;
+    this.closeClientModal();
+  }
+
+  // --- Detalle desplegable de fila ---
+  toggleDetail(id: number | undefined): void {
+    if (!id) return;
+    if (this.expandedDetails.has(id)) {
+      this.expandedDetails.delete(id);
+    } else {
+      this.expandedDetails.add(id);
+    }
+  }
+
+  isDetailExpanded(id: number | undefined): boolean {
+    return id ? this.expandedDetails.has(id) : false;
+  }
+
   addToCart(product: Product): void {
     if (product.requiresFlavor) {
       this.pendingFlavorProduct = product;
       return;
     }
     if (product.requiresStation) {
-      this.pendingStationProduct = product;
+      this.askStation(product);
       return;
     }
     this.pushToCart(product);
   }
 
-  /** Un producto puede pedir las dos cosas: primero el sabor, despues el area. */
+  /** Platos del pedido a los que puede acompanar un adicional */
+  private get dishOptions(): DishOption[] {
+    return toDishOptions([
+      ...(this.currentOrder?.details ?? []).map((d) => ({
+        name: d.productName,
+        station: d.station ?? d.productStation,
+      })),
+      ...this.draftCart.map((l) => ({
+        name: l.product.name,
+        station: l.station ?? l.product.station,
+      })),
+    ]);
+  }
+
+  private askStation(product: Product, flavor?: Flavor): void {
+    const dishes = this.dishOptions;
+    const areas = areasOf(dishes);
+
+    if (areas.length === 1) {
+      this.pushToCart(product, flavor, areas[0]);
+      return;
+    }
+
+    this.stationDishes = dishes;
+    this.pendingStationProduct = product;
+    this.pendingStationFlavor = flavor;
+  }
+
   onFlavorChosen(flavor: Flavor): void {
     const product = this.pendingFlavorProduct;
     this.pendingFlavorProduct = null;
     if (!product) return;
 
     if (product.requiresStation) {
-      this.pendingStationProduct = product;
-      this.pendingStationFlavor = flavor;
+      this.askStation(product, flavor);
       return;
     }
     this.pushToCart(product, flavor);
@@ -170,8 +304,6 @@ export class TableOrderComponent implements OnInit {
   }
 
   private pushToCart(product: Product, flavor?: Flavor, station?: KitchenStation): void {
-    // Dos lineas del mismo producto con distinta area no se agrupan: cada una
-    // sale a una estacion diferente y deben viajar por separado.
     const line = this.draftCart.find(
       (l) =>
         l.product.idProduct === product.idProduct &&
@@ -210,11 +342,20 @@ export class TableOrderComponent implements OnInit {
     return (this.currentOrder?.total ?? 0) + this.draftTotal;
   }
 
+  get hasAnyItems(): boolean {
+    return (
+      (this.currentOrder?.details && this.currentOrder.details.length > 0) ||
+      this.draftCart.length > 0
+    );
+  }
+
   sendOrder(): void {
     if (!this.table?.idTable || this.draftCart.length === 0) return;
 
     this.sending = true;
     this.errorMessage = '';
+    this.feedbackMessage = '';
+
     const items = this.draftCart.map((l) => ({
       idProduct: l.product.idProduct!,
       quantity: l.quantity,
@@ -229,6 +370,8 @@ export class TableOrderComponent implements OnInit {
           this.currentOrder = order;
           this.draftCart = [];
           this.sending = false;
+          this.feedbackMessage = '¡Pedido enviado a cocina!';
+          setTimeout(() => (this.feedbackMessage = ''), 3500);
         },
         error: (err) => {
           this.errorMessage = err?.message || 'No se pudo enviar el pedido.';
@@ -241,6 +384,7 @@ export class TableOrderComponent implements OnInit {
     const request: OrderCreateRequest = {
       saleType: 'SALON',
       idTable: this.table.idTable,
+      idClient: this.selectedClient?.idClient,
       items,
     };
 
@@ -249,6 +393,8 @@ export class TableOrderComponent implements OnInit {
         this.currentOrder = order;
         this.draftCart = [];
         this.sending = false;
+        this.feedbackMessage = '¡Pedido creado y enviado a cocina!';
+        setTimeout(() => (this.feedbackMessage = ''), 3500);
       },
       error: (err) => {
         this.errorMessage = err?.message || 'No se pudo enviar el pedido.';
@@ -257,16 +403,49 @@ export class TableOrderComponent implements OnInit {
     });
   }
 
-  // ===================== Corregir un pedido ya enviado =====================
+  // --- Botones de la barra inferior (Precuenta y Despacho) ---
+  printPreAccount(): void {
+    if (!this.currentOrder?.idOrder) {
+      this.errorMessage = 'No hay un pedido confirmado en esta mesa para generar la precuenta.';
+      setTimeout(() => (this.errorMessage = ''), 4000);
+      return;
+    }
 
-  /**
-   * Quitar un plato pide PIN; cambiarle la nota no.
-   *
-   * El PIN protege lo que baja la cuenta: el plato pudo haberse cocinado ya y
-   * quitarlo le resta plata a la mesa. Una nota ("sin aji") no mueve el monto y
-   * suele ser justo lo que hay que corregir a ultimo momento, asi que pedirle un
-   * PIN al mesero solo lo entorpeceria.
-   */
+    this.feedbackMessage = 'Imprimiendo precuenta...';
+    this.printerService.printPreAccount(this.currentOrder.idOrder).subscribe({
+      next: () => {
+        this.feedbackMessage = 'Precuenta impresa con éxito.';
+        setTimeout(() => (this.feedbackMessage = ''), 3500);
+      },
+      error: (err) => {
+        this.errorMessage = err?.message || 'No se pudo imprimir la precuenta.';
+        setTimeout(() => (this.errorMessage = ''), 4000);
+      },
+    });
+  }
+
+  despacho(): void {
+    if (this.draftCart.length > 0) {
+      this.sendOrder();
+    } else if (this.currentOrder?.idOrder) {
+      this.feedbackMessage = 'Reenviando comanda a la estación...';
+      this.printerService.printKitchen(this.currentOrder.idOrder).subscribe({
+        next: () => {
+          this.feedbackMessage = 'Comanda despachada a cocina.';
+          setTimeout(() => (this.feedbackMessage = ''), 3500);
+        },
+        error: (err) => {
+          this.errorMessage = err?.message || 'No se pudo despachar a la impresora de cocina.';
+          setTimeout(() => (this.errorMessage = ''), 4000);
+        },
+      });
+    } else {
+      this.errorMessage = 'Agrega productos antes de despachar.';
+      setTimeout(() => (this.errorMessage = ''), 3000);
+    }
+  }
+
+  // ===================== Corregir un pedido ya enviado =====================
   askRemoveItem(detail: OrderDetail): void {
     this.itemToRemove = detail;
     this.itemError = '';
@@ -289,7 +468,6 @@ export class TableOrderComponent implements OnInit {
     this.itemToRemove = null;
     this.itemError = '';
     this.orderService.removeItem(detail.idOrderDetail, pin).subscribe({
-      // El backend devuelve el pedido ya recalculado: el total baja solo.
       next: (order) => (this.currentOrder = order),
       error: (err) => {
         this.itemError = (err as { message?: string })?.message || 'No se pudo quitar el plato.';
@@ -327,7 +505,6 @@ export class TableOrderComponent implements OnInit {
   }
 
   // --- Anular el pedido completo ---
-
   askCancelOrder(): void {
     this.cancellingOrder = true;
     this.itemError = '';
@@ -349,7 +526,6 @@ export class TableOrderComponent implements OnInit {
 
     this.cancellingOrder = false;
     this.orderService.cancelOrder(idOrder, pin, 'Anulado desde Salon').subscribe({
-      // Anular libera la mesa, asi que ya no hay nada que atender aqui.
       next: () => this.router.navigate(['/pages/salon']),
       error: (err) => {
         this.itemError = (err as { message?: string })?.message || 'No se pudo anular el pedido.';
@@ -381,7 +557,6 @@ export class TableOrderComponent implements OnInit {
   }
 
   onPaid(): void {
-    // El pago se registro; se espera a que el usuario cierre el modal (boton "Listo")
-    // para que pueda ver el numero de comprobante antes de volver al Salon.
+    // El pago se registro
   }
 }

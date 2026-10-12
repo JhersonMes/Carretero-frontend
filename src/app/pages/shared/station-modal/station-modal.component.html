@@ -1,18 +1,39 @@
 <div class="modal-overlay" (click)="cancel()">
   <div class="modal-content" (click)="$event.stopPropagation()">
-    <h2>Que area lo prepara?</h2>
-    <p class="modal-hint">{{ product.name }} &middot; sale solo en la comanda del area que elijas.</p>
+    <h2>{{ hasDishes ? 'Con que plato va?' : 'Que area lo prepara?' }}</h2>
+    <p class="modal-hint">
+      {{ product.name }} &middot;
+      {{
+        hasDishes
+          ? 'sale a la misma area que el plato que elijas'
+          : 'el pedido aun no tiene platos, elige el area'
+      }}
+    </p>
 
-    <div class="station-list">
+    <!-- Lo habitual: se elige el plato y el area sale de el -->
+    <div class="dish-list" *ngIf="hasDishes">
       <button
         type="button"
-        class="station-option"
+        class="dish-option"
+        *ngFor="let d of dishes"
+        [class.selected]="selectedDish === d.name"
+        (click)="selectDish(d)"
+      >
+        <span class="dish-name">{{ d.name }}</span>
+        <span class="dish-area">{{ labelOf(d.station) }}</span>
+      </button>
+    </div>
+
+    <!-- Sin platos a los que engancharse: se elige el area directamente -->
+    <div class="dish-list" *ngIf="!hasDishes">
+      <button
+        type="button"
+        class="dish-option"
         *ngFor="let s of stations"
         [class.selected]="selected === s.key"
-        (click)="select(s.key)"
+        (click)="selectStation(s.key)"
       >
-        <span class="station-name">{{ s.label }}</span>
-        <span class="station-hint">{{ s.hint }}</span>
+        <span class="dish-name">{{ s.label }}</span>
       </button>
     </div>
 

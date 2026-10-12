@@ -1,180 +1,445 @@
-﻿<div class="order-page" *ngIf="table">
-  <div class="order-header">
-    <a routerLink="/pages/salon" class="back-link">&larr; Salon</a>
-    <div class="order-header-title">
-      <h1>{{ table.name }}</h1>
-      <p class="lead">{{ table.capacity }} personas</p>
-    </div>
-  </div>
-
-  <div class="order-builder-layout">
-    <div class="order-main">
-      <div class="category-tabs">
-        <button
-          type="button"
-          class="category-tab"
-          *ngFor="let category of categories"
-          [class.active]="selectedCategory?.idCategory === category.idCategory"
-          (click)="selectCategory(category)"
-        >
-          {{ category.name }}
-        </button>
-      </div>
-
-      <div class="product-grid">
-        <button type="button" class="product-card" *ngFor="let product of products" (click)="addToCart(product)">
-          <span class="product-name">{{ product.name }}</span>
-          <span class="product-price">S/ {{ product.price.toFixed(2) }}</span>
-        </button>
-
-        <p class="empty-state" *ngIf="products.length === 0">Esta categoria no tiene productos.</p>
-      </div>
-    </div>
-
-    <aside class="cart-panel">
-      <h2>Pedido</h2>
-
-      <div class="sent-section" *ngIf="currentOrder && currentOrder.details && currentOrder.details.length > 0">
-        <span class="section-label">Ya enviado</span>
-        <div class="cart-lines">
-          <div class="cart-line sent" *ngFor="let detail of currentOrder.details">
-            <div class="cart-line-info">
-              <span class="cart-line-name">{{ detail.quantity }}x {{ detail.productName }}</span>
-              <span class="cart-line-flavor" *ngIf="detail.flavorName">{{ detail.flavorName }}</span>
-              <span class="cart-line-note" *ngIf="detail.notes">{{ detail.notes }}</span>
-              <span class="cart-line-price">S/ {{ detail.subtotal.toFixed(2) }}</span>
-
-              <!--
-                Corregir una comanda: la nota no mueve el monto y va libre; quitar
-                el plato si lo mueve, y por eso pide PIN.
-              -->
-              <span class="line-actions">
-                <button type="button" class="line-btn" (click)="startEditNote(detail)">
-                  {{ detail.notes ? 'Editar nota' : 'Agregar nota' }}
-                </button>
-                <button type="button" class="line-btn danger" (click)="askRemoveItem(detail)">
-                  Quitar
-                </button>
-              </span>
-            </div>
-            <span class="item-status-badge" [class]="'status-' + (detail.itemStatus || 'PENDIENTE')">
-              {{ detail.itemStatus === 'LISTO' ? 'Listo' : detail.itemStatus === 'EN_PREPARACION' ? 'En preparacion' : 'Pendiente' }}
-            </span>
-          </div>
+<div class="pos-container" *ngIf="table">
+  <!-- ===================== PANEL IZQUIERDO: PEDIDO / ORDEN ===================== -->
+  <aside class="pos-order-panel">
+    <!-- Cabecera de la mesa -->
+    <header class="pos-order-header">
+      <div class="pos-order-header-top">
+        <div class="pos-order-title-group">
+          <a routerLink="/pages/salon" class="pos-back-link" title="Volver al Salón">&larr; Salón</a>
+          <svg class="pos-table-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <h2 class="pos-order-title">{{ table.name }}</h2>
         </div>
 
-        <div class="error-message" *ngIf="itemError">{{ itemError }}</div>
-
-        <button type="button" class="cancel-order-btn" (click)="askCancelOrder()">
-          Anular todo el pedido
-        </button>
-      </div>
-
-      <div class="draft-section" *ngIf="draftCart.length > 0">
-        <span class="section-label">Por enviar</span>
-        <div class="cart-lines">
-          <div class="cart-line" *ngFor="let line of draftCart">
-            <div class="cart-line-info">
-              <span class="cart-line-name">{{ line.product.name }}</span>
-              <span class="cart-line-flavor" *ngIf="line.flavor">{{ line.flavor.name }}</span>
-              <span class="cart-line-price">S/ {{ (line.unitPrice * line.quantity).toFixed(2) }}</span>
-            </div>
-            <div class="cart-line-qty">
-              <button type="button" (click)="decrementLine(line)">-</button>
-              <span>{{ line.quantity }}</span>
-              <button type="button" (click)="incrementLine(line)">+</button>
-            </div>
-          </div>
+        <!-- Toggle Por posición (como en la Imagen 2) -->
+        <div class="pos-toggle-group">
+          <label class="pos-switch">
+            <input type="checkbox" [(ngModel)]="byPosition" />
+            <span class="pos-slider"></span>
+          </label>
+          <span class="pos-toggle-label">Por posición</span>
         </div>
       </div>
 
-      <p class="cart-empty-msg" *ngIf="!currentOrder && draftCart.length === 0">
-        Aun no has agregado productos.
-      </p>
+      <div class="pos-order-meta">
+        <span class="pos-meta-item">
+          <svg class="pos-meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span>Mozo: <strong>{{ currentWaiterName }}</strong></span>
+        </span>
+        <span class="pos-meta-item">
+          <svg class="pos-meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <span>Cant. Personas: <strong>{{ table.capacity || 1 }}</strong></span>
+        </span>
+      </div>
+    </header>
 
-      <div class="cart-total">
-        <span>Total</span>
-        <span>S/ {{ grandTotal.toFixed(2) }}</span>
+    <!-- Fila de selección de cliente (como en las imágenes 1 y 2) -->
+    <div class="pos-client-bar" (click)="openClientModal()">
+      <div class="pos-client-content" [class.has-client]="selectedClient">
+        <svg class="pos-client-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        <span>
+          {{ selectedClient ? (selectedClient.name + (selectedClient.docNumber ? ' · ' + selectedClient.docNumber : '')) : 'Selecciona un cliente' }}
+        </span>
+      </div>
+      <button
+        type="button"
+        class="pos-client-clear"
+        *ngIf="selectedClient"
+        (click)="$event.stopPropagation(); selectedClient = null"
+        title="Quitar cliente"
+      >
+        &times;
+      </button>
+    </div>
+
+    <!-- Cuerpo con lista de platos o estado vacío -->
+    <div class="pos-order-body">
+      <!-- Estado vacío (como en Imagen 1) -->
+      <div class="pos-empty-cart" *ngIf="!hasAnyItems">
+        <svg class="pos-cart-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+          <circle cx="9" cy="21" r="1.5"></circle>
+          <circle cx="20" cy="21" r="1.5"></circle>
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+        </svg>
+        <h3 class="pos-empty-title">Agrega un producto</h3>
+        <p class="pos-empty-desc">Selecciona una categoría y productos del panel de la derecha</p>
       </div>
 
-      <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
+      <!-- Tabla de productos (como en Imagen 2) -->
+      <div class="pos-cart-table" *ngIf="hasAnyItems">
+        <div class="pos-table-header">
+          <span class="th-qty">Cant.</span>
+          <span class="th-name">Producto</span>
+          <span class="th-price">Precio</span>
+        </div>
 
-      <button type="button" class="send-btn" [disabled]="draftCart.length === 0 || sending" (click)="sendOrder()">
-        {{ sending ? 'Enviando...' : 'Enviar pedido' }}
+        <div class="pos-table-body">
+          <!-- SECCIÓN: Platos ya enviados a cocina -->
+          <ng-container *ngIf="currentOrder?.details && currentOrder!.details!.length > 0">
+            <div class="pos-section-badge">Ya enviado a cocina</div>
+            <div class="pos-table-row sent-row" *ngFor="let detail of currentOrder!.details">
+              <div class="pos-row-qty">
+                {{ detail.quantity }}
+              </div>
+              <div class="pos-row-product">
+                <div class="pos-product-title-row">
+                  <span
+                    class="pos-station-badge"
+                    [class]="'status-' + (detail.itemStatus || 'PENDIENTE')"
+                    [title]="detail.itemStatus || 'PENDIENTE'"
+                  >
+                    S
+                  </span>
+                  <span class="pos-product-name">{{ detail.productName }}</span>
+                </div>
+
+                <div class="pos-product-flavors" *ngIf="detail.flavorName">
+                  <strong>SABORES:</strong> +{{ detail.flavorName }}
+                </div>
+                <div class="pos-product-note" *ngIf="detail.notes">
+                  Nota: {{ detail.notes }}
+                </div>
+
+                <!-- Botón Ver detalle (como en Imagen 2) -->
+                <button
+                  type="button"
+                  class="pos-detail-toggle-btn"
+                  (click)="toggleDetail(detail.idOrderDetail)"
+                >
+                  {{ isDetailExpanded(detail.idOrderDetail) ? 'Ocultar detalle ⌃' : 'Ver detalle ⌄' }}
+                </button>
+
+                <!-- Acciones desplegadas -->
+                <div class="pos-row-actions" *ngIf="isDetailExpanded(detail.idOrderDetail)">
+                  <button type="button" class="pos-action-link" (click)="startEditNote(detail)">
+                    {{ detail.notes ? 'Editar nota' : '+ Nota' }}
+                  </button>
+                  <button type="button" class="pos-action-link danger" (click)="askRemoveItem(detail)">
+                    Quitar (PIN)
+                  </button>
+                </div>
+              </div>
+              <div class="pos-row-price">
+                S/ {{ (detail.subtotal || 0).toFixed(2) }}
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- SECCIÓN: Platos por enviar (borrador) -->
+          <ng-container *ngIf="draftCart.length > 0">
+            <div class="pos-section-badge draft-badge">Por enviar</div>
+            <div class="pos-table-row draft-row" *ngFor="let line of draftCart">
+              <div class="pos-row-qty pos-qty-controls">
+                <button type="button" class="pos-qty-btn" (click)="incrementLine(line)">+</button>
+                <span class="pos-qty-num">{{ line.quantity }}</span>
+                <button type="button" class="pos-qty-btn" (click)="decrementLine(line)">-</button>
+              </div>
+              <div class="pos-row-product">
+                <div class="pos-product-title-row">
+                  <span class="pos-station-badge" title="Por enviar">S</span>
+                  <span class="pos-product-name">{{ line.product.name }}</span>
+                </div>
+                <div class="pos-product-flavors" *ngIf="line.flavor">
+                  <strong>SABORES:</strong> +{{ line.flavor.name }}
+                </div>
+                <div class="pos-product-note" *ngIf="line.station">
+                  Área: {{ line.station }}
+                </div>
+              </div>
+              <div class="pos-row-price">
+                S/ {{ (line.unitPrice * line.quantity).toFixed(2) }}
+              </div>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alertas y avisos contextuales -->
+    <div class="pos-alerts-area" *ngIf="errorMessage || feedbackMessage || itemError">
+      <div class="alert-box error" *ngIf="errorMessage">{{ errorMessage }}</div>
+      <div class="alert-box error" *ngIf="itemError">{{ itemError }}</div>
+      <div class="alert-box success" *ngIf="feedbackMessage">{{ feedbackMessage }}</div>
+    </div>
+
+    <!-- Enlace para anular pedido si existe orden activa -->
+    <div class="pos-cancel-wrapper" *ngIf="currentOrder?.idOrder">
+      <button type="button" class="pos-cancel-link-btn" (click)="askCancelOrder()">
+        Anular todo el pedido
+      </button>
+    </div>
+
+    <!-- ================= BARRA DE ACCIÓN INFERIOR (Imagen 2) ================= -->
+    <footer class="pos-order-footer">
+      <button
+        type="button"
+        class="pos-footer-action-btn"
+        [disabled]="!currentOrder?.idOrder"
+        (click)="printPreAccount()"
+        title="Imprimir precuenta para la mesa"
+      >
+        <svg class="pos-footer-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="6 9 6 2 18 2 18 9"></polyline>
+          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+          <rect x="6" y="14" width="12" height="8"></rect>
+        </svg>
+        <span>Precuenta</span>
       </button>
 
       <button
         type="button"
-        class="charge-btn"
-        *ngIf="currentOrder && canCharge"
+        class="pos-footer-action-btn"
+        [disabled]="!hasAnyItems || sending"
+        (click)="despacho()"
+        title="Despachar pedido a cocina"
+      >
+        <svg class="pos-footer-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 2L11 13"></path>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+        <span>{{ sending ? 'Enviando...' : (draftCart.length > 0 ? 'Despacho' : 'Reenviar') }}</span>
+      </button>
+
+      <button
+        type="button"
+        class="pos-pay-button"
+        [disabled]="!currentOrder || !canCharge"
         (click)="openCheckout()"
       >
-        Cobrar
+        <span class="pos-pay-label">PAGAR</span>
+        <span class="pos-pay-amount">S/ {{ grandTotal.toFixed(2) }}</span>
       </button>
-    </aside>
-  </div>
+    </footer>
+  </aside>
 
-  <app-flavor-modal
-    *ngIf="pendingFlavorProduct"
-    [product]="pendingFlavorProduct"
-    (confirmed)="onFlavorChosen($event)"
-    (cancelled)="onFlavorCancelled()"
-  ></app-flavor-modal>
+  <!-- ===================== PANEL DERECHO: CATÁLOGO ===================== -->
+  <main class="pos-catalog-panel">
+    <!-- Pestañas superiores (como en Imagen 1 y 2) -->
+    <nav class="pos-nav-tabs">
+      <button
+        type="button"
+        class="pos-nav-tab"
+        [class.active]="activeTab === 'categoria'"
+        (click)="setTab('categoria')"
+      >
+        Categoría
+      </button>
+      <button
+        type="button"
+        class="pos-nav-tab"
+        [class.active]="activeTab === 'menu'"
+        (click)="setTab('menu')"
+      >
+        Menú
+      </button>
+      <button
+        type="button"
+        class="pos-nav-tab"
+        [class.active]="activeTab === 'busqueda'"
+        (click)="setTab('busqueda')"
+      >
+        Búsqueda
+      </button>
+      <button
+        type="button"
+        class="pos-nav-tab"
+        [class.active]="activeTab === 'favoritos'"
+        (click)="setTab('favoritos')"
+      >
+        Favoritos
+      </button>
+    </nav>
 
-  <app-station-modal
-    *ngIf="pendingStationProduct"
-    [product]="pendingStationProduct"
-    (confirmed)="onStationChosen($event)"
-    (cancelled)="onStationCancelled()"
-  ></app-station-modal>
-
-  <app-checkout-modal
-    *ngIf="showCheckout && currentOrder"
-    [order]="currentOrder"
-    (closed)="closeCheckout()"
-    (paid)="onPaid()"
-  ></app-checkout-modal>
-  <!-- Quitar un plato: pide PIN porque le baja el monto a la cuenta -->
-  <app-pin-pad
-    *ngIf="itemToRemove"
-    [subtitle]="removeSubtitle"
-    (authorized)="onRemoveAuthorized($event)"
-    (cancelled)="cancelRemoveItem()"
-  ></app-pin-pad>
-
-  <!-- Anular el pedido entero -->
-  <app-pin-pad
-    *ngIf="cancellingOrder"
-    [subtitle]="cancelSubtitle"
-    (authorized)="onCancelAuthorized($event)"
-    (cancelled)="cancelCancelOrder()"
-  ></app-pin-pad>
-
-  <!-- Nota del plato: no mueve el monto, no pide PIN -->
-  <div class="modal-overlay" *ngIf="itemToNote" (click)="cancelEditNote()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <h2>Nota del plato</h2>
-      <p class="modal-hint">
-        {{ itemToNote.quantity }}x {{ itemToNote.productName }}. La cocina la ve en su comanda.
-      </p>
-
-      <div class="form-group">
-        <label for="notaPlato">Indicacion</label>
-        <input
-          id="notaPlato"
-          type="text"
-          [(ngModel)]="noteDraft"
-          placeholder="Ej. sin aji, para llevar, bien cocido"
-        />
+    <div class="pos-catalog-content">
+      <!-- PESTAÑA 1: CATEGORÍAS (Grid como en Imagen 1 y 2) -->
+      <div class="pos-view-categories" *ngIf="activeTab === 'categoria'">
+        <div class="pos-category-grid">
+          <button
+            type="button"
+            class="pos-category-card"
+            *ngFor="let cat of categories"
+            (click)="selectCategoryAndOpenMenu(cat)"
+          >
+            <span class="pos-category-name">{{ cat.name }}</span>
+            <span class="pos-category-count">{{ productCounts[cat.idCategory!] || 0 }} prod.</span>
+          </button>
+        </div>
       </div>
 
-      <div class="modal-actions">
-        <button type="button" class="secondary" (click)="cancelEditNote()">Cancelar</button>
-        <button type="button" class="confirm-btn" [disabled]="savingNote" (click)="saveNote()">
-          {{ savingNote ? 'Guardando...' : 'Guardar' }}
-        </button>
+      <!-- PESTAÑA 2: MENÚ (Productos de la categoría elegida) -->
+      <div class="pos-view-menu" *ngIf="activeTab === 'menu'">
+        <div class="pos-menu-toolbar">
+          <button type="button" class="pos-return-cats-btn" (click)="setTab('categoria')">
+            &larr; Volver a Categorías
+          </button>
+          <span class="pos-active-cat-name" *ngIf="selectedCategory">
+            {{ selectedCategory.name }} ({{ products.length }} prod.)
+          </span>
+        </div>
+
+        <div class="pos-product-grid">
+          <button
+            type="button"
+            class="pos-prod-card"
+            *ngFor="let product of products"
+            (click)="addToCart(product)"
+          >
+            <span class="pos-prod-card-name">{{ product.name }}</span>
+            <div class="pos-prod-card-bottom">
+              <span class="pos-prod-card-price">S/ {{ product.price.toFixed(2) }}</span>
+              <span class="pos-prod-badge" *ngIf="product.requiresFlavor">Opciones</span>
+              <span class="pos-prod-badge" *ngIf="product.requiresStation">Adicional</span>
+            </div>
+          </button>
+
+          <p class="empty-state" *ngIf="products.length === 0">
+            Esta categoría no tiene productos registrados.
+          </p>
+        </div>
+      </div>
+
+      <!-- PESTAÑA 3: BÚSQUEDA RÁPIDA -->
+      <div class="pos-view-search" *ngIf="activeTab === 'busqueda'">
+        <div class="pos-search-wrapper">
+          <svg class="pos-search-lens" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input
+            type="text"
+            class="pos-search-input"
+            [(ngModel)]="searchQuery"
+            (input)="onSearchChange()"
+            placeholder="Buscar producto por nombre, categoría o descripción..."
+            autofocus
+          />
+        </div>
+
+        <div class="pos-product-grid">
+          <button
+            type="button"
+            class="pos-prod-card"
+            *ngFor="let product of searchResults"
+            (click)="addToCart(product)"
+          >
+            <span class="pos-prod-card-name">{{ product.name }}</span>
+            <div class="pos-prod-card-bottom">
+              <span class="pos-prod-card-price">S/ {{ product.price.toFixed(2) }}</span>
+              <span class="pos-prod-badge" *ngIf="product.category">{{ product.category.name }}</span>
+            </div>
+          </button>
+
+          <p class="empty-state" *ngIf="searchResults.length === 0">
+            No se encontraron productos que coincidan con "{{ searchQuery }}".
+          </p>
+        </div>
+      </div>
+
+      <!-- PESTAÑA 4: FAVORITOS -->
+      <div class="pos-view-favorites" *ngIf="activeTab === 'favoritos'">
+        <div class="pos-product-grid">
+          <button
+            type="button"
+            class="pos-prod-card"
+            *ngFor="let product of favoriteProducts"
+            (click)="addToCart(product)"
+          >
+            <span class="pos-prod-card-name">{{ product.name }}</span>
+            <div class="pos-prod-card-bottom">
+              <span class="pos-prod-card-price">S/ {{ product.price.toFixed(2) }}</span>
+              <span class="pos-prod-badge">Destacado</span>
+            </div>
+          </button>
+
+          <p class="empty-state" *ngIf="favoriteProducts.length === 0">
+            No hay productos favoritos en este momento.
+          </p>
+        </div>
       </div>
     </div>
-  </div>
+  </main>
+</div>
 
+<!-- ===================== MODALES COMPARTIDOS ===================== -->
+<app-client-modal
+  *ngIf="showClientModal"
+  [currentClient]="selectedClient"
+  (clientSelected)="onClientSelected($event)"
+  (closed)="closeClientModal()"
+></app-client-modal>
+
+<app-flavor-modal
+  *ngIf="pendingFlavorProduct"
+  [product]="pendingFlavorProduct"
+  (confirmed)="onFlavorChosen($event)"
+  (cancelled)="onFlavorCancelled()"
+></app-flavor-modal>
+
+<app-station-modal
+  *ngIf="pendingStationProduct"
+  [product]="pendingStationProduct"
+  [dishes]="stationDishes"
+  (confirmed)="onStationChosen($event)"
+  (cancelled)="onStationCancelled()"
+></app-station-modal>
+
+<app-checkout-modal
+  *ngIf="showCheckout && currentOrder"
+  [order]="currentOrder"
+  (closed)="closeCheckout()"
+  (paid)="onPaid()"
+></app-checkout-modal>
+
+<app-pin-pad
+  *ngIf="itemToRemove"
+  [subtitle]="removeSubtitle"
+  (authorized)="onRemoveAuthorized($event)"
+  (cancelled)="cancelRemoveItem()"
+></app-pin-pad>
+
+<app-pin-pad
+  *ngIf="cancellingOrder"
+  [subtitle]="cancelSubtitle"
+  (authorized)="onCancelAuthorized($event)"
+  (cancelled)="cancelCancelOrder()"
+></app-pin-pad>
+
+<!-- Modal de nota del plato -->
+<div class="modal-overlay" *ngIf="itemToNote" (click)="cancelEditNote()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <h2>Nota del plato</h2>
+    <p class="modal-hint">
+      {{ itemToNote.quantity }}x {{ itemToNote.productName }}. La cocina la ve en su comanda.
+    </p>
+
+    <div class="form-group">
+      <label for="notaPlato">Indicación</label>
+      <input
+        id="notaPlato"
+        type="text"
+        [(ngModel)]="noteDraft"
+        placeholder="Ej. sin aji, para llevar, bien cocido"
+      />
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="secondary" (click)="cancelEditNote()">Cancelar</button>
+      <button type="button" class="confirm-btn" [disabled]="savingNote" (click)="saveNote()">
+        {{ savingNote ? 'Guardando...' : 'Guardar' }}
+      </button>
+    </div>
+  </div>
 </div>

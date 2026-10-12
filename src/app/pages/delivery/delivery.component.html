@@ -444,6 +444,7 @@
     <app-station-modal
       *ngIf="pendingStationProduct"
       [product]="pendingStationProduct"
+      [dishes]="stationDishes"
       (confirmed)="onStationChosen($event)"
       (cancelled)="onStationCancelled()"
     ></app-station-modal>
