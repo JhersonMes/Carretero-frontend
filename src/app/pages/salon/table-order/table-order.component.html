@@ -1,6 +1,38 @@
 <div class="pos-container" *ngIf="table">
+  <!-- ===================== SELECTOR DE VISTA MÓVIL ===================== -->
+  <div class="pos-mobile-view-switch">
+    <button
+      type="button"
+      class="mobile-switch-btn"
+      [class.active]="mobileView === 'catalog'"
+      (click)="setMobileView('catalog')"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="switch-icon">
+        <rect x="3" y="3" width="7" height="7"></rect>
+        <rect x="14" y="3" width="7" height="7"></rect>
+        <rect x="14" y="14" width="7" height="7"></rect>
+        <rect x="3" y="14" width="7" height="7"></rect>
+      </svg>
+      <span>Carta / Menú</span>
+    </button>
+    <button
+      type="button"
+      class="mobile-switch-btn"
+      [class.active]="mobileView === 'order'"
+      (click)="setMobileView('order')"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="switch-icon">
+        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <path d="M16 10a4 4 0 0 1-8 0"></path>
+      </svg>
+      <span>Comanda</span>
+      <span class="mobile-count-pill" *ngIf="totalItemsCount > 0">{{ totalItemsCount }}</span>
+    </button>
+  </div>
+
   <!-- ===================== PANEL IZQUIERDO: PEDIDO / ORDEN ===================== -->
-  <aside class="pos-order-panel">
+  <aside class="pos-order-panel" [class.mobile-hidden]="mobileView !== 'order'">
     <!-- Cabecera de la mesa -->
     <header class="pos-order-header">
       <div class="pos-order-header-top">
@@ -226,7 +258,7 @@
   </aside>
 
   <!-- ===================== PANEL DERECHO: CATÁLOGO ===================== -->
-  <main class="pos-catalog-panel">
+  <main class="pos-catalog-panel" [class.mobile-hidden]="mobileView !== 'catalog'">
     <!-- Pestañas superiores (como en Imagen 1 y 2) -->
     <nav class="pos-nav-tabs">
       <button
@@ -371,6 +403,27 @@
       </div>
     </div>
   </main>
+
+  <!-- ===================== BARRA FLOTANTE MÓVIL (EN CARTA) ===================== -->
+  <div
+    class="pos-mobile-cart-float"
+    *ngIf="mobileView === 'catalog' && (hasAnyItems || totalItemsCount > 0)"
+    (click)="setMobileView('order')"
+  >
+    <div class="cart-float-info">
+      <span class="cart-float-qty">{{ totalItemsCount }}</span>
+      <div class="cart-float-texts">
+        <span class="cart-float-label">{{ totalItemsCount === 1 ? '1 plato agregado' : totalItemsCount + ' platos agregados' }}</span>
+        <span class="cart-float-total">S/ {{ grandTotal.toFixed(2) }}</span>
+      </div>
+    </div>
+    <div class="cart-float-action">
+      <span>Ver Comanda</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="float-arrow">
+        <polyline points="9 18 15 12 9 6"></polyline>
+      </svg>
+    </div>
+  </div>
 </div>
 
 <!-- ===================== MODALES COMPARTIDOS ===================== -->

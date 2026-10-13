@@ -5,6 +5,7 @@
    =================================================================== */
 
 :root {
+  color-scheme: light;
   --carretero-red: #e31b22;
   --carretero-red-dark: #c4161c;
   --carretero-red-darker: #a01216;
@@ -408,6 +409,14 @@ tbody tr:last-child td {
    Estructura moderna de Punto de Venta con paleta Carretero (Rojo/Carbón/Blanco)
    =================================================================== */
 
+.pos-mobile-view-switch {
+  display: none !important;
+}
+
+.pos-mobile-cart-float {
+  display: none !important;
+}
+
 .pos-container {
   display: grid;
   grid-template-columns: 390px 1fr;
@@ -417,18 +426,249 @@ tbody tr:last-child td {
   min-height: 580px;
 }
 
-@media (max-width: 1150px) {
+@media (max-width: 1150px) and (min-width: 901px) {
   .pos-container {
     grid-template-columns: 350px 1fr;
     gap: 16px;
   }
 }
 
-@media (max-width: 920px) {
+/* ===================================================================
+   RESPONSIVE DESIGN PARA CELULARES (VISTAS MÓVILES POS)
+   =================================================================== */
+@media (max-width: 900px) {
   .pos-container {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
     height: auto;
     min-height: 0;
+    gap: 10px;
+    padding-bottom: 74px; /* Margen para barra flotante si está en carta */
+  }
+
+  .pos-mobile-view-switch {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    background: #ffffff;
+    padding: 6px;
+    border-radius: 12px;
+    border: 1.5px solid var(--surface-border, #e4dfda);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    position: sticky;
+    top: 0;
+    z-index: 30;
+  }
+
+  .mobile-switch-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .mobile-switch-btn.active {
+    background: var(--carretero-red, #e31b22);
+    color: #ffffff;
+    box-shadow: 0 3px 10px rgba(227, 27, 34, 0.25);
+  }
+
+  .mobile-switch-btn .switch-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .mobile-count-pill {
+    background: #eae5e1;
+    color: var(--text-primary);
+    font-size: 0.72rem;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 999px;
+  }
+
+  .mobile-switch-btn.active .mobile-count-pill {
+    background: #ffffff;
+    color: var(--carretero-red);
+  }
+
+  /* Ocultar el panel inactivo en móvil */
+  .pos-order-panel.mobile-hidden,
+  .pos-catalog-panel.mobile-hidden {
+    display: none !important;
+  }
+
+  .pos-order-panel,
+  .pos-catalog-panel {
+    width: 100%;
+    min-height: calc(100vh - 190px);
+    height: auto;
+  }
+
+  .pos-order-header {
+    padding: 12px 14px 10px;
+  }
+
+  .pos-order-title {
+    font-size: 1.15rem;
+  }
+
+  .mobile-add-more-btn {
+    width: 100%;
+    margin: 8px 0 0;
+    padding: 9px;
+    border-radius: 8px;
+    background: #fdf5f5;
+    color: var(--carretero-red);
+    border: 1px dashed var(--carretero-red);
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .pos-nav-tabs {
+    padding: 0 6px;
+  }
+
+  .pos-nav-tab {
+    padding: 12px 14px;
+    font-size: 0.82rem;
+  }
+
+  .pos-catalog-content {
+    padding: 12px 8px;
+  }
+
+  .pos-category-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  .pos-category-card {
+    min-height: 85px !important;
+    padding: 14px 10px 10px !important;
+  }
+
+  .pos-category-name {
+    font-size: 0.84rem !important;
+    margin-bottom: 6px !important;
+  }
+
+  .pos-product-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  .pos-prod-card {
+    min-height: 85px !important;
+    padding: 12px 10px !important;
+  }
+
+  .pos-prod-card-name {
+    font-size: 0.82rem !important;
+    margin-bottom: 6px !important;
+  }
+
+  .pos-prod-card-price {
+    font-size: 0.86rem !important;
+  }
+
+  /* BARRA FLOTANTE MÓVIL EN MODO CARTA */
+  .pos-mobile-cart-float {
+    display: flex !important;
+    position: fixed;
+    bottom: 12px;
+    left: 12px;
+    right: 12px;
+    z-index: 100;
+    background: #1e1d1d;
+    color: #ffffff;
+    border-radius: 14px;
+    padding: 10px 14px;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    border: 1.5px solid rgba(255, 255, 255, 0.15);
+    cursor: pointer;
+    animation: slideUpFloat 0.22s ease-out;
+  }
+
+  @keyframes slideUpFloat {
+    from {
+      transform: translateY(30px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .cart-float-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .cart-float-qty {
+    background: var(--carretero-red, #e31b22);
+    color: #ffffff;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+  }
+
+  .cart-float-texts {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+  }
+
+  .cart-float-label {
+    font-size: 0.7rem;
+    opacity: 0.75;
+  }
+
+  .cart-float-total {
+    font-size: 0.98rem;
+    font-weight: 800;
+    color: #ffffff;
+  }
+
+  .cart-float-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--carretero-red, #e31b22);
+    color: #ffffff;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 0.82rem;
+    letter-spacing: 0.02em;
+  }
+
+  .float-arrow {
+    width: 16px;
+    height: 16px;
   }
 }
 

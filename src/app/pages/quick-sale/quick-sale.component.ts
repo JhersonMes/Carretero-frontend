@@ -77,6 +77,17 @@ export class QuickSaleComponent implements OnInit {
   selectedClient: Client | null = null;
   showClientModal = false;
 
+  // Vista activa en móvil (carta vs pedido rápido)
+  mobileView: 'catalog' | 'order' = 'catalog';
+
+  get totalItemsCount(): number {
+    return this.cart.reduce((sum, l) => sum + l.quantity, 0);
+  }
+
+  setMobileView(view: 'catalog' | 'order'): void {
+    this.mobileView = view;
+  }
+
   // Pestañas del catálogo
   activeTab: 'categoria' | 'menu' | 'busqueda' | 'favoritos' = 'categoria';
   searchQuery = '';

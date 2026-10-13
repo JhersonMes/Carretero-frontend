@@ -61,6 +61,15 @@ export class LayoutComponent {
   private router = inject(Router);
 
   roleDisplay = roleDisplayOf;
+  isMobileMenuOpen = false;
+
+  toggleMobileMenu(): void {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+  }
+
+  closeMobileMenu(): void {
+    this.isMobileMenuOpen = false;
+  }
 
   get navItems(): NavItem[] {
     const role = this.authService.roleName().toUpperCase();

@@ -86,6 +86,19 @@ export class TableOrderComponent implements OnInit {
   // Toggle por posición (conmutador en la cabecera)
   byPosition = false;
 
+  // Vista activa en móvil (carta vs comanda)
+  mobileView: 'catalog' | 'order' = 'catalog';
+
+  get totalItemsCount(): number {
+    const sentCount = this.currentOrder?.details?.reduce((sum, d) => sum + (d.quantity || 1), 0) ?? 0;
+    const draftCount = this.draftCart.reduce((sum, l) => sum + l.quantity, 0);
+    return sentCount + draftCount;
+  }
+
+  setMobileView(view: 'catalog' | 'order'): void {
+    this.mobileView = view;
+  }
+
   // Pestañas del catálogo derecho
   activeTab: 'categoria' | 'menu' | 'busqueda' | 'favoritos' = 'categoria';
   searchQuery = '';
