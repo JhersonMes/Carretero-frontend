@@ -60,6 +60,7 @@
             step="0.10"
             [ngModel]="priceDraft.get(p.idProduct!)"
             (ngModelChange)="priceDraft.set(p.idProduct!, $event)"
+            (keyup.enter)="savePrice(p)"
             [class.zero]="p.price <= 0"
           />
           <button

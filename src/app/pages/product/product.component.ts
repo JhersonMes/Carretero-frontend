@@ -35,7 +35,7 @@ export class ProductComponent implements OnInit {
   savedId: number | null = null;
 
   /** Precio en edicion por producto, para no pisar la lista mientras se escribe. */
-  priceDraft = new Map<number, string>();
+  priceDraft = new Map<number, string | number>();
 
   ngOnInit(): void {
     this.categoryService.findAllRaw().subscribe((data) => (this.categories = data));
@@ -160,8 +160,14 @@ export class ProductComponent implements OnInit {
     const id = product.idProduct;
     if (id == null) return;
 
-    const raw = (this.priceDraft.get(id) ?? '').replace(',', '.');
-    const price = Number(raw);
+    const draft = this.priceDraft.get(id);
+    let price: number;
+    if (typeof draft === 'number') {
+      price = draft;
+    } else {
+      const raw = String(draft ?? '').replace(',', '.').trim();
+      price = Number(raw);
+    }
 
     if (!isFinite(price) || price <= 0) {
       this.errorMessage = `"${product.name}": el precio debe ser mayor a 0.`;
@@ -179,7 +185,7 @@ export class ProductComponent implements OnInit {
         setTimeout(() => (this.savedId === id ? (this.savedId = null) : null), 2000);
       },
       error: (err) => {
-        this.errorMessage = err?.message || `No se pudo actualizar el precio de "${product.name}".`;
+        this.errorMessage = err?.error?.message || err?.message || `No se pudo actualizar el precio de "${product.name}".`;
         this.savingId = null;
       },
     });
@@ -189,8 +195,9 @@ export class ProductComponent implements OnInit {
     const id = product.idProduct;
     if (id == null) return;
 
-    // El backend exige precio > 0 al guardar el producto completo.
-    if (product.price <= 0) {
+    // Solo se exige precio si se va a activar un producto actualmente inactivo.
+    // Si ya está activo y se quiere desactivar, se debe permitir sin restricción de precio.
+    if (product.active === false && product.price <= 0) {
       this.errorMessage = `"${product.name}": asigna un precio antes de activarlo.`;
       return;
     }
@@ -203,7 +210,7 @@ export class ProductComponent implements OnInit {
         this.savingId = null;
       },
       error: (err) => {
-        this.errorMessage = err?.message || 'No se pudo cambiar el estado del producto.';
+        this.errorMessage = err?.error?.message || err?.message || 'No se pudo cambiar el estado del producto.';
         this.savingId = null;
       },
     });
