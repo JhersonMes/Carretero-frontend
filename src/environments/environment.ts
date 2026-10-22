@@ -1,7 +1,7 @@
 // Configuracion de PRODUCCION (la usa `ng build`).
-// Reemplaza la URL por el dominio que Railway genere para el backend.
+// HOST es el dominio del backend desplegado en Render.
 export const environment = {
   production: true,
-  HOST: 'https://carretero-backend-production.up.railway.app',
+  HOST: 'https://carretero-backend.onrender.com',
   TOKEN_NAME: 'carretero_token'
 };
