@@ -1,0 +1,103 @@
+<div class="home">
+  <section class="welcome" *ngIf="authService.currentUser() as user">
+    <div class="welcome-monogram" [style.background]="roleDisplay(user.role.name).color">
+      {{ roleDisplay(user.role.name).monogram }}
+    </div>
+
+    <div class="welcome-copy">
+      <span class="welcome-date">{{ todayLabel }}</span>
+      <h1>{{ greeting }}</h1>
+      <p class="welcome-subtitle">{{ subtitle }}</p>
+    </div>
+  </section>
+
+  <p class="loading" *ngIf="loading">Cargando el resumen de tu turno...</p>
+
+  <ng-container *ngIf="!loading && stats as data">
+    <section class="shift-card" [class.is-open]="data.isOpen">
+      <div class="shift-head">
+        <span class="shift-state">{{ shiftStateLabel }}</span>
+        <span class="shift-window" *ngIf="data.shift">
+          Desde {{ data.shift.openTime | date: 'dd/MM HH:mm' }}
+          <ng-container *ngIf="data.shift.closeTime">
+            hasta {{ data.shift.closeTime | date: 'dd/MM HH:mm' }}
+          </ng-container>
+          <ng-container *ngIf="!data.shift.closeTime">hasta ahora</ng-container>
+        </span>
+      </div>
+
+      <div class="shift-metrics" *ngIf="data.shift; else noShift">
+        <div class="metric">
+          <span class="metric-value">{{ data.orderCount }}</span>
+          <span class="metric-label">Pedidos</span>
+        </div>
+        <div class="metric">
+          <span class="metric-value">{{ data.itemCount }}</span>
+          <span class="metric-label">{{ isStation ? 'Productos despachados' : 'Productos vendidos' }}</span>
+        </div>
+        <div class="metric" *ngIf="showsAmounts">
+          <span class="metric-value">S/ {{ data.salesTotal | number: '1.2-2' }}</span>
+          <span class="metric-label">Total vendido</span>
+        </div>
+      </div>
+
+      <!-- La caja ciega es asunto de quien cobra; a una estacion no le dice nada. -->
+      <p class="blind-note" *ngIf="data.isOpen && !isStation">
+        Caja ciega: los montos de tu turno se muestran recien al cerrar la caja.
+      </p>
+
+      <ng-template #noShift>
+        <p class="shift-empty" *ngIf="isStation; else salonEmpty">
+          Todavia no hay movimiento en este turno. Cuando empiecen a entrar pedidos, aqui vas a
+          ver lo mas despachado por {{ areaLabel }}.
+        </p>
+        <ng-template #salonEmpty>
+          <p class="shift-empty">
+            Todavia no se ha aperturado ninguna caja. Abre tu turno en
+            <a routerLink="/pages/cash-shift">Caja</a> y aqui apareceran los platos y bebidas mas
+            vendidos.
+          </p>
+        </ng-template>
+      </ng-template>
+    </section>
+
+    <section class="rankings" [class.single]="data.rankings.length === 1" *ngIf="data.shift">
+      <article class="ranking-card" *ngFor="let group of data.rankings">
+        <header>
+          <h2>{{ headingFor(group) }}</h2>
+          <span class="ranking-note">{{ data.isOpen ? 'Turno en curso' : 'Turno cerrado' }}</span>
+        </header>
+
+        <ol class="ranking-list" *ngIf="group.items.length; else emptyGroup">
+          <li *ngFor="let item of group.items; let i = index" [class.is-first]="i === 0">
+            <span class="rank-position">{{ i + 1 }}</span>
+            <span class="rank-name">{{ item.name }}</span>
+            <span class="rank-qty">{{ item.quantity }} und.</span>
+            <span class="rank-amount" *ngIf="showsAmounts">S/ {{ item.amount | number: '1.2-2' }}</span>
+          </li>
+        </ol>
+        <ng-template #emptyGroup>
+          <p class="ranking-empty">{{ emptyMessageFor(group) }}</p>
+        </ng-template>
+      </article>
+    </section>
+
+    <p class="ranking-hint" *ngIf="data.shift && hasRanking">
+      {{
+        isStation
+          ? 'Solo se cuenta lo que paso por tu area, entre la apertura y el cierre de la caja.'
+          : 'El conteo toma todos los pedidos no anulados registrados entre la apertura y el cierre de la caja.'
+      }}
+    </p>
+  </ng-container>
+
+  <section class="quick-links">
+    <h2>Accesos rapidos</h2>
+    <div class="quick-grid">
+      <a *ngFor="let link of quickLinks" class="quick-card" [routerLink]="link.path">
+        <span class="quick-label">{{ link.label }}</span>
+        <span class="quick-description">{{ link.description }}</span>
+      </a>
+    </div>
+  </section>
+</div>

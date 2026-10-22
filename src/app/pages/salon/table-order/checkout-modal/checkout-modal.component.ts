@@ -4,7 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { PaymentMethodService } from '../../../../services/payment-method.service';
 import { PaymentService } from '../../../../services/payment.service';
 import { InvoiceService } from '../../../../services/invoice.service';
+import { BusinessConfigService } from '../../../../services/business-config.service';
+import { ReceiptService } from '../../../../services/receipt.service';
 import { PaymentMethod } from '../../../../model/payment-method';
+import { BusinessConfig } from '../../../../model/business-config';
+import { Invoice } from '../../../../model/invoice';
 import { Order } from '../../../../model/order';
 import { InvoiceType, DocumentType } from '../../../../model/enums';
 import { PaymentCreateRequest } from '../../../../model/payment-create-request';
@@ -26,6 +30,8 @@ export class CheckoutModalComponent implements OnInit {
   private paymentMethodService = inject(PaymentMethodService);
   private paymentService = inject(PaymentService);
   private invoiceService = inject(InvoiceService);
+  private businessConfigService = inject(BusinessConfigService);
+  private receiptService = inject(ReceiptService);
 
   @Input({ required: true }) order!: Order;
   @Output() closed = new EventEmitter<void>();
@@ -46,7 +52,18 @@ export class CheckoutModalComponent implements OnInit {
   successMessage = '';
   fullyPaid = false;
 
+  /** true mientras se pregunta si quiere la boleta virtual. */
+  askVirtual = false;
+  emittedInvoice: Invoice | null = null;
+  private businessConfig: BusinessConfig | null = null;
+
   ngOnInit(): void {
+    // La cabecera de la boleta sale de la configuracion del negocio.
+    this.businessConfigService.getConfig().subscribe({
+      next: (config) => (this.businessConfig = config),
+      error: () => (this.businessConfig = null),
+    });
+
     this.paymentMethodService.findAll().subscribe((methods) => {
       this.paymentMethods = methods;
       if (methods.length > 0 && this.paymentLines[0]) {
@@ -206,8 +223,12 @@ export class CheckoutModalComponent implements OnInit {
 
     this.invoiceService.emitInvoice(request).subscribe({
       next: (invoice) => {
-        this.successMessage = `Mesa cobrada y liberada. Comprobante ${invoice.fullNumber} emitido.`;
+        this.emittedInvoice = invoice;
         this.submitting = false;
+        // Antes de dar por cerrada la mesa se pregunta si quiere la boleta en
+        // pantalla. Muchas ventas no la necesitan y abrirla siempre obligaria a
+        // cerrar una pestana en cada cobro.
+        this.askVirtual = true;
         this.paid.emit();
       },
       error: (err) => {
@@ -217,6 +238,36 @@ export class CheckoutModalComponent implements OnInit {
         this.paid.emit();
       },
     });
+  }
+
+  /** Si la quiere, la boleta se abre en su propia pagina, lista para imprimir. */
+  generateVirtual(): void {
+    this.askVirtual = false;
+    this.confirmSuccess();
+
+    const method = this.paymentMethods.find(
+      (m) => m.idPaymentMethod === this.paymentLines[0]?.idPaymentMethod
+    );
+
+    this.receiptService.open(
+      this.receiptService.buildFromOrder({
+        business: this.businessConfig,
+        order: this.order,
+        invoice: this.emittedInvoice,
+        paymentMethod: method?.name,
+      })
+    );
+  }
+
+  /** Sin boleta virtual: la venta ya quedo en el historial y se puede sacar de ahi. */
+  skipVirtual(): void {
+    this.askVirtual = false;
+    this.confirmSuccess();
+  }
+
+  private confirmSuccess(): void {
+    this.successMessage =
+      `Mesa cobrada y liberada. Comprobante ${this.emittedInvoice?.fullNumber} emitido.`;
   }
 
   close(): void {

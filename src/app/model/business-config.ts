@@ -1,3 +1,5 @@
+import { SunatEnvironment } from './enums';
+
 export interface BusinessConfig {
   idConfig?: number;
   businessName: string;
@@ -11,6 +13,8 @@ export interface BusinessConfig {
   facturaSeries?: string;
   notaVentaSeries?: string;
 
+  /** Ambiente de emision. Si viene vacio, el backend lo trata como SIMULADO. */
+  sunatEnvironment?: SunatEnvironment;
   sunatApiUrl?: string;
   sunatApiToken?: string;
   dniRucApiUrl?: string;

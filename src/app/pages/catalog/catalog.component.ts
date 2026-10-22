@@ -92,6 +92,34 @@ export class CatalogComponent implements OnInit {
     });
   }
 
+  /**
+   * Corrige el area de una categoria mal clasificada.
+   *
+   * Pregunta si mover tambien sus productos porque la comanda se enruta por el
+   * area del producto, no por la de la categoria: si solo se mueve la categoria,
+   * lo ya cargado sigue saliendo a la estacion equivocada. Por eso mover todo es
+   * la respuesta por defecto.
+   */
+  changeCategoryStation(category: Category, station: KitchenStation): void {
+    if (!category.idCategory || station === category.station) return;
+
+    const previous = category.station;
+    const moveProducts = confirm(
+      `Mover "${category.name}" de ${previous} a ${station}.\n\n` +
+        'Aceptar: mueve tambien sus productos, para que sus comandas salgan a la nueva area.\n' +
+        'Cancelar: cambia solo la categoria y sus productos siguen saliendo a ' + previous + '.'
+    );
+
+    this.errorMessage = '';
+    this.categoryService.changeStation(category.idCategory, station, moveProducts).subscribe({
+      next: (updated) => {
+        category.station = updated.station;
+        if (this.selectedCategory?.idCategory === category.idCategory) this.loadProducts();
+      },
+      error: (err) => this.fail(err, 'No se pudo cambiar el area de la categoria.'),
+    });
+  }
+
   toggleCategoryActive(category: Category): void {
     this.errorMessage = '';
     this.categoryService
@@ -176,6 +204,21 @@ export class CatalogComponent implements OnInit {
       next: () => this.loadProducts(),
       error: (err) => this.fail(err, `No se pudo guardar "${product.name}".`),
     });
+  }
+
+  /**
+   * Marca o desmarca que el area del producto se elija al pedirlo. Se puede
+   * cambiar despues del alta: un adicional que hoy solo acompana platos de
+   * cocina puede empezar a acompanar tambien los de parrilla.
+   */
+  setRequiresStation(product: Product, requiresStation: boolean): void {
+    this.errorMessage = '';
+    this.productService
+      .update(product.idProduct!, { ...product, requiresStation })
+      .subscribe({
+        next: (updated) => (product.requiresStation = updated.requiresStation),
+        error: (err) => this.fail(err, `No se pudo cambiar el area de "${product.name}".`),
+      });
   }
 
   toggleProductActive(product: Product): void {
@@ -318,6 +361,7 @@ export class CatalogComponent implements OnInit {
       station: undefined,
       requiresKitchen: true,
       requiresFlavor: false,
+      requiresStation: false,
       active: true,
     };
   }

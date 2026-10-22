@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist/test-out",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "target": "ES2022",
+    "types": []
+  },
+  "include": [
+    "src/**/*.spec.ts",
+    "src/**/*.ts",
+    "src/types/**/*.d.ts"
+  ]
+}

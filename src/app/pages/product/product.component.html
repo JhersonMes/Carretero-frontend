@@ -13,6 +13,23 @@
       <option [ngValue]="'ALL'">Todas</option>
       <option *ngFor="let c of categories" [ngValue]="c.idCategory">{{ c.name }}</option>
     </select>
+
+    <!-- Ordena por lo que mejor calza con lo tecleado; entre parecidos, primero
+         lo que mas se vende. -->
+    <div class="search-box">
+      <input
+        type="search"
+        id="productSearch"
+        [(ngModel)]="query"
+        placeholder="Buscar producto: alitas, gaseosa, hamburguesa..."
+      />
+      <button type="button" class="clear-query" *ngIf="query" (click)="clearQuery()">&times;</button>
+    </div>
+
+    <span class="result-count" *ngIf="query">
+      {{ visibleProducts.length }}
+      {{ visibleProducts.length === 1 ? 'coincidencia' : 'coincidencias' }}
+    </span>
   </div>
 
   <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
@@ -43,6 +60,7 @@
             step="0.10"
             [ngModel]="priceDraft.get(p.idProduct!)"
             (ngModelChange)="priceDraft.set(p.idProduct!, $event)"
+            (keyup.enter)="savePrice(p)"
             [class.zero]="p.price <= 0"
           />
           <button
@@ -67,7 +85,9 @@
       </tr>
 
       <tr *ngIf="visibleProducts.length === 0">
-        <td colspan="5" class="empty-state">No hay productos en esta categoria.</td>
+        <td colspan="5" class="empty-state">
+          {{ query ? 'Ningun producto coincide con "' + query + '".' : 'No hay productos en esta categoria.' }}
+        </td>
       </tr>
     </tbody>
   </table>

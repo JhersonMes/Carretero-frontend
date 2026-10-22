@@ -15,18 +15,57 @@
     <button
       type="button"
       class="table-card"
-      *ngFor="let table of visibleTables"
+      *ngFor="let table of visibleTables; trackBy: trackByTable"
       [style.--status-color]="statusMeta[table.status].color"
+      [class.has-order]="table.totalItems > 0"
       (click)="openTable(table)"
     >
-      <span class="table-name">{{ table.name }}</span>
-      <span class="table-capacity">{{ table.capacity }} personas</span>
-      <span class="status-badge" [style.background]="statusMeta[table.status].color">
-        {{ statusMeta[table.status].label }}
-      </span>
+      <div class="card-top">
+        <span class="table-name">{{ table.name }}</span>
+        <span class="status-badge" [style.background]="statusMeta[table.status].color">
+          {{ statusMeta[table.status].label }}
+        </span>
+      </div>
+
+      <div class="card-sub">
+        <span class="table-capacity">{{ table.capacity }} personas</span>
+        <span class="order-code" *ngIf="table.orderCode">· {{ table.orderCode }}</span>
+      </div>
+
+      <!-- Meseros que han intervenido en esta mesa -->
+      <div class="waiters" *ngIf="table.totalItems > 0">
+        <span class="waiters-caption">{{ table.waiters.length > 1 ? 'Meseros' : 'Mesero' }}</span>
+        <div class="waiter-chips">
+          <span class="waiter-chip" *ngFor="let waiter of table.waiters">{{ waiter }}</span>
+          <span class="waiter-chip empty" *ngIf="table.waiters.length === 0">Sin mesero registrado</span>
+        </div>
+      </div>
+
+      <!-- Estado de cocina + cronometro -->
+      <div class="kitchen-row" *ngIf="table.totalItems > 0">
+        <span
+          class="kitchen-badge"
+          [class.dispatched]="isDispatched(table)"
+          [class.preparing]="isWaiting(table)"
+        >
+          {{ kitchenLabel(table) }}
+        </span>
+
+        <span
+          class="timer"
+          *ngIf="showTimer(table)"
+          [ngClass]="urgency(table)"
+          [class.frozen]="isDispatched(table)"
+        >
+          <span class="timer-caption">{{ isDispatched(table) ? 'atendida en' : 'esperando' }}</span>
+          <span class="timer-value">{{ timerLabel(table) }}</span>
+        </span>
+      </div>
+
+      <div class="free-hint" *ngIf="table.totalItems === 0">Sin pedido activo</div>
     </button>
 
-    <p class="empty-state" *ngIf="visibleTables.length === 0">
+    <p class="empty-state" *ngIf="!loading && visibleTables.length === 0">
       No hay {{ tab === 'MESA' ? 'mesas' : 'barras' }} registradas en esta sección.
     </p>
   </div>

@@ -17,4 +17,17 @@ export class BusinessConfigService {
   updateConfig(config: BusinessConfig) {
     return this.http.put<BusinessConfig>(this.url, config);
   }
+
+  /**
+   * Comprueba el PIN antes de abrir una accion que lo exige. La operacion real
+   * lo vuelve a validar en el servidor: esto es solo para no hacer llenar un
+   * formulario a quien no esta autorizado.
+   */
+  verifyPin(pin: string) {
+    return this.http.post<{ valid: boolean }>(`${this.url}/verify-pin`, { pin });
+  }
+
+  changeAdminPin(pin: string) {
+    return this.http.put<void>(`${this.url}/admin-pin`, { pin });
+  }
 }

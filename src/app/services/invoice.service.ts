@@ -28,4 +28,19 @@ export class InvoiceService extends GenericService<Invoice> {
   emitInvoice(request: InvoiceEmitRequest) {
     return this.http.post<Invoice>(`${this.url}/emit`, request);
   }
+
+  /**
+   * Reemite el comprobante de una venta ya cobrada: anula el actual y emite uno
+   * nuevo con los datos corregidos. No cambia lo vendido ni el total.
+   */
+  reissueInvoice(request: InvoiceEmitRequest, pin: string) {
+    return this.http.post<Invoice>(`${this.url}/reissue`, request, {
+      params: { pin },
+    });
+  }
+
+  /** Todos los comprobantes del pedido, anulados incluidos. */
+  findAllByOrder(idOrder: number) {
+    return this.http.get<Invoice[]>(`${this.url}/order/${idOrder}/all`);
+  }
 }

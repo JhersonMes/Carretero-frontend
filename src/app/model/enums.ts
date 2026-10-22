@@ -16,12 +16,21 @@ export type DocumentType = 'DNI' | 'RUC' | 'SIN_DOC' | 'CE' | 'PASAPORTE';
 
 export type InvoiceType = 'BOLETA' | 'FACTURA' | 'NOTA_VENTA';
 
+/**
+ * SIMULADO no es lo mismo que ACEPTADO: el primero significa que el comprobante
+ * nunca salio del equipo y el segundo que SUNAT lo acepto. Es la diferencia
+ * entre estar declarado y creer que se esta.
+ */
 export type SunatStatus =
   | 'NO_ENVIADO'
+  | 'SIMULADO'
   | 'PENDIENTE'
   | 'ACEPTADO'
   | 'RECHAZADO'
   | 'ANULADO';
+
+/** Ambiente de emision configurado en el negocio. */
+export type SunatEnvironment = 'SIMULADO' | 'BETA' | 'PRODUCCION';
 
 export type CashMovementType = 'INGRESO' | 'EGRESO';
 

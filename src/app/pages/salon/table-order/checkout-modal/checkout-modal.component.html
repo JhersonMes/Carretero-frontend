@@ -112,7 +112,23 @@
       </div>
     </ng-container>
 
-    <ng-container *ngIf="fullyPaid">
+    <!-- Cobrado: primero se pregunta por la boleta virtual, despues se confirma -->
+    <ng-container *ngIf="fullyPaid && askVirtual">
+      <div class="virtual-ask">
+        <strong>Comprobante {{ emittedInvoice?.fullNumber }} emitido.</strong>
+        <p>Generar la boleta virtual?</p>
+        <span class="virtual-hint">
+          Se abre en otra pagina, lista para imprimir o guardar en PDF. Si eliges que no,
+          la venta igual queda en tu historial y puedes descargarla desde ahi.
+        </span>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="secondary" (click)="skipVirtual()">No</button>
+        <button type="button" class="confirm-btn" (click)="generateVirtual()">Si, generar</button>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="fullyPaid && !askVirtual">
       <div class="success-message big" *ngIf="successMessage">{{ successMessage }}</div>
       <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
       <div class="modal-actions">

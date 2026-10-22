@@ -52,8 +52,36 @@ export class OrderService extends GenericService<Order> {
     return this.http.post<Order>(`${this.url}/${idOrder}/items`, items);
   }
 
+  /**
+   * Anula una venta. El PIN lo comprueba el backend; aqui solo se transporta.
+   * La venta no se borra: queda registrada como anulada con quien la anulo.
+   */
+  cancelOrder(idOrder: number, pin: string, reason?: string) {
+    return this.http.post<Order>(`${this.url}/${idOrder}/cancel`, { pin, reason });
+  }
+
+  /** Ventas anuladas. Solo para el panel de administracion. */
+  findCancelled() {
+    return this.http.get<Order[]>(`${this.url}/cancelled`);
+  }
+
   updateOrderStatus(idOrder: number, status: OrderStatus) {
     return this.http.patch<Order>(`${this.url}/${idOrder}/status`, { status });
+  }
+
+  /**
+   * Quita un plato de un pedido abierto. Pide PIN porque baja el monto de una
+   * cuenta y el plato pudo haberse cocinado ya.
+   */
+  removeItem(idOrderDetail: number, pin: string) {
+    return this.http.delete<Order>(`${this.url}/items/${idOrderDetail}`, {
+      params: { pin },
+    });
+  }
+
+  /** Nota del plato ("sin aji", "para llevar"). No mueve el monto. */
+  updateItemNotes(idOrderDetail: number, notes: string) {
+    return this.http.patch<OrderDetail>(`${this.url}/items/${idOrderDetail}/notes`, { notes });
   }
 
   updateItemStatus(idOrderDetail: number, status: OrderItemStatus) {

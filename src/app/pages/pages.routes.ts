@@ -1,6 +1,11 @@
 import { Routes } from '@angular/router';
+import { cashierOnlyGuard } from '../guards/cashier-only.guard';
 
 export const pagesRoutes: Routes = [
+  {
+    path: 'home',
+    loadComponent: () => import('./home/home.component').then((m) => m.HomeComponent),
+  },
   {
     path: 'dashboard',
     loadComponent: () =>
@@ -136,6 +141,11 @@ export const pagesRoutes: Routes = [
     loadComponent: () => import('./salon/salon.component').then((m) => m.SalonComponent),
   },
   {
+    path: 'table-layout',
+    loadComponent: () =>
+      import('./table-layout/table-layout.component').then((m) => m.TableLayoutComponent),
+  },
+  {
     path: 'salon/:id',
     loadComponent: () =>
       import('./salon/table-order/table-order.component').then((m) => m.TableOrderComponent),
@@ -144,6 +154,12 @@ export const pagesRoutes: Routes = [
     path: 'quick-sale',
     loadComponent: () =>
       import('./quick-sale/quick-sale.component').then((m) => m.QuickSaleComponent),
+  },
+  {
+    path: 'delivery',
+    canActivate: [cashierOnlyGuard],
+    loadComponent: () =>
+      import('./delivery/delivery.component').then((m) => m.DeliveryComponent),
   },
   {
     path: 'cash-shift',

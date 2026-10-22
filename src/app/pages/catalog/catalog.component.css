@@ -129,6 +129,43 @@
   color: var(--carretero-white);
 }
 
+.check.inline {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.check.inline input {
+  width: auto;
+  margin: 0;
+  accent-color: var(--carretero-red);
+}
+
+.station-select {
+  padding: 4px 6px;
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  background: var(--surface-card);
+  border: 1.5px solid var(--surface-border);
+  border-radius: var(--radius-sm);
+}
+
+.station-select:focus {
+  outline: none;
+  border-color: var(--carretero-red);
+  color: var(--text-primary);
+}
+
 .row-actions {
   display: flex;
   gap: 6px;

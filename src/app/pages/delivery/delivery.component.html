@@ -1,0 +1,452 @@
+<div class="delivery-page">
+  <div class="page-header">
+    <h1>Delivery</h1>
+    <p class="lead">Registra al cliente, toma su pedido y emite la boleta del reparto.</p>
+  </div>
+
+  <div class="shift-warning" *ngIf="!checkingShift && !activeShift">
+    No hay una caja aperturada. <a routerLink="/pages/cash-shift">Apertura la caja</a> antes de enviar pedidos.
+  </div>
+
+  <!-- Pasos -->
+  <div class="steps">
+    <button type="button" class="step" [class.active]="step === 'cliente'" (click)="backToClient()">
+      <span class="step-num">1</span> Cliente
+    </button>
+    <span class="step-sep"></span>
+    <button
+      type="button"
+      class="step"
+      [class.active]="step === 'pedido'"
+      [disabled]="!canTakeOrder"
+      (click)="goToOrder()"
+    >
+      <span class="step-num">2</span> Pedido
+    </button>
+  </div>
+
+  <!-- ============================ PASO 1: CLIENTE ============================ -->
+  <section class="client-step" *ngIf="step === 'cliente'">
+    <div class="client-error" *ngIf="clientError">
+      {{ clientError }}
+      <button type="button" class="link-btn" *ngIf="duplicateClient" (click)="useDuplicate()">
+        Atender a {{ duplicateClient.name }}
+      </button>
+    </div>
+
+    <p class="loading-msg" *ngIf="loadingClients">Cargando clientes...</p>
+
+    <div class="client-columns" *ngIf="!loadingClients">
+      <!-- Buscar: es la opcion principal cuando ya hay clientes registrados -->
+      <div class="panel search-panel" *ngIf="hasClients && !registering">
+        <h2>Buscar cliente</h2>
+        <p class="panel-hint">Escribe el nombre, el numero o el DNI de quien llama.</p>
+
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Nombre, telefono o DNI"
+          [(ngModel)]="query"
+        />
+
+        <ul class="client-list">
+          <li *ngFor="let c of results">
+            <button
+              type="button"
+              class="client-row"
+              [class.selected]="selectedClient?.idClient === c.idClient"
+              (click)="selectClient(c)"
+            >
+              <span class="client-name">{{ c.name }}</span>
+              <span class="client-phone">
+                {{ c.phone || 'Sin telefono' }}
+                <ng-container *ngIf="c.docNumber"> &middot; DNI {{ c.docNumber }}</ng-container>
+              </span>
+            </button>
+          </li>
+          <li class="no-results" *ngIf="results.length === 0">
+            Ningun cliente coincide con "{{ query }}".
+          </li>
+        </ul>
+
+        <button type="button" class="link-btn" (click)="startRegister()">
+          + Registrar cliente nuevo
+        </button>
+      </div>
+
+      <!-- Registro: unica opcion cuando el padron esta vacio -->
+      <div class="panel register-panel" *ngIf="!hasClients || registering">
+        <h2>Registrar cliente</h2>
+        <p class="panel-hint" *ngIf="!hasClients">
+          Todavia no hay clientes registrados. Da de alta al primero para poder atender su delivery.
+        </p>
+        <p class="panel-hint" *ngIf="hasClients">
+          Sus datos quedan guardados para las proximas busquedas.
+        </p>
+
+        <div class="form-group">
+          <label for="nombre">Nombre</label>
+          <input id="nombre" type="text" [(ngModel)]="form.name" placeholder="Nombre del cliente" />
+        </div>
+
+        <div class="form-group">
+          <label for="numero">Numero</label>
+          <input
+            id="numero"
+            type="tel"
+            inputmode="numeric"
+            [attr.maxlength]="phoneMaxDigits"
+            [(ngModel)]="form.phone"
+            (input)="onPhoneInput($event, form)"
+            placeholder="Celular de 9 digitos"
+          />
+          <small class="field-hint">Maximo {{ phoneMaxDigits }} digitos, sin espacios ni +51.</small>
+        </div>
+
+        <div class="form-group">
+          <label for="dni">DNI (opcional)</label>
+          <input
+            id="dni"
+            type="text"
+            inputmode="numeric"
+            [attr.maxlength]="dniDigits"
+            [(ngModel)]="form.docNumber"
+            (input)="onDocInput($event, form)"
+            placeholder="8 digitos"
+          />
+          <small class="field-hint">
+            Obligatorio si la boleta supera S/ {{ boletaDniThreshold.toFixed(2) }}.
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label for="direccion">Direccion</label>
+          <input
+            id="direccion"
+            type="text"
+            [(ngModel)]="firstAddress.street"
+            placeholder="Jr. / Av. / Calle y numero"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="distrito">Distrito o sector (opcional)</label>
+          <input id="distrito" type="text" [(ngModel)]="firstAddress.district" />
+        </div>
+
+        <div class="form-group">
+          <label for="referencia">Referencia (opcional)</label>
+          <input
+            id="referencia"
+            type="text"
+            [(ngModel)]="firstAddress.reference"
+            placeholder="Porton verde, frente al parque..."
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="costo">Costo de delivery a esa direccion (S/)</label>
+          <input id="costo" type="number" min="0" step="0.50" [(ngModel)]="firstAddress.deliveryFee" />
+        </div>
+
+        <div class="panel-actions">
+          <button type="button" class="primary" [disabled]="savingClient" (click)="registerClient()">
+            {{ savingClient ? 'Guardando...' : 'Registrar y continuar' }}
+          </button>
+          <button type="button" *ngIf="hasClients" (click)="cancelRegister()">Cancelar</button>
+        </div>
+      </div>
+
+      <!-- Cliente elegido: sus datos y todas sus direcciones -->
+      <div class="panel chosen-panel" *ngIf="selectedClient">
+        <h2>Cliente seleccionado</h2>
+
+        <!-- Ficha del cliente -->
+        <div class="chosen-client" *ngIf="!editingClient">
+          <span class="chosen-name">{{ selectedClient.name }}</span>
+          <span class="chosen-phone">{{ selectedClient.phone || 'Sin telefono' }}</span>
+          <span class="chosen-doc">
+            {{ selectedClient.docNumber ? 'DNI ' + selectedClient.docNumber : 'Sin documento' }}
+          </span>
+          <div class="chosen-actions">
+            <button type="button" class="link-btn" (click)="startEditClient()">Editar datos</button>
+            <button type="button" class="link-btn" (click)="clearClient()">Cambiar cliente</button>
+          </div>
+        </div>
+
+        <!-- Edicion de los datos del cliente -->
+        <div class="edit-block" *ngIf="editingClient">
+          <div class="form-group">
+            <label for="edit-nombre">Nombre</label>
+            <input id="edit-nombre" type="text" [(ngModel)]="editingClient.name" />
+          </div>
+          <div class="form-group">
+            <label for="edit-numero">Numero</label>
+            <input
+              id="edit-numero"
+              type="tel"
+              inputmode="numeric"
+              [attr.maxlength]="phoneMaxDigits"
+              [(ngModel)]="editingClient.phone"
+              (input)="onPhoneInput($event, editingClient)"
+            />
+            <small class="field-hint">Maximo {{ phoneMaxDigits }} digitos.</small>
+          </div>
+          <div class="form-group">
+            <label for="edit-dni">DNI</label>
+            <input
+              id="edit-dni"
+              type="text"
+              inputmode="numeric"
+              [attr.maxlength]="dniDigits"
+              [(ngModel)]="editingClient.docNumber"
+              (input)="onDocInput($event, editingClient)"
+            />
+          </div>
+          <div class="panel-actions">
+            <button type="button" class="primary" (click)="saveClient()">Guardar datos</button>
+            <button type="button" (click)="cancelEditClient()">Cancelar</button>
+          </div>
+        </div>
+
+        <h3 class="addr-title">Direcciones del cliente</h3>
+
+        <ul class="address-list">
+          <li *ngFor="let a of addresses" class="address-item">
+            <button
+              type="button"
+              class="address-row"
+              [class.selected]="selectedAddress?.idAddress === a.idAddress"
+              (click)="chooseAddress(a)"
+            >
+              <span class="address-head">
+                <span class="address-street">{{ addressLabel(a) }}</span>
+                <span class="address-badge" *ngIf="a.favorite">Habitual</span>
+              </span>
+              <span class="address-ref" *ngIf="a.reference">{{ a.reference }}</span>
+              <span class="address-fee">Delivery S/ {{ (a.deliveryFee || 0).toFixed(2) }}</span>
+            </button>
+            <div class="address-actions">
+              <button type="button" class="link-btn" (click)="startEditAddress(a)">Editar</button>
+              <button type="button" class="link-btn" *ngIf="!a.favorite" (click)="makeFavorite(a)">
+                Hacer habitual
+              </button>
+              <button type="button" class="link-btn danger" (click)="removeAddress(a)">Borrar</button>
+            </div>
+          </li>
+          <li class="no-results" *ngIf="addresses.length === 0 && !addressForm">
+            Este cliente no tiene direcciones guardadas.
+          </li>
+        </ul>
+
+        <!-- Alta / edicion de una direccion -->
+        <div class="edit-block" *ngIf="addressForm">
+          <div class="form-group">
+            <label for="dir-calle">{{ isEditingAddress ? 'Editar direccion' : 'Nueva direccion' }}</label>
+            <input
+              id="dir-calle"
+              type="text"
+              [(ngModel)]="addressForm.street"
+              placeholder="Jr. / Av. / Calle y numero"
+            />
+          </div>
+          <div class="form-group">
+            <label for="dir-distrito">Distrito o sector</label>
+            <input id="dir-distrito" type="text" [(ngModel)]="addressForm.district" />
+          </div>
+          <div class="form-group">
+            <label for="dir-ref">Referencia</label>
+            <input id="dir-ref" type="text" [(ngModel)]="addressForm.reference" />
+          </div>
+          <div class="form-group">
+            <label for="dir-costo">Costo de delivery (S/)</label>
+            <input id="dir-costo" type="number" min="0" step="0.50" [(ngModel)]="addressForm.deliveryFee" />
+          </div>
+          <label class="check-line">
+            <input type="checkbox" [(ngModel)]="addressForm.favorite" />
+            Es su direccion habitual
+          </label>
+          <div class="panel-actions">
+            <button type="button" class="primary" [disabled]="savingAddress" (click)="saveAddress()">
+              {{ savingAddress ? 'Guardando...' : 'Guardar direccion' }}
+            </button>
+            <button type="button" *ngIf="addresses.length > 0" (click)="cancelAddressForm()">
+              Cancelar
+            </button>
+          </div>
+        </div>
+
+        <button type="button" class="link-btn" *ngIf="!addressForm" (click)="startAddAddress()">
+          + Agregar otra direccion
+        </button>
+
+        <button type="button" class="continue-btn primary" [disabled]="!canTakeOrder" (click)="goToOrder()">
+          Comandar su orden
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ PASO 2: PEDIDO ============================ -->
+  <section class="order-step" *ngIf="step === 'pedido'">
+    <div class="order-builder-layout">
+      <div class="order-main">
+        <div class="category-tabs">
+          <button
+            type="button"
+            class="category-tab"
+            *ngFor="let category of categories"
+            [class.active]="selectedCategory?.idCategory === category.idCategory"
+            (click)="selectCategory(category)"
+          >
+            {{ category.name }}
+          </button>
+        </div>
+
+        <div class="product-grid">
+          <button
+            type="button"
+            class="product-card"
+            *ngFor="let product of products"
+            (click)="addToCart(product)"
+          >
+            <span class="product-name">{{ product.name }}</span>
+            <span class="product-price">S/ {{ product.price.toFixed(2) }}</span>
+          </button>
+
+          <p class="empty-state" *ngIf="products.length === 0">Esta categoria no tiene productos.</p>
+        </div>
+      </div>
+
+      <aside class="cart-panel">
+        <h2>Pedido de delivery</h2>
+
+        <!-- Datos del reparto: nombre, jiron y lo que cuesta llegar hasta ahi -->
+        <div class="delivery-card">
+          <div class="delivery-row">
+            <span>Cliente</span>
+            <span>{{ selectedClient?.name }}</span>
+          </div>
+          <div class="delivery-row" *ngIf="selectedClient?.phone">
+            <span>Numero</span>
+            <span>{{ selectedClient?.phone }}</span>
+          </div>
+          <div class="delivery-row" *ngIf="selectedClient?.docNumber">
+            <span>DNI</span>
+            <span>{{ selectedClient?.docNumber }}</span>
+          </div>
+          <div class="delivery-row">
+            <span>Jiron</span>
+            <span>{{ addressLabel(selectedAddress) }}</span>
+          </div>
+          <div class="delivery-row" *ngIf="selectedAddress?.reference">
+            <span>Referencia</span>
+            <span>{{ selectedAddress?.reference }}</span>
+          </div>
+          <div class="delivery-row fee-row">
+            <span>Delivery (S/)</span>
+            <input type="number" min="0" step="0.50" [(ngModel)]="deliveryFee" />
+          </div>
+          <button type="button" class="link-btn" (click)="backToClient()">Cambiar cliente o direccion</button>
+        </div>
+
+        <div class="cart-lines" *ngIf="cart.length > 0; else emptyCart">
+          <div class="cart-line" *ngFor="let line of cart">
+            <div class="cart-line-info">
+              <span class="cart-line-name">{{ line.product.name }}</span>
+              <span class="cart-line-flavor" *ngIf="line.flavor">{{ line.flavor.name }}</span>
+              <span class="cart-line-price">S/ {{ (line.unitPrice * line.quantity).toFixed(2) }}</span>
+            </div>
+            <div class="cart-line-qty">
+              <button type="button" (click)="decrementLine(line)">-</button>
+              <span>{{ line.quantity }}</span>
+              <button type="button" (click)="incrementLine(line)">+</button>
+            </div>
+          </div>
+        </div>
+        <ng-template #emptyCart>
+          <p class="cart-empty-msg">Aun no has agregado productos.</p>
+        </ng-template>
+
+        <div class="sub-total">
+          <span>Consumo</span>
+          <span>S/ {{ subtotal.toFixed(2) }}</span>
+        </div>
+        <div class="sub-total">
+          <span>Delivery</span>
+          <span>S/ {{ (deliveryFee || 0).toFixed(2) }}</span>
+        </div>
+        <div class="sub-total">
+          <span>Op. gravada</span>
+          <span>S/ {{ taxableAmount.toFixed(2) }}</span>
+        </div>
+        <div class="sub-total">
+          <span>IGV (18%)</span>
+          <span>S/ {{ igvAmount.toFixed(2) }}</span>
+        </div>
+        <div class="cart-total">
+          <span>Total</span>
+          <span>S/ {{ total.toFixed(2) }}</span>
+        </div>
+        <p class="igv-note">Los precios de carta ya incluyen IGV.</p>
+
+        <!-- Regla SUNAT: sobre S/ 700 la boleta debe identificar al comprador -->
+        <div class="dni-warning" *ngIf="needsDni">
+          Esta boleta supera S/ {{ boletaDniThreshold.toFixed(2) }}, asi que debe llevar el DNI del
+          comprador.
+          <button type="button" class="link-btn" (click)="backToClient()">
+            Registrar el DNI del cliente
+          </button>
+        </div>
+
+        <div class="pay-with" *ngIf="paymentMethods.length">
+          <span class="pay-with-label">Cobrar con</span>
+          <div class="method-row">
+            <button
+              type="button"
+              class="method-chip"
+              *ngFor="let method of paymentMethods"
+              [class.active]="selectedMethodId === method.idPaymentMethod"
+              (click)="selectMethod(method)"
+            >
+              {{ method.name }}
+            </button>
+          </div>
+        </div>
+
+        <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
+        <div class="success-message" *ngIf="successMessage">{{ successMessage }}</div>
+
+        <button type="button" class="send-btn" [disabled]="!canSend" (click)="sendOrder()">
+          {{ sendLabel }}
+        </button>
+
+        <!-- Boleta lista: el dialogo de impresion permite guardarla como PDF -->
+        <div class="receipt-actions" *ngIf="receipt">
+          <span class="receipt-number" *ngIf="receipt.invoiceNumber">
+            Boleta {{ receipt.invoiceNumber }}
+          </span>
+          <button type="button" class="send-btn boleta-btn" (click)="printReceipt()">
+            Generar boleta en PDF
+          </button>
+          <button type="button" class="link-btn" (click)="newDelivery()">Nuevo delivery</button>
+        </div>
+      </aside>
+    </div>
+
+    <app-flavor-modal
+      *ngIf="pendingFlavorProduct"
+      [product]="pendingFlavorProduct"
+      (confirmed)="onFlavorChosen($event)"
+      (cancelled)="onFlavorCancelled()"
+    ></app-flavor-modal>
+
+    <app-station-modal
+      *ngIf="pendingStationProduct"
+      [product]="pendingStationProduct"
+      [dishes]="stationDishes"
+      (confirmed)="onStationChosen($event)"
+      (cancelled)="onStationCancelled()"
+    ></app-station-modal>
+  </section>
+</div>

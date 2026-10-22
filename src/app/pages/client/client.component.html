@@ -12,7 +12,13 @@
       </select>
       <input type="text" placeholder="N° documento" [(ngModel)]="newClient.docNumber" />
       <input type="text" placeholder="Nombre o razon social" [(ngModel)]="newClient.name" />
-      <input type="text" placeholder="Telefono" [(ngModel)]="newClient.phone" />
+      <input
+        type="tel"
+        inputmode="numeric"
+        maxlength="9"
+        placeholder="Telefono (9 digitos)"
+        [(ngModel)]="newClient.phone"
+      />
       <input type="email" placeholder="Correo" [(ngModel)]="newClient.email" />
       <button type="button" class="primary" (click)="create()">Agregar</button>
     </div>
@@ -55,7 +61,7 @@
             <input type="text" [(ngModel)]="editing.docNumber" />
           </td>
           <td><input type="text" [(ngModel)]="editing.name" /></td>
-          <td><input type="text" [(ngModel)]="editing.phone" /></td>
+          <td><input type="tel" inputmode="numeric" maxlength="9" [(ngModel)]="editing.phone" /></td>
           <td><input type="email" [(ngModel)]="editing.email" /></td>
           <td class="actions-cell">
             <button type="button" class="mini" (click)="saveEdit()">Guardar</button>

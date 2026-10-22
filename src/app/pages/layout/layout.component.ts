@@ -18,6 +18,7 @@ const ADMIN_NAV: NavItem[] = [
   { path: '/pages/catalog', label: 'Carta' },
   { path: '/pages/product', label: 'Precios' },
   { path: '/pages/client', label: 'Clientes' },
+  { path: '/pages/table-layout', label: 'Distribucion del salon' },
   { path: '/pages/ingredient', label: 'Ingredientes' },
   { path: '/pages/menu', label: 'Menus' },
   { path: '/pages/payment-method', label: 'Metodos de pago' },
@@ -25,12 +26,25 @@ const ADMIN_NAV: NavItem[] = [
 ];
 
 const MESERO_NAV: NavItem[] = [
+  { path: '/pages/home', label: 'Inicio' },
   { path: '/pages/salon', label: 'Salon' },
   { path: '/pages/quick-sale', label: 'Venta rapida' },
   { path: '/pages/cash-shift', label: 'Caja' },
 ];
 
-const KITCHEN_NAV: NavItem[] = [{ path: '/pages/kitchen', label: 'Comandas' }];
+/**
+ * El cajero ve lo mismo que el mesero mas Delivery: los pedidos por telefono
+ * entran por caja, que es quien tiene el padron de clientes y cobra el reparto.
+ */
+const CAJERO_NAV: NavItem[] = [
+  ...MESERO_NAV,
+  { path: '/pages/delivery', label: 'Delivery' },
+];
+
+const KITCHEN_NAV: NavItem[] = [
+  { path: '/pages/home', label: 'Inicio' },
+  { path: '/pages/kitchen', label: 'Comandas' },
+];
 
 const STATION_ROLES = ['COCINA', 'PARRILLA', 'BEBIDAS'];
 
@@ -47,10 +61,20 @@ export class LayoutComponent {
   private router = inject(Router);
 
   roleDisplay = roleDisplayOf;
+  isMobileMenuOpen = false;
+
+  toggleMobileMenu(): void {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+  }
+
+  closeMobileMenu(): void {
+    this.isMobileMenuOpen = false;
+  }
 
   get navItems(): NavItem[] {
     const role = this.authService.roleName().toUpperCase();
-    if (role === 'MESERO' || role === 'CAJERO') return MESERO_NAV;
+    if (role === 'CAJERO') return CAJERO_NAV;
+    if (role === 'MESERO') return MESERO_NAV;
     if (STATION_ROLES.includes(role)) return KITCHEN_NAV;
     return ADMIN_NAV;
   }
