@@ -1,5 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { LoginService } from '../../services/login.service';
 import { AuthService } from '../../services/auth.service';
@@ -23,6 +24,7 @@ const ADMIN_NAV: NavItem[] = [
   { path: '/pages/menu', label: 'Menus' },
   { path: '/pages/payment-method', label: 'Metodos de pago' },
   { path: '/pages/payment', label: 'Historial de pagos' },
+  { path: '/pages/printers', label: 'Impresoras' },
 ];
 
 const MESERO_NAV: NavItem[] = [
@@ -51,7 +53,7 @@ const STATION_ROLES = ['COCINA', 'PARRILLA', 'BEBIDAS'];
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, LogoComponent],
+  imports: [CommonModule, FormsModule, RouterOutlet, RouterLink, RouterLinkActive, LogoComponent],
   templateUrl: './layout.component.html',
   styleUrl: './layout.component.css',
 })
@@ -62,6 +64,54 @@ export class LayoutComponent {
 
   roleDisplay = roleDisplayOf;
   isMobileMenuOpen = false;
+
+  // Cambio de la propia contrasena (CP-16-4-1)
+  showPasswordModal = false;
+  currentPassword = '';
+  newPassword = '';
+  repeatPassword = '';
+  passwordError = '';
+  passwordOk = '';
+  savingPassword = false;
+
+  openPasswordModal(): void {
+    this.showPasswordModal = true;
+    this.currentPassword = this.newPassword = this.repeatPassword = '';
+    this.passwordError = this.passwordOk = '';
+  }
+
+  closePasswordModal(): void {
+    this.showPasswordModal = false;
+  }
+
+  savePassword(): void {
+    this.passwordError = '';
+    this.passwordOk = '';
+    if (!this.currentPassword || !this.newPassword) {
+      this.passwordError = 'Escribe tu contraseña actual y la nueva.';
+      return;
+    }
+    if (this.newPassword.length < 6) {
+      this.passwordError = 'La contraseña nueva debe tener al menos 6 caracteres.';
+      return;
+    }
+    if (this.newPassword !== this.repeatPassword) {
+      this.passwordError = 'La contraseña nueva no coincide en los dos campos.';
+      return;
+    }
+    this.savingPassword = true;
+    this.loginService.changePassword(this.currentPassword, this.newPassword).subscribe({
+      next: () => {
+        this.savingPassword = false;
+        this.passwordOk = 'Contraseña actualizada. Úsala la próxima vez que inicies sesión.';
+        this.currentPassword = this.newPassword = this.repeatPassword = '';
+      },
+      error: (err) => {
+        this.savingPassword = false;
+        this.passwordError = err?.message || 'No se pudo cambiar la contraseña.';
+      },
+    });
+  }
 
   toggleMobileMenu(): void {
     this.isMobileMenuOpen = !this.isMobileMenuOpen;

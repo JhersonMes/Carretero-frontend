@@ -33,6 +33,7 @@
           />
         </div>
 
+        <div class="error-message session-expired" *ngIf="sessionMessage && !errorMessage">{{ sessionMessage }}</div>
         <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
 
         <button type="submit" class="submit-btn">Ingresar</button>
@@ -42,11 +43,30 @@
         <button type="button" class="forgot-password-link" (click)="toggleForgotPassword()">
           ¿Olvidaste tu contraseña?
         </button>
-        <div class="forgot-password-info" *ngIf="showForgotPasswordInfo">
-          Por seguridad, el restablecimiento de contraseña lo realiza el administrador del sistema
-          desde el módulo de Usuarios. Comunícate con el equipo de administración indicando tu usuario.
-        </div>
+        <!-- RF-06: se envia un enlace al correo registrado para crear una contrasena nueva -->
+        <form class="forgot-password-form" *ngIf="showForgotPasswordInfo" (ngSubmit)="sendRecovery()">
+          <p class="forgot-password-info">
+            Escribe el correo con el que te registraron y te enviaremos un enlace para crear una nueva contraseña.
+          </p>
+          <input
+            type="email"
+            id="recoveryEmail"
+            name="recoveryEmail"
+            [(ngModel)]="recoveryEmail"
+            placeholder="Correo registrado"
+            autocomplete="email"
+          />
+          <button type="submit" class="recovery-btn" [disabled]="sendingRecovery">
+            {{ sendingRecovery ? 'Enviando...' : 'Enviar enlace' }}
+          </button>
+          <div class="recovery-ok" *ngIf="recoveryMessage">{{ recoveryMessage }}</div>
+          <div class="error-message" *ngIf="recoveryError">{{ recoveryError }}</div>
+        </form>
       </div>
+
+      <p class="register-note">
+        ¿No tienes cuenta? <a routerLink="/register">Regístrate</a>
+      </p>
     </div>
   </section>
 

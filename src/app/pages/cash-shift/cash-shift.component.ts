@@ -1,4 +1,6 @@
-﻿import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+﻿import { CashMovement } from '../../model/cash-movement';
+import { CashMovementType } from '../../model/enums';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -204,6 +206,7 @@ export class CashShiftComponent implements OnInit, OnDestroy {
         this.activeShift = shift;
         this.loading = false;
         this.loadMySales(shift?.idCashShift);
+        this.loadMovements();
       },
       error: () => {
         this.activeShift = null;
@@ -666,6 +669,75 @@ export class CashShiftComponent implements OnInit, OnDestroy {
           // recarga todo para que la pantalla vuelva a reflejar la realidad.
           this.loadShift();
           this.refreshPending();
+        },
+      });
+  }
+
+  // ===================== Ingresos y egresos del turno (HU-05) =====================
+  movements: CashMovement[] = [];
+  showMovementModal = false;
+  movementType: CashMovementType = 'EGRESO';
+  movementAmount: number | null = null;
+  movementReason = '';
+  movementError = '';
+  movementMessage = '';
+  savingMovement = false;
+
+  loadMovements(): void {
+    const id = this.activeShift?.idCashShift;
+    if (!id) {
+      this.movements = [];
+      return;
+    }
+    this.cashShiftService.getMovements(id).subscribe({
+      next: (list) => (this.movements = [...list].sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''))),
+      error: () => (this.movements = []),
+    });
+  }
+
+  openMovementModal(): void {
+    this.showMovementModal = true;
+    this.movementType = 'EGRESO';
+    this.movementAmount = null;
+    this.movementReason = '';
+    this.movementError = '';
+  }
+
+  closeMovementModal(): void {
+    this.showMovementModal = false;
+  }
+
+  saveMovement(): void {
+    this.movementError = '';
+    const amount = Number(this.movementAmount ?? 0);
+    if (!(amount > 0)) {
+      this.movementError = 'El monto debe ser mayor a 0.';
+      return;
+    }
+    if (!this.movementReason.trim()) {
+      this.movementError = 'Escribe el motivo del movimiento.';
+      return;
+    }
+    if (!this.activeShift?.idCashShift) return;
+    this.savingMovement = true;
+    this.cashShiftService
+      .registerMovement({
+        idCashShift: this.activeShift.idCashShift,
+        type: this.movementType,
+        amount,
+        reason: this.movementReason.trim(),
+      })
+      .subscribe({
+        next: (m) => {
+          this.savingMovement = false;
+          this.showMovementModal = false;
+          this.movementMessage = `${m.type === 'EGRESO' ? 'Egreso' : 'Ingreso'} de S/ ${amount.toFixed(2)} registrado: ${m.reason}.`;
+          setTimeout(() => (this.movementMessage = ''), 5000);
+          this.loadMovements();
+        },
+        error: (err) => {
+          this.savingMovement = false;
+          this.movementError = err?.message || 'No se pudo registrar el movimiento.';
         },
       });
   }

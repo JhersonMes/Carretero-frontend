@@ -204,3 +204,31 @@
   font-size: 0.8rem;
   margin-top: 10px;
 }
+
+/* Aviso "Pidiendo cuenta" (HU-07 escenario 4) */
+.pos-cancel-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.pos-bill-btn {
+  margin: 0;
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: #fff7e0;
+  color: #8a5a00;
+  border: 1.5px solid #f0a202;
+  border-radius: var(--radius-sm);
+}
+
+.pos-bill-btn:hover {
+  background: #ffefc2;
+}
+
+.pos-bill-btn.active {
+  background: #f0a202;
+  color: #fff;
+}

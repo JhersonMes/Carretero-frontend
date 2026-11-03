@@ -314,3 +314,38 @@
   from { opacity: 0; transform: scale(0.95); }
   to { opacity: 1; transform: scale(1); }
 }
+
+/* Consulta RENIEC / SUNAT (HU-13) */
+.lookup-state {
+  padding: 12px;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.lookup-result {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid #d6e4f5;
+  background: #f4f8fd;
+  border-radius: 10px;
+}
+
+.lookup-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #4b5563;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.lookup-warning {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #fff7e0;
+  border: 1px solid #f3d27a;
+  color: #7a5600;
+  font-size: 0.8rem;
+}

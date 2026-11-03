@@ -348,3 +348,59 @@
     width: 100%;
   }
 }
+
+/* --- Cambio de contrasena --- */
+.account-btn {
+  margin-right: 8px;
+}
+
+.pwd-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(24, 23, 23, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 300;
+  padding: 16px;
+}
+
+.pwd-modal {
+  background: var(--surface-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 24px 26px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.pwd-modal h2 {
+  margin: 0 0 14px;
+  font-size: 1.2rem;
+}
+
+.pwd-error,
+.pwd-ok {
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 0.84rem;
+  margin-bottom: 10px;
+}
+
+.pwd-error {
+  background: #fdecec;
+  border: 1px solid #f6c8c8;
+  color: var(--carretero-red-dark);
+}
+
+.pwd-ok {
+  background: #e8f5ec;
+  border: 1px solid #bfe3c9;
+  color: #1e6b35;
+}
+
+.pwd-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}

@@ -1,0 +1,100 @@
+.printers-page {
+  max-width: 1080px;
+}
+
+.page-header p {
+  margin: 4px 0 18px;
+  color: var(--text-muted, #6b7280);
+}
+
+.printer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.printer-card,
+.service-card {
+  background: var(--surface, #fff);
+  border: 1px solid var(--surface-border, #e5e7eb);
+  border-radius: 12px;
+  padding: 16px 18px;
+}
+
+.service-card {
+  margin-top: 16px;
+  max-width: 560px;
+}
+
+.printer-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.printer-head h3,
+.service-card h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.printer-hint {
+  margin: 4px 0 12px;
+  font-size: 0.82rem;
+  color: var(--text-muted, #6b7280);
+}
+
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.form-group label {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.test-btn {
+  margin: 4px 0 0;
+}
+
+.test-result {
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+}
+
+.test-result.ok {
+  background: #e8f5ec;
+  color: #1e6b35;
+  border: 1px solid #bfe3c9;
+}
+
+.test-result.fail {
+  background: #fdecec;
+  color: #8a1c1c;
+  border: 1px solid #f3c2c2;
+}
+
+.save-ok {
+  background: #e8f5ec;
+  color: #1e6b35;
+  border: 1px solid #bfe3c9;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.page-actions {
+  margin-top: 16px;
+}

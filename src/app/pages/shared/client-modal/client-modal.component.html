@@ -59,7 +59,22 @@
           <span class="select-indicator" *ngIf="currentClient?.idClient === c.idClient">Seleccionado</span>
         </button>
 
-        <div class="empty-results" *ngIf="!loading && filteredClients.length === 0">
+        <div class="lookup-state" *ngIf="lookupLoading">Consultando RENIEC / SUNAT...</div>
+
+        <div class="lookup-result" *ngIf="lookup && !lookupLoading">
+          <div class="client-info">
+            <span class="lookup-label">{{ lookup.docType }} {{ lookup.docNumber }}</span>
+            <span class="client-name">{{ lookup.name }}</span>
+            <span class="client-meta" *ngIf="lookup.address">{{ lookup.address }}</span>
+          </div>
+          <p class="lookup-warning" *ngIf="lookupSimulated">
+            Dato de prueba: el servicio de RENIEC/SUNAT no está configurado. Configura el token de la API en
+            Impresoras y servicios para traer los datos reales.
+          </p>
+          <button type="button" class="submit-btn" [disabled]="loading" (click)="useLookup()">Registrar y seleccionar</button>
+        </div>
+
+        <div class="empty-results" *ngIf="!loading && !lookup && !lookupLoading && filteredClients.length === 0">
           <p>No se encontraron clientes para "{{ searchQuery }}".</p>
           <button type="button" class="create-direct-btn" (click)="toggleCreate()">
             + Registrar "{{ searchQuery }}" como nuevo cliente

@@ -20,6 +20,27 @@ export class LoginService {
     return this.http.post<{ jwtToken: string }>(this.url, body);
   }
 
+  /** Pide el enlace de recuperacion (RF-06). Responde igual exista o no el correo. */
+  forgotPassword(email: string) {
+    return this.http.post<{ message: string }>(`${environment.HOST}/auth/forgot-password`, { email });
+  }
+
+  /** Crea la contrasena nueva con el enlace recibido por correo. */
+  resetPassword(token: string, newPassword: string) {
+    return this.http.post<{ message: string }>(`${environment.HOST}/auth/reset-password`, { token, newPassword });
+  }
+
+  /** El colaborador cambia su propia contrasena (CP-16-4-1). */
+  changePassword(currentPassword: string, newPassword: string) {
+    return this.http.put<{ message: string }>(`${environment.HOST}/auth/password`, { currentPassword, newPassword });
+  }
+
+  /** Borra la sesion guardada sin llamar al servidor (sesion vencida). */
+  clearSession() {
+    sessionStorage.removeItem(environment.TOKEN_NAME);
+    localStorage.removeItem(environment.TOKEN_NAME);
+  }
+
   register(username: string, email: string, password: string) {
     const body = { username, email, password };
     return this.http.post<any>(`${environment.HOST}/register`, body);

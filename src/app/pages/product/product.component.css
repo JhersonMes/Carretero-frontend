@@ -201,3 +201,43 @@
   font-size: 0.86rem;
   font-weight: 600;
 }
+
+/* --- Historial de precios --- */
+.history-btn {
+  margin-left: 6px;
+  padding: 5px 10px;
+  font-size: 0.75rem;
+}
+
+.history-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(24, 23, 23, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 300;
+  padding: 16px;
+}
+
+.history-modal {
+  background: var(--surface-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 22px 24px;
+  width: 100%;
+  max-width: 620px;
+  max-height: 85vh;
+  overflow: auto;
+}
+
+.history-modal h2 {
+  margin: 0 0 14px;
+  font-size: 1.15rem;
+}
+
+.history-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 14px;
+}

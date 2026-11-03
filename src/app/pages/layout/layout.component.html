@@ -30,6 +30,13 @@
           {{ roleDisplay(user.role.name).label }}
         </span>
       </div>
+      <button type="button" class="logout-btn account-btn" (click)="openPasswordModal()" title="Cambiar contraseña">
+        <span class="logout-text">Cambiar contraseña</span>
+        <svg class="logout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+      </button>
       <button type="button" class="logout-btn" (click)="logout()" title="Cerrar sesión">
         <span class="logout-text">Cerrar sesión</span>
         <svg class="logout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -69,4 +76,29 @@
       <router-outlet></router-outlet>
     </main>
   </div>
+</div>
+
+<!-- Cambio de la propia contrasena (CP-16-4-1) -->
+<div class="pwd-backdrop" *ngIf="showPasswordModal" (click)="closePasswordModal()">
+  <form class="pwd-modal" (click)="$event.stopPropagation()" (ngSubmit)="savePassword()">
+    <h2>Cambiar contraseña</h2>
+    <div class="form-group">
+      <label for="currentPassword">Contraseña actual</label>
+      <input id="currentPassword" type="password" name="currentPassword" [(ngModel)]="currentPassword" autocomplete="current-password" />
+    </div>
+    <div class="form-group">
+      <label for="newPassword">Contraseña nueva</label>
+      <input id="newPassword" type="password" name="newPassword" [(ngModel)]="newPassword" autocomplete="new-password" />
+    </div>
+    <div class="form-group">
+      <label for="repeatPassword">Repite la contraseña nueva</label>
+      <input id="repeatPassword" type="password" name="repeatPassword" [(ngModel)]="repeatPassword" autocomplete="new-password" />
+    </div>
+    <div class="pwd-error" *ngIf="passwordError">{{ passwordError }}</div>
+    <div class="pwd-ok" *ngIf="passwordOk">{{ passwordOk }}</div>
+    <div class="pwd-actions">
+      <button type="button" class="secondary" (click)="closePasswordModal()">Cerrar</button>
+      <button type="submit" [disabled]="savingPassword">{{ savingPassword ? 'Guardando...' : 'Guardar' }}</button>
+    </div>
+  </form>
 </div>

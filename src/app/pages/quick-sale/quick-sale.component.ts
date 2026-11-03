@@ -125,7 +125,9 @@ export class QuickSaleComponent implements OnInit {
 
     this.paymentMethodService.findAll().subscribe((methods) => {
       this.paymentMethods = methods;
-      this.selectedMethodId = methods[0]?.idPaymentMethod ?? null;
+      // Sin metodo preseleccionado: el cajero elige con que cobra en cada venta (CP-09-2-2).
+      // Antes venia EFECTIVO marcado y una venta con Yape podia registrarse como efectivo.
+      this.selectedMethodId = null;
     });
 
     this.loadAllProducts();
@@ -155,8 +157,10 @@ export class QuickSaleComponent implements OnInit {
     return shiftUser?.fullName || currentUser?.fullName || currentUser?.username || 'Caja Para Llevar Principal';
   }
 
+  /** Marca el metodo con el que se cobra (pulsarlo de nuevo no lo desmarca). */
   selectMethod(method: PaymentMethod): void {
     this.selectedMethodId = method.idPaymentMethod;
+    this.errorMessage = '';
   }
 
   loadShiftStatus(): void {
@@ -319,7 +323,7 @@ export class QuickSaleComponent implements OnInit {
 
   get canSend(): boolean {
     if (this.checkingShift || !this.activeShift || this.sending) return false;
-    if (!this.selectedMethodId) return false;
+    // Sin metodo el boton sigue activo: al pulsarlo se explica que falta elegirlo.
     return this.pendingPaymentOrder !== null || this.cart.length > 0;
   }
 

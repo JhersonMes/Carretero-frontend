@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { cashierOnlyGuard } from '../guards/cashier-only.guard';
+import { ADMIN, SALON_ROLES, STATION_ROLES, roleGuard } from '../guards/role.guard';
 
 export const pagesRoutes: Routes = [
   {
@@ -8,11 +9,13 @@ export const pagesRoutes: Routes = [
   },
   {
     path: 'dashboard',
+    canActivate: [roleGuard(ADMIN)],
     loadComponent: () =>
       import('./dashboard/dashboard.component').then((m) => m.DashboardComponent),
   },
   {
     path: 'role',
+    canActivate: [roleGuard(ADMIN)],
     loadComponent: () => import('./role/role.component').then((m) => m.RoleComponent),
     children: [
       {
@@ -29,6 +32,7 @@ export const pagesRoutes: Routes = [
   },
   {
     path: 'user',
+    canActivate: [roleGuard(ADMIN)],
     loadComponent: () => import('./user/user.component').then((m) => m.UserComponent),
     children: [
       {
@@ -45,18 +49,22 @@ export const pagesRoutes: Routes = [
   },
   {
     path: 'product',
+    canActivate: [roleGuard(ADMIN)],
     loadComponent: () => import('./product/product.component').then((m) => m.ProductComponent),
   },
   {
     path: 'catalog',
+    canActivate: [roleGuard(ADMIN)],
     loadComponent: () => import('./catalog/catalog.component').then((m) => m.CatalogComponent),
   },
   {
     path: 'client',
+    canActivate: [roleGuard(ADMIN)],
     loadComponent: () => import('./client/client.component').then((m) => m.ClientComponent),
   },
   {
     path: 'ingredient',
+    canActivate: [roleGuard(ADMIN)],
     loadComponent: () =>
       import('./ingredient/ingredient.component').then((m) => m.IngredientComponent),
     children: [
@@ -78,6 +86,7 @@ export const pagesRoutes: Routes = [
   },
   {
     path: 'menu',
+    canActivate: [roleGuard(ADMIN)],
     loadComponent: () => import('./menu/menu.component').then((m) => m.MenuComponent),
     children: [
       {
@@ -94,6 +103,7 @@ export const pagesRoutes: Routes = [
   },
   {
     path: 'payment-method',
+    canActivate: [roleGuard(ADMIN)],
     loadComponent: () =>
       import('./payment-method/payment-method.component').then(
         (m) => m.PaymentMethodComponent
@@ -117,6 +127,7 @@ export const pagesRoutes: Routes = [
   },
   {
     path: 'payment',
+    canActivate: [roleGuard(ADMIN)],
     loadComponent: () =>
       import('./payment/payment.component').then((m) => m.PaymentComponent),
     children: [
@@ -138,20 +149,24 @@ export const pagesRoutes: Routes = [
   },
   {
     path: 'salon',
+    canActivate: [roleGuard(SALON_ROLES)],
     loadComponent: () => import('./salon/salon.component').then((m) => m.SalonComponent),
   },
   {
     path: 'table-layout',
+    canActivate: [roleGuard(ADMIN)],
     loadComponent: () =>
       import('./table-layout/table-layout.component').then((m) => m.TableLayoutComponent),
   },
   {
     path: 'salon/:id',
+    canActivate: [roleGuard(SALON_ROLES)],
     loadComponent: () =>
       import('./salon/table-order/table-order.component').then((m) => m.TableOrderComponent),
   },
   {
     path: 'quick-sale',
+    canActivate: [roleGuard(SALON_ROLES)],
     loadComponent: () =>
       import('./quick-sale/quick-sale.component').then((m) => m.QuickSaleComponent),
   },
@@ -163,12 +178,19 @@ export const pagesRoutes: Routes = [
   },
   {
     path: 'cash-shift',
+    canActivate: [roleGuard(SALON_ROLES)],
     loadComponent: () =>
       import('./cash-shift/cash-shift.component').then((m) => m.CashShiftComponent),
   },
   {
     path: 'kitchen',
+    canActivate: [roleGuard(STATION_ROLES)],
     loadComponent: () => import('./kitchen/kitchen.component').then((m) => m.KitchenComponent),
+  },
+  {
+    path: 'printers',
+    canActivate: [roleGuard(ADMIN)],
+    loadComponent: () => import('./printers/printers.component').then((m) => m.PrintersComponent),
   },
   {
     path: 'unauthorized',

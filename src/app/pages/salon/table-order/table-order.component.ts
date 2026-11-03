@@ -1,3 +1,4 @@
+import { forkJoin } from 'rxjs';
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -416,6 +417,31 @@ export class TableOrderComponent implements OnInit {
     });
   }
 
+  // --- Aviso "Pidiendo cuenta" (HU-07, CP-07-4-1) ---
+  changingStatus = false;
+
+  toggleAskingBill(): void {
+    if (!this.table?.idTable) return;
+    const next = this.table.status === 'PIDIENDO_CUENTA' ? 'OCUPADA' : 'PIDIENDO_CUENTA';
+    this.changingStatus = true;
+    this.tableService.updateStatus(this.table.idTable, next).subscribe({
+      next: (updated) => {
+        this.table = { ...this.table!, status: updated.status };
+        this.changingStatus = false;
+        this.feedbackMessage =
+          next === 'PIDIENDO_CUENTA'
+            ? 'Mesa marcada como "Pidiendo cuenta": en el salón se ve en ámbar para que caja la cobre.'
+            : 'Se quitó el aviso de cuenta.';
+        setTimeout(() => (this.feedbackMessage = ''), 4000);
+      },
+      error: (err) => {
+        this.changingStatus = false;
+        this.errorMessage = err?.message || 'No se pudo cambiar el estado de la mesa.';
+        setTimeout(() => (this.errorMessage = ''), 4000);
+      },
+    });
+  }
+
   // --- Botones de la barra inferior (Precuenta y Despacho) ---
   printPreAccount(): void {
     if (!this.currentOrder?.idOrder) {
@@ -426,9 +452,17 @@ export class TableOrderComponent implements OnInit {
 
     this.feedbackMessage = 'Imprimiendo precuenta...';
     this.printerService.printPreAccount(this.currentOrder.idOrder).subscribe({
-      next: () => {
-        this.feedbackMessage = 'Precuenta impresa con éxito.';
-        setTimeout(() => (this.feedbackMessage = ''), 3500);
+      next: (res) => {
+        // El servidor responde 200 tambien cuando no pudo imprimir: hay que mirar success.
+        // Antes se decia "impresa con exito" aunque la ticketera no recibiera nada (CP-12-2-1).
+        if (res?.success) {
+          this.feedbackMessage = 'Precuenta impresa con éxito.';
+          setTimeout(() => (this.feedbackMessage = ''), 3500);
+        } else {
+          this.feedbackMessage = '';
+          this.errorMessage = res?.message || 'No se pudo imprimir la precuenta.';
+          setTimeout(() => (this.errorMessage = ''), 5000);
+        }
       },
       error: (err) => {
         this.errorMessage = err?.message || 'No se pudo imprimir la precuenta.';
@@ -441,11 +475,20 @@ export class TableOrderComponent implements OnInit {
     if (this.draftCart.length > 0) {
       this.sendOrder();
     } else if (this.currentOrder?.idOrder) {
-      this.feedbackMessage = 'Reenviando comanda a la estación...';
-      this.printerService.printKitchen(this.currentOrder.idOrder).subscribe({
-        next: () => {
-          this.feedbackMessage = 'Comanda despachada a cocina.';
-          setTimeout(() => (this.feedbackMessage = ''), 3500);
+      this.feedbackMessage = 'Imprimiendo la comanda...';
+      const idOrder = this.currentOrder.idOrder;
+      // Se imprimen las dos comandas (cocina/parrilla y bebidas) y se revisa success de
+      // cada una: antes se anunciaba "despachada" aunque nada saliera (CP-12-1-1).
+      forkJoin([this.printerService.printKitchen(idOrder), this.printerService.printBar(idOrder)]).subscribe({
+        next: ([kitchen, bar]) => {
+          if (kitchen?.success && bar?.success) {
+            this.feedbackMessage = 'Comanda impresa en la ticketera.';
+            setTimeout(() => (this.feedbackMessage = ''), 3500);
+          } else {
+            this.feedbackMessage = '';
+            this.errorMessage = (!kitchen?.success ? kitchen?.message : bar?.message) || 'No se pudo imprimir la comanda.';
+            setTimeout(() => (this.errorMessage = ''), 5000);
+          }
         },
         error: (err) => {
           this.errorMessage = err?.message || 'No se pudo despachar a la impresora de cocina.';

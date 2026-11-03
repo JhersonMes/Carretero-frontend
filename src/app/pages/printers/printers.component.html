@@ -1,0 +1,61 @@
+<div class="printers-page">
+  <header class="page-header">
+    <h2>Impresoras y servicios</h2>
+    <p>Ticketeras térmicas de la red local y servicio de consulta de DNI / RUC.</p>
+  </header>
+
+  <div class="loading" *ngIf="loading">Cargando configuración...</div>
+
+  <ng-container *ngIf="config && !loading">
+    <div class="printer-grid">
+      <section class="printer-card" *ngFor="let c of cards" [attr.data-station]="c.key">
+        <div class="printer-head">
+          <h3>{{ c.title }}</h3>
+          <label class="switch">
+            <input type="checkbox" [ngModel]="enabled(c.key)" (ngModelChange)="setEnabled(c.key, $event)" [id]="c.key + 'Enabled'" />
+            <span>{{ enabled(c.key) ? 'Activa' : 'Inactiva' }}</span>
+          </label>
+        </div>
+        <p class="printer-hint">{{ c.hint }}</p>
+
+        <div class="form-group">
+          <label [for]="c.key + 'Ip'">IP</label>
+          <input type="text" [id]="c.key + 'Ip'" [ngModel]="ip(c.key)" (ngModelChange)="setIp(c.key, $event)" placeholder="192.168.1.50" />
+        </div>
+        <div class="form-group">
+          <label [for]="c.key + 'Port'">Puerto</label>
+          <input type="number" [id]="c.key + 'Port'" [ngModel]="port(c.key)" (ngModelChange)="setPort(c.key, $event)" min="1" max="65535" />
+        </div>
+
+        <button type="button" class="test-btn" [disabled]="testing[c.key]" (click)="test(c.key)">
+          {{ testing[c.key] ? 'Probando...' : 'Probar conexión' }}
+        </button>
+        <p class="test-result" *ngIf="testResult[c.key] as r" [class.ok]="r.ok" [class.fail]="!r.ok">{{ r.text }}</p>
+      </section>
+    </div>
+
+    <section class="service-card">
+      <h3>Consulta de DNI / RUC</h3>
+      <p class="printer-hint">
+        Servicio externo (RENIEC / SUNAT) para traer el nombre del cliente. Sin token se usan datos de prueba.
+      </p>
+      <div class="form-group">
+        <label for="dniRucApiUrl">URL del servicio</label>
+        <input type="text" id="dniRucApiUrl" [(ngModel)]="config.dniRucApiUrl" placeholder="https://apiperu.dev/api" />
+      </div>
+      <div class="form-group">
+        <label for="dniRucApiToken">Token</label>
+        <input type="password" id="dniRucApiToken" [(ngModel)]="config.dniRucApiToken" autocomplete="off" />
+      </div>
+    </section>
+
+    <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
+    <p class="save-ok" *ngIf="message">{{ message }}</p>
+
+    <div class="page-actions">
+      <button type="button" class="save-btn" [disabled]="saving" (click)="save()">
+        {{ saving ? 'Guardando...' : 'Guardar configuración' }}
+      </button>
+    </div>
+  </ng-container>
+</div>

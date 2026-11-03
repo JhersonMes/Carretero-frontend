@@ -209,6 +209,16 @@
 
     <!-- Enlace para anular pedido si existe orden activa -->
     <div class="pos-cancel-wrapper" *ngIf="currentOrder?.idOrder">
+      <!-- HU-07 escenario 4: el mesero avisa a caja que la mesa pide la cuenta -->
+      <button
+        type="button"
+        class="pos-bill-btn"
+        [class.active]="table.status === 'PIDIENDO_CUENTA'"
+        [disabled]="changingStatus"
+        (click)="toggleAskingBill()"
+      >
+        {{ table.status === 'PIDIENDO_CUENTA' ? 'Quitar aviso de cuenta' : 'Pidiendo cuenta' }}
+      </button>
       <button type="button" class="pos-cancel-link-btn" (click)="askCancelOrder()">
         Anular todo el pedido
       </button>
@@ -236,13 +246,13 @@
         class="pos-footer-action-btn"
         [disabled]="!hasAnyItems || sending"
         (click)="despacho()"
-        title="Despachar pedido a cocina"
+        [title]="draftCart.length > 0 ? 'Despachar pedido a cocina' : 'Volver a imprimir la comanda en cocina y barra'"
       >
         <svg class="pos-footer-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M22 2L11 13"></path>
           <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
         </svg>
-        <span>{{ sending ? 'Enviando...' : (draftCart.length > 0 ? 'Despacho' : 'Reenviar') }}</span>
+        <span>{{ sending ? 'Enviando...' : (draftCart.length > 0 ? 'Despacho' : 'Imprimir comanda') }}</span>
       </button>
 
       <button

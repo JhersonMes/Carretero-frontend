@@ -32,6 +32,9 @@
         <span class="order-code" *ngIf="table.orderCode">· {{ table.orderCode }}</span>
       </div>
 
+      <!-- Consumo de la mesa (suma de todos sus pedidos abiertos), CP-07-1-1 y CP-07-1-2 -->
+      <div class="order-amount" *ngIf="table.totalItems > 0">S/ {{ (table.orderTotal ?? 0).toFixed(2) }}</div>
+
       <!-- Meseros que han intervenido en esta mesa -->
       <div class="waiters" *ngIf="table.totalItems > 0">
         <span class="waiters-caption">{{ table.waiters.length > 1 ? 'Meseros' : 'Mesero' }}</span>

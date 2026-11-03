@@ -280,3 +280,10 @@
     font-size: 1.35rem;
   }
 }
+
+.order-amount {
+  margin-top: 6px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}

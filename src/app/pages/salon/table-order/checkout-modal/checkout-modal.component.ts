@@ -5,7 +5,7 @@ import { PaymentMethodService } from '../../../../services/payment-method.servic
 import { PaymentService } from '../../../../services/payment.service';
 import { InvoiceService } from '../../../../services/invoice.service';
 import { BusinessConfigService } from '../../../../services/business-config.service';
-import { ReceiptService } from '../../../../services/receipt.service';
+import { BOLETA_DNI_THRESHOLD, ReceiptService } from '../../../../services/receipt.service';
 import { PaymentMethod } from '../../../../model/payment-method';
 import { BusinessConfig } from '../../../../model/business-config';
 import { Invoice } from '../../../../model/invoice';
@@ -153,8 +153,14 @@ export class CheckoutModalComponent implements OnInit {
     return this.invoiceType === 'FACTURA' || this.invoiceType === 'BOLETA';
   }
 
+  /** RN-30: una boleta mayor a S/ 700 debe identificar al comprador. */
+  get boletaNeedsDni(): boolean {
+    return this.invoiceType === 'BOLETA' && (this.order.total ?? 0) > BOLETA_DNI_THRESHOLD;
+  }
+
   get docNumberLabel(): string {
-    return this.invoiceType === 'FACTURA' ? 'RUC (11 digitos)' : 'DNI (opcional)';
+    if (this.invoiceType === 'FACTURA') return 'RUC (11 digitos)';
+    return this.boletaNeedsDni ? `DNI (obligatorio: boleta mayor a S/ ${BOLETA_DNI_THRESHOLD.toFixed(2)})` : 'DNI (opcional)';
   }
 
   private buildDocType(): DocumentType | undefined {
@@ -178,6 +184,12 @@ export class CheckoutModalComponent implements OnInit {
     }
     if (this.invoiceType === 'FACTURA' && this.docNumber.trim().length !== 11) {
       this.errorMessage = 'Para Factura, el RUC debe tener 11 digitos.';
+      return;
+    }
+    // RN-30: se valida antes de registrar el pago. Antes solo lo hacia Delivery y en
+    // Salon se cobraba una boleta de S/ 735 sin DNI (CP-11-2-3).
+    if (this.boletaNeedsDni && !/^\d{8}$/.test(this.docNumber.trim())) {
+      this.errorMessage = `Una boleta mayor a S/ ${BOLETA_DNI_THRESHOLD.toFixed(2)} debe identificar al comprador: ingresa su DNI de 8 digitos.`;
       return;
     }
     if (!this.order.idOrder) return;

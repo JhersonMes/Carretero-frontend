@@ -33,9 +33,22 @@ export class RegisterComponent {
         this.successMessage = 'Registro exitoso. Redirigiendo al login...';
         setTimeout(() => this.router.navigate(['/login']), 1500);
       },
-      error: () => {
-        this.errorMessage = 'Error al registrar usuario';
+      error: (err) => {
+        // El servidor explica que fallo (usuario corto, correo invalido, usuario repetido).
+        // Antes solo se veia un mensaje generico (CP-02-2-1).
+        const detail = this.friendlyDetail(err?.message);
+        this.errorMessage = detail ? `Error al registrar usuario: ${detail}` : 'Error al registrar usuario';
       }
     });
+  }
+
+  /** "username: El nombre..., email: El email..." -> "El nombre... · El email..." */
+  private friendlyDetail(message: string | undefined): string {
+    if (!message || message.startsWith('Ocurrió un error')) return '';
+    return message
+      .split(/,\s*(?=[a-zA-Z]+:)/)
+      .map((part) => part.replace(/^[a-zA-Z]+:\s*/, '').trim())
+      .filter(Boolean)
+      .join(' · ');
   }
 }

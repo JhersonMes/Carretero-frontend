@@ -4,29 +4,39 @@
 
   <router-outlet></router-outlet>
 
+  <p class="feedback ok" *ngIf="message">{{ message }}</p>
+  <p class="feedback err" *ngIf="errorMessage">{{ errorMessage }}</p>
+
   <table>
     <thead>
       <tr>
         <th>ID</th>
         <th>Usuario</th>
+        <th>Nombre</th>
         <th>Email</th>
         <th>Rol</th>
+        <th>Estado</th>
         <th>Acciones</th>
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let u of users">
+      <tr *ngFor="let u of users" [class.disabled-row]="u.enabled === false">
         <td>{{ u.idUser }}</td>
         <td>{{ u.username }}</td>
+        <td>{{ u.fullName }}</td>
         <td>{{ u.email }}</td>
         <td>{{ u.role.name || 'N/A' }}</td>
         <td>
+          <span class="state" [class.off]="u.enabled === false">{{ u.enabled === false ? 'De baja' : 'Activa' }}</span>
+        </td>
+        <td>
           <button [routerLink]="['edit', u.idUser]">Editar</button>
-          <button (click)="deleteUser(u.idUser)">Eliminar</button>
+          <button *ngIf="u.enabled !== false" (click)="deactivate(u)">Dar de baja</button>
+          <button *ngIf="u.enabled === false" (click)="activate(u)">Reactivar</button>
         </td>
       </tr>
       <tr *ngIf="users.length === 0">
-        <td colspan="5">No hay usuarios registrados.</td>
+        <td colspan="7">No hay usuarios registrados.</td>
       </tr>
     </tbody>
   </table>

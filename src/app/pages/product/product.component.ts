@@ -5,6 +5,7 @@ import { ProductService } from '../../services/product.service';
 import { CategoryService } from '../../services/category.service';
 import { Product } from '../../model/product';
 import { Category } from '../../model/category';
+import { PriceHistory } from '../../model/price-history';
 
 /**
  * Administracion de la carta. Existe sobre todo para cargar los precios:
@@ -214,5 +215,33 @@ export class ProductComponent implements OnInit {
         this.savingId = null;
       },
     });
+  }
+
+  // --- Historico de precios (CP-15-4-1): del cambio mas reciente al mas antiguo ---
+  historyProduct: Product | null = null;
+  history: PriceHistory[] = [];
+  loadingHistory = false;
+  historyError = '';
+
+  openHistory(product: Product): void {
+    if (product.idProduct == null) return;
+    this.historyProduct = product;
+    this.history = [];
+    this.historyError = '';
+    this.loadingHistory = true;
+    this.productService.getPriceHistory(product.idProduct).subscribe({
+      next: (data) => {
+        this.history = data;
+        this.loadingHistory = false;
+      },
+      error: (err) => {
+        this.historyError = err?.message || 'No se pudo cargar el historial de precios.';
+        this.loadingHistory = false;
+      },
+    });
+  }
+
+  closeHistory(): void {
+    this.historyProduct = null;
   }
 }

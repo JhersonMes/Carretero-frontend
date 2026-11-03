@@ -8,4 +8,13 @@ import { environment } from '../../environments/environment';
 })
 export class UserService extends GenericSignalService<User> {
   protected override url: string = `${environment.HOST}/users`;
+
+  /** Baja logica (RN-04): la cuenta queda deshabilitada, no se borra. */
+  deactivate(id: number) {
+    return this.http.delete<User>(`${this.url}/${id}`);
+  }
+
+  activate(id: number) {
+    return this.http.patch<User>(`${this.url}/${id}/activate`, {});
+  }
 }

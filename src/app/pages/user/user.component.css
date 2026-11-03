@@ -1,0 +1,37 @@
+.feedback {
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 0.86rem;
+  margin: 10px 0;
+}
+
+.feedback.ok {
+  background: #e8f5ec;
+  border: 1px solid #bfe3c9;
+  color: #1e6b35;
+}
+
+.feedback.err {
+  background: #fdecec;
+  border: 1px solid #f6c8c8;
+  color: var(--carretero-red-dark);
+}
+
+.state {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: #e8f5ec;
+  color: #1e6b35;
+}
+
+.state.off {
+  background: #eee;
+  color: #777;
+}
+
+.disabled-row td {
+  color: #8a8483;
+}
