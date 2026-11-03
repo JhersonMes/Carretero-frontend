@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { LoginService } from '../../services/login.service';
@@ -12,7 +12,7 @@ import { LogoComponent } from '../../shared/logo/logo.component';
 @Component({
   selector: 'app-reset-password',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, LogoComponent],
+  imports: [FormsModule, RouterLink, LogoComponent],
   templateUrl: './reset-password.component.html',
   styleUrl: '../register/register.component.css',
 })

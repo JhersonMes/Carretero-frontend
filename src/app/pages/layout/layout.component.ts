@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { LoginService } from '../../services/login.service';
@@ -53,7 +53,7 @@ const STATION_ROLES = ['COCINA', 'PARRILLA', 'BEBIDAS'];
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterOutlet, RouterLink, RouterLinkActive, LogoComponent],
+  imports: [FormsModule, RouterOutlet, RouterLink, RouterLinkActive, LogoComponent],
   templateUrl: './layout.component.html',
   styleUrl: './layout.component.css',
 })

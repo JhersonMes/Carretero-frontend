@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { DiningTableService } from '../../services/dining-table.service';
@@ -13,7 +13,7 @@ import { DiningTable } from '../../model/dining-table';
 @Component({
   selector: 'app-table-layout',
   standalone: true,
-  imports: [CommonModule, FormsModule, DragDropModule],
+  imports: [FormsModule, DragDropModule],
   templateUrl: './table-layout.component.html',
   styleUrl: './table-layout.component.css',
 })

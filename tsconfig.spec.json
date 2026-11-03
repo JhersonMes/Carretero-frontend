@@ -5,7 +5,18 @@
     "module": "CommonJS",
     "moduleResolution": "node",
     "target": "ES2022",
-    "types": []
+    "types": [],
+    "paths": {
+      "@angular/common/http": [
+        "./node_modules/@angular/common/types/http.d.ts"
+      ],
+      "@angular/core/rxjs-interop": [
+        "./node_modules/@angular/core/types/rxjs-interop.d.ts"
+      ],
+      "@angular/cdk/drag-drop": [
+        "./node_modules/@angular/cdk/types/drag-drop.d.ts"
+      ]
+    }
   },
   "include": [
     "src/**/*.spec.ts",

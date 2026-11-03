@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { CategoryService } from '../../services/category.service';
 import { ProductService } from '../../services/product.service';
@@ -18,7 +18,7 @@ const STATIONS: KitchenStation[] = ['COCINA', 'PARRILLA', 'BEBIDAS'];
 @Component({
   selector: 'app-catalog',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   templateUrl: './catalog.component.html',
   styleUrl: './catalog.component.css',
 })

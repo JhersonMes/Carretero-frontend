@@ -1,5 +1,5 @@
 import { Component, EventEmitter, HostListener, Input, Output, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { BusinessConfigService } from '../../../services/business-config.service';
 
 /** Largo del PIN, el mismo que valida el backend al guardarlo. */
@@ -19,7 +19,7 @@ const PIN_LENGTH = 4;
 @Component({
   selector: 'app-pin-pad',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './pin-pad.component.html',
   styleUrl: './pin-pad.component.css',
 })

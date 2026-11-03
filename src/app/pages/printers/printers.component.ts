@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { BusinessConfigService } from '../../services/business-config.service';
 import { PrinterService } from '../../services/printer.service';
@@ -21,7 +21,7 @@ interface PrinterCard {
 @Component({
   selector: 'app-printers',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   templateUrl: './printers.component.html',
   styleUrl: './printers.component.css',
 })

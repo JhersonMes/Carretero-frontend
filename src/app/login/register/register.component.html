@@ -7,8 +7,12 @@
     <h2>Registro de cuenta</h2>
     <p class="subtitle">Esta cuenta se creara con el rol operativo basico (Mesero)</p>
 
-    <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
-    <div class="success-message" *ngIf="successMessage">{{ successMessage }}</div>
+    @if (errorMessage) {
+      <div class="error-message">{{ errorMessage }}</div>
+    }
+    @if (successMessage) {
+      <div class="success-message">{{ successMessage }}</div>
+    }
 
     <form (ngSubmit)="onSubmit()">
       <div class="form-group">

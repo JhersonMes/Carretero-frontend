@@ -15,19 +15,23 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let pm of methods">
-        <td>{{ pm.idPaymentMethod }}</td>
-        <td>{{ pm.name }}</td>
-        <td>{{ pm.description }}</td>
-        <td>{{ pm.active ? 'Activo' : 'Inactivo' }}</td>
-        <td>
-          <button [routerLink]="['edit', pm.idPaymentMethod]">Editar</button>
-          <button (click)="deleteMethod(pm.idPaymentMethod)">Eliminar</button>
-        </td>
-      </tr>
-      <tr *ngIf="methods.length === 0">
-        <td colspan="5">No hay métodos de pago registrados.</td>
-      </tr>
+      @for (pm of methods; track pm) {
+        <tr>
+          <td>{{ pm.idPaymentMethod }}</td>
+          <td>{{ pm.name }}</td>
+          <td>{{ pm.description }}</td>
+          <td>{{ pm.active ? 'Activo' : 'Inactivo' }}</td>
+          <td>
+            <button [routerLink]="['edit', pm.idPaymentMethod]">Editar</button>
+            <button (click)="deleteMethod(pm.idPaymentMethod)">Eliminar</button>
+          </td>
+        </tr>
+      }
+      @if (methods.length === 0) {
+        <tr>
+          <td colspan="5">No hay métodos de pago registrados.</td>
+        </tr>
+      }
     </tbody>
   </table>
 </div>

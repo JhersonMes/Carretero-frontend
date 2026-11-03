@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FlavorService } from '../../../services/flavor.service';
 import { Flavor } from '../../../model/flavor';
 import { Product } from '../../../model/product';
@@ -11,7 +11,7 @@ import { Product } from '../../../model/product';
 @Component({
   selector: 'app-flavor-modal',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './flavor-modal.component.html',
   styleUrl: './flavor-modal.component.css',
 })

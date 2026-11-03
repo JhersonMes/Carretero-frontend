@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { KitchenStation } from '../../../model/enums';
 import { Product } from '../../../model/product';
 
@@ -30,7 +30,7 @@ const STATIONS: { key: KitchenStation; label: string }[] = [
 @Component({
   selector: 'app-station-modal',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './station-modal.component.html',
   styleUrl: './station-modal.component.css',
 })

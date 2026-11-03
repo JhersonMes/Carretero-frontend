@@ -1,5 +1,5 @@
 import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { ClientService } from '../../../services/client.service';
 import { SunatService } from '../../../services/sunat.service';
@@ -10,7 +10,7 @@ import { DocumentType } from '../../../model/enums';
 @Component({
   selector: 'app-client-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   templateUrl: './client-modal.component.html',
   styleUrl: './client-modal.component.css',
 })

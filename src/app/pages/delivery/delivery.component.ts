@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { switchMap } from 'rxjs';
@@ -80,7 +80,7 @@ const DNI_DIGITS = 8;
 @Component({
   selector: 'app-delivery',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, FlavorModalComponent, StationModalComponent],
+  imports: [FormsModule, RouterLink, FlavorModalComponent, StationModalComponent],
   templateUrl: './delivery.component.html',
   styleUrl: './delivery.component.css',
 })

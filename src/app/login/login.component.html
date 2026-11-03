@@ -17,7 +17,7 @@
             autocomplete="username"
             placeholder="Ej. admin o caja1"
             required
-          />
+            />
         </div>
 
         <div class="form-group">
@@ -30,11 +30,15 @@
             autocomplete="current-password"
             placeholder="••••••••"
             required
-          />
+            />
         </div>
 
-        <div class="error-message session-expired" *ngIf="sessionMessage && !errorMessage">{{ sessionMessage }}</div>
-        <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
+        @if (sessionMessage && !errorMessage) {
+          <div class="error-message session-expired">{{ sessionMessage }}</div>
+        }
+        @if (errorMessage) {
+          <div class="error-message">{{ errorMessage }}</div>
+        }
 
         <button type="submit" class="submit-btn">Ingresar</button>
       </form>
@@ -44,25 +48,31 @@
           ¿Olvidaste tu contraseña?
         </button>
         <!-- RF-06: se envia un enlace al correo registrado para crear una contrasena nueva -->
-        <form class="forgot-password-form" *ngIf="showForgotPasswordInfo" (ngSubmit)="sendRecovery()">
-          <p class="forgot-password-info">
-            Escribe el correo con el que te registraron y te enviaremos un enlace para crear una nueva contraseña.
-          </p>
-          <label for="recoveryEmail">Correo registrado</label>
-          <input
-            type="email"
-            id="recoveryEmail"
-            name="recoveryEmail"
-            [(ngModel)]="recoveryEmail"
-            placeholder="Correo registrado"
-            autocomplete="email"
-          />
-          <button type="submit" class="recovery-btn" [disabled]="sendingRecovery">
-            {{ sendingRecovery ? 'Enviando...' : 'Enviar enlace' }}
-          </button>
-          <div class="recovery-ok" *ngIf="recoveryMessage">{{ recoveryMessage }}</div>
-          <div class="error-message" *ngIf="recoveryError">{{ recoveryError }}</div>
-        </form>
+        @if (showForgotPasswordInfo) {
+          <form class="forgot-password-form" (ngSubmit)="sendRecovery()">
+            <p class="forgot-password-info">
+              Escribe el correo con el que te registraron y te enviaremos un enlace para crear una nueva contraseña.
+            </p>
+            <label for="recoveryEmail">Correo registrado</label>
+            <input
+              type="email"
+              id="recoveryEmail"
+              name="recoveryEmail"
+              [(ngModel)]="recoveryEmail"
+              placeholder="Correo registrado"
+              autocomplete="email"
+              />
+            <button type="submit" class="recovery-btn" [disabled]="sendingRecovery">
+              {{ sendingRecovery ? 'Enviando...' : 'Enviar enlace' }}
+            </button>
+            @if (recoveryMessage) {
+              <div class="recovery-ok">{{ recoveryMessage }}</div>
+            }
+            @if (recoveryError) {
+              <div class="error-message">{{ recoveryError }}</div>
+            }
+          </form>
+        }
       </div>
 
       <p class="register-note">

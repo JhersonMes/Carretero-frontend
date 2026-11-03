@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { RolService } from '../../../services/rol.service';
@@ -8,7 +8,7 @@ import { Role } from '../../../model/role';
 @Component({
   selector: 'app-role-edit',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink],
   templateUrl: './role-edit.component.html'
 })
 export class RoleEditComponent implements OnInit {

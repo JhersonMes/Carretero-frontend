@@ -11,128 +11,147 @@
       <button type="button" class="close-btn" (click)="close()">&times;</button>
     </header>
 
-    <div class="modal-body" *ngIf="!creating">
-      <div class="search-box">
-        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        </svg>
-        <input
-          aria-label="Buscar cliente"
-          type="text"
-          class="search-input"
-          [(ngModel)]="searchQuery"
-          (input)="onSearch()"
-          placeholder="Buscar por DNI, RUC, celular o nombre..."
-          autofocus
-        />
-        <button type="button" class="clear-search-btn" *ngIf="searchQuery" (click)="searchQuery = ''; onSearch()">
-          &times;
-        </button>
-      </div>
-
-      <div class="quick-options">
-        <button type="button" class="quick-btn" (click)="select(null)">
-          <span>Consumidor Final (Sin cliente)</span>
-        </button>
-        <button type="button" class="create-toggle-btn" (click)="toggleCreate()">
-          + Nuevo Cliente
-        </button>
-      </div>
-
-      <div class="client-list">
-        <div class="loading-state" *ngIf="loading">Cargando clientes...</div>
-
-        <button
-          type="button"
-          class="client-item"
-          *ngFor="let c of filteredClients"
-          [class.active]="currentClient?.idClient === c.idClient"
-          (click)="select(c)"
-        >
-          <div class="client-info">
-            <span class="client-name">{{ c.name }}</span>
-            <span class="client-meta">
-              <span class="doc-badge" *ngIf="c.docNumber">{{ c.docType }}: {{ c.docNumber }}</span>
-              <span class="phone-badge" *ngIf="c.phone">Tel: {{ c.phone }}</span>
-            </span>
-          </div>
-          <span class="select-indicator" *ngIf="currentClient?.idClient === c.idClient">Seleccionado</span>
-        </button>
-
-        <div class="lookup-state" *ngIf="lookupLoading">Consultando RENIEC / SUNAT...</div>
-
-        <div class="lookup-result" *ngIf="lookup && !lookupLoading">
-          <div class="client-info">
-            <span class="lookup-label">{{ lookup.docType }} {{ lookup.docNumber }}</span>
-            <span class="client-name">{{ lookup.name }}</span>
-            <span class="client-meta" *ngIf="lookup.address">{{ lookup.address }}</span>
-          </div>
-          <p class="lookup-warning" *ngIf="lookupSimulated">
-            Dato de prueba: el servicio de RENIEC/SUNAT no está configurado. Configura el token de la API en
-            Impresoras y servicios para traer los datos reales.
-          </p>
-          <button type="button" class="submit-btn" [disabled]="loading" (click)="useLookup()">Registrar y seleccionar</button>
+    @if (!creating) {
+      <div class="modal-body">
+        <div class="search-box">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input
+            aria-label="Buscar cliente"
+            type="text"
+            class="search-input"
+            [(ngModel)]="searchQuery"
+            (input)="onSearch()"
+            placeholder="Buscar por DNI, RUC, celular o nombre..."
+            autofocus
+            />
+          @if (searchQuery) {
+            <button type="button" class="clear-search-btn" (click)="searchQuery = ''; onSearch()">
+              &times;
+            </button>
+          }
         </div>
+        <div class="quick-options">
+          <button type="button" class="quick-btn" (click)="select(null)">
+            <span>Consumidor Final (Sin cliente)</span>
+          </button>
+          <button type="button" class="create-toggle-btn" (click)="toggleCreate()">
+            + Nuevo Cliente
+          </button>
+        </div>
+        <div class="client-list">
+          @if (loading) {
+            <div class="loading-state">Cargando clientes...</div>
+          }
+          @for (c of filteredClients; track c) {
+            <button
+              type="button"
+              class="client-item"
+              [class.active]="currentClient?.idClient === c.idClient"
+              (click)="select(c)"
+              >
+              <div class="client-info">
+                <span class="client-name">{{ c.name }}</span>
+                <span class="client-meta">
+                  @if (c.docNumber) {
+                    <span class="doc-badge">{{ c.docType }}: {{ c.docNumber }}</span>
+                  }
+                  @if (c.phone) {
+                    <span class="phone-badge">Tel: {{ c.phone }}</span>
+                  }
+                </span>
+              </div>
+              @if (currentClient?.idClient === c.idClient) {
+                <span class="select-indicator">Seleccionado</span>
+              }
+            </button>
+          }
+          @if (lookupLoading) {
+            <div class="lookup-state">Consultando RENIEC / SUNAT...</div>
+          }
+          @if (lookup && !lookupLoading) {
+            <div class="lookup-result">
+              <div class="client-info">
+                <span class="lookup-label">{{ lookup.docType }} {{ lookup.docNumber }}</span>
+                <span class="client-name">{{ lookup.name }}</span>
+                @if (lookup.address) {
+                  <span class="client-meta">{{ lookup.address }}</span>
+                }
+              </div>
+              @if (lookupSimulated) {
+                <p class="lookup-warning">
+                  Dato de prueba: el servicio de RENIEC/SUNAT no está configurado. Configura el token de la API en
+                  Impresoras y servicios para traer los datos reales.
+                </p>
+              }
+              <button type="button" class="submit-btn" [disabled]="loading" (click)="useLookup()">Registrar y seleccionar</button>
+            </div>
+          }
+          @if (!loading && !lookup && !lookupLoading && filteredClients.length === 0) {
+            <div class="empty-results">
+              <p>No se encontraron clientes para "{{ searchQuery }}".</p>
+              <button type="button" class="create-direct-btn" (click)="toggleCreate()">
+                + Registrar "{{ searchQuery }}" como nuevo cliente
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    }
 
-        <div class="empty-results" *ngIf="!loading && !lookup && !lookupLoading && filteredClients.length === 0">
-          <p>No se encontraron clientes para "{{ searchQuery }}".</p>
-          <button type="button" class="create-direct-btn" (click)="toggleCreate()">
-            + Registrar "{{ searchQuery }}" como nuevo cliente
+    <!-- Formulario para crear nuevo cliente -->
+    @if (creating) {
+      <div class="modal-body">
+        @if (errorMessage) {
+          <div class="alert-error">{{ errorMessage }}</div>
+        }
+        <div class="form-row">
+          <div class="form-field doc-type-field">
+            <label for="new-client-docType">Tipo Doc.</label>
+            <select id="new-client-docType" [(ngModel)]="newClient.docType">
+              @for (dt of docTypes; track dt) {
+                <option [value]="dt">{{ dt }}</option>
+              }
+            </select>
+          </div>
+          <div class="form-field doc-num-field">
+            <label for="new-client-docNumber">N° Documento</label>
+            <input
+              id="new-client-docNumber"
+              type="text"
+              [(ngModel)]="newClient.docNumber"
+              placeholder="DNI o RUC"
+              />
+          </div>
+        </div>
+        <div class="form-field">
+          <label for="new-client-name">Nombre o Razón Social *</label>
+          <input
+            id="new-client-name"
+            type="text"
+            [(ngModel)]="newClient.name"
+            placeholder="Ej. Juan Pérez / Empresa SAC"
+            required
+            />
+        </div>
+        <div class="form-field">
+          <label for="new-client-phone">Teléfono / Celular</label>
+          <input
+            id="new-client-phone"
+            type="tel"
+            [(ngModel)]="newClient.phone"
+            placeholder="Ej. 987654321"
+            />
+        </div>
+        <div class="form-actions">
+          <button type="button" class="cancel-btn" (click)="toggleCreate()">Volver a búsqueda</button>
+          <button type="button" class="submit-btn" [disabled]="loading" (click)="saveNewClient()">
+            {{ loading ? 'Guardando...' : 'Guardar y Seleccionar' }}
           </button>
         </div>
       </div>
-    </div>
-
-    <!-- Formulario para crear nuevo cliente -->
-    <div class="modal-body" *ngIf="creating">
-      <div class="alert-error" *ngIf="errorMessage">{{ errorMessage }}</div>
-
-      <div class="form-row">
-        <div class="form-field doc-type-field">
-          <label for="new-client-docType">Tipo Doc.</label>
-          <select id="new-client-docType" [(ngModel)]="newClient.docType">
-            <option *ngFor="let dt of docTypes" [value]="dt">{{ dt }}</option>
-          </select>
-        </div>
-        <div class="form-field doc-num-field">
-          <label for="new-client-docNumber">N° Documento</label>
-          <input
-            id="new-client-docNumber"
-            type="text"
-            [(ngModel)]="newClient.docNumber"
-            placeholder="DNI o RUC"
-          />
-        </div>
-      </div>
-
-      <div class="form-field">
-        <label for="new-client-name">Nombre o Razón Social *</label>
-        <input
-          id="new-client-name"
-          type="text"
-          [(ngModel)]="newClient.name"
-          placeholder="Ej. Juan Pérez / Empresa SAC"
-          required
-        />
-      </div>
-
-      <div class="form-field">
-        <label for="new-client-phone">Teléfono / Celular</label>
-        <input
-          id="new-client-phone"
-          type="tel"
-          [(ngModel)]="newClient.phone"
-          placeholder="Ej. 987654321"
-        />
-      </div>
-
-      <div class="form-actions">
-        <button type="button" class="cancel-btn" (click)="toggleCreate()">Volver a búsqueda</button>
-        <button type="button" class="submit-btn" [disabled]="loading" (click)="saveNewClient()">
-          {{ loading ? 'Guardando...' : 'Guardar y Seleccionar' }}
-        </button>
-      </div>
-    </div>
+    }
   </div>
 </div>

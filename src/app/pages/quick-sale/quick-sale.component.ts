@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { CategoryService } from '../../services/category.service';
@@ -39,13 +39,12 @@ interface CartLine {
   selector: 'app-quick-sale',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     RouterLink,
     FlavorModalComponent,
     StationModalComponent,
-    ClientModalComponent,
-  ],
+    ClientModalComponent
+],
   templateUrl: './quick-sale.component.html',
   styleUrl: './quick-sale.component.css',
 })

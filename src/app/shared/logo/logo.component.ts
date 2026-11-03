@@ -1,5 +1,5 @@
 import { Component, HostBinding, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 /** Centro geometrico del anillo en el lienzo original (777.76 x 608.85). */
 const RING_CENTER_X = 388.88;
@@ -19,7 +19,7 @@ const EMBLEM_FLAME_SCALE = 1.9;
 @Component({
   selector: 'app-logo',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './logo.component.html',
   styleUrl: './logo.component.css',
 })

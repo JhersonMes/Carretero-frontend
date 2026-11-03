@@ -1,583 +1,640 @@
 ﻿<div class="cash-page">
   <h1 class="page-title">Caja</h1>
 
-  <div *ngIf="!loading">
-    <!-- Caja aperturada -->
-    <div class="shift-card open" *ngIf="activeShift">
-      <div class="shift-status">
-        <span class="status-dot"></span>
-        <span>Caja aperturada</span>
-      </div>
-
-      <div class="shift-details">
-        <div class="detail">
-          <span class="detail-label">Aperturada por</span>
-          <span class="detail-value">{{ activeShift.user?.fullName || activeShift.user?.username }}</span>
+  @if (!loading) {
+    <div>
+      <!-- Caja aperturada -->
+      @if (activeShift) {
+        <div class="shift-card open">
+          <div class="shift-status">
+            <span class="status-dot"></span>
+            <span>Caja aperturada</span>
+          </div>
+          <div class="shift-details">
+            <div class="detail">
+              <span class="detail-label">Aperturada por</span>
+              <span class="detail-value">{{ activeShift.user?.fullName || activeShift.user?.username }}</span>
+            </div>
+            <div class="detail">
+              <span class="detail-label">Hora de apertura</span>
+              <span class="detail-value">{{ activeShift.openTime | date: 'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+            <div class="detail">
+              <span class="detail-label">Monto inicial</span>
+              <span class="detail-value">S/ {{ activeShift.initialAmount.toFixed(2) }}</span>
+            </div>
+          </div>
+          <p class="blind-note">
+            Caja ciega: las ventas del turno y el efectivo esperado se muestran recien al cerrar,
+            para que el conteo se haga sin saber cuanto deberia haber.
+          </p>
+          @if (hasPending) {
+            <div class="pending-warning">
+              <strong>Faltan cobros por hacer</strong>
+              <p>
+                Hay {{ pending.length }}
+                {{ pending.length === 1 ? 'mesa sin cobrar' : 'mesas sin cobrar' }} en el salon.
+                Se cobran todas antes de poder cerrar la caja.
+              </p>
+            </div>
+          }
+          <!-- HU-05: ingresos y egresos de efectivo del turno (CP-05-3-1 y CP-05-4-1) -->
+          <section class="movements">
+            <div class="movements-header">
+              <h3>Movimientos de efectivo</h3>
+              <button type="button" class="movement-btn" (click)="openMovementModal()">Registrar ingreso / egreso</button>
+            </div>
+            @if (movementMessage) {
+              <p class="movement-ok">{{ movementMessage }}</p>
+            }
+            @if (movements.length > 0) {
+              <table class="movements-table">
+                <thead>
+                  <tr>
+                    <th>Tipo</th>
+                    <th>Monto</th>
+                    <th>Motivo</th>
+                    <th>Hora</th>
+                    <th>Registró</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (m of movements; track m) {
+                    <tr>
+                      <td><span class="mov-type" [class.out]="m.type === 'EGRESO'">{{ m.type === 'EGRESO' ? 'Egreso' : 'Ingreso' }}</span></td>
+                      <td>{{ m.type === 'EGRESO' ? '−' : '+' }} S/ {{ m.amount | number: '1.2-2' }}</td>
+                      <td>{{ m.reason }}</td>
+                      <td>{{ m.createdAt | date: 'dd/MM HH:mm' }}</td>
+                      <td>{{ m.user?.fullName || m.user?.username }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            }
+            @if (movements.length === 0) {
+              <p class="movements-empty">Aún no hay ingresos ni egresos en este turno.</p>
+            }
+          </section>
+          <button
+            type="button"
+            class="close-shift-btn"
+            [disabled]="checkingPending"
+            (click)="requestClose()"
+            >
+            {{ checkingPending ? 'Verificando cobros...' : 'Cerrar caja' }}
+          </button>
         </div>
-        <div class="detail">
-          <span class="detail-label">Hora de apertura</span>
-          <span class="detail-value">{{ activeShift.openTime | date: 'dd/MM/yyyy HH:mm' }}</span>
-        </div>
-        <div class="detail">
-          <span class="detail-label">Monto inicial</span>
-          <span class="detail-value">S/ {{ activeShift.initialAmount.toFixed(2) }}</span>
-        </div>
-      </div>
-
-      <p class="blind-note">
-        Caja ciega: las ventas del turno y el efectivo esperado se muestran recien al cerrar,
-        para que el conteo se haga sin saber cuanto deberia haber.
-      </p>
-
-      <div class="pending-warning" *ngIf="hasPending">
-        <strong>Faltan cobros por hacer</strong>
-        <p>
-          Hay {{ pending.length }}
-          {{ pending.length === 1 ? 'mesa sin cobrar' : 'mesas sin cobrar' }} en el salon.
-          Se cobran todas antes de poder cerrar la caja.
-        </p>
-      </div>
-
-      <!-- HU-05: ingresos y egresos de efectivo del turno (CP-05-3-1 y CP-05-4-1) -->
-      <section class="movements">
-        <div class="movements-header">
-          <h3>Movimientos de efectivo</h3>
-          <button type="button" class="movement-btn" (click)="openMovementModal()">Registrar ingreso / egreso</button>
-        </div>
-        <p class="movement-ok" *ngIf="movementMessage">{{ movementMessage }}</p>
-        <table class="movements-table" *ngIf="movements.length > 0">
-          <thead>
-            <tr>
-              <th>Tipo</th>
-              <th>Monto</th>
-              <th>Motivo</th>
-              <th>Hora</th>
-              <th>Registró</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let m of movements">
-              <td><span class="mov-type" [class.out]="m.type === 'EGRESO'">{{ m.type === 'EGRESO' ? 'Egreso' : 'Ingreso' }}</span></td>
-              <td>{{ m.type === 'EGRESO' ? '−' : '+' }} S/ {{ m.amount | number: '1.2-2' }}</td>
-              <td>{{ m.reason }}</td>
-              <td>{{ m.createdAt | date: 'dd/MM HH:mm' }}</td>
-              <td>{{ m.user?.fullName || m.user?.username }}</td>
-            </tr>
-          </tbody>
-        </table>
-        <p class="movements-empty" *ngIf="movements.length === 0">Aún no hay ingresos ni egresos en este turno.</p>
-      </section>
-
-      <button
-        type="button"
-        class="close-shift-btn"
-        [disabled]="checkingPending"
-        (click)="requestClose()"
-      >
-        {{ checkingPending ? 'Verificando cobros...' : 'Cerrar caja' }}
-      </button>
-    </div>
-
-    <!-- Reporte del turno recien cerrado -->
-    <div class="shift-card report" *ngIf="!activeShift && closedShift as report">
-      <div class="shift-status">
-        <span class="status-dot inactive"></span>
-        <span>Turno cerrado</span>
-      </div>
-
-      <div class="shift-details">
-        <div class="detail">
-          <span class="detail-label">Cerrada a las</span>
-          <span class="detail-value">{{ report.closeTime | date: 'dd/MM/yyyy HH:mm' }}</span>
-        </div>
-        <div class="detail">
-          <span class="detail-label">Monto inicial</span>
-          <span class="detail-value">S/ {{ report.initialAmount.toFixed(2) }}</span>
-        </div>
-        <div class="detail">
-          <span class="detail-label">Efectivo esperado</span>
-          <span class="detail-value">S/ {{ (report.expectedCash ?? 0).toFixed(2) }}</span>
-        </div>
-        <div class="detail">
-          <span class="detail-label">Efectivo contado</span>
-          <span class="detail-value">S/ {{ (report.actualCash ?? 0).toFixed(2) }}</span>
-        </div>
-      </div>
-
-      <div
-        class="difference"
-        [class.over]="(report.difference ?? 0) > 0"
-        [class.short]="(report.difference ?? 0) < 0"
-      >
-        <span class="difference-label">
-          {{
-            (report.difference ?? 0) === 0
+      }
+      <!-- Reporte del turno recien cerrado -->
+      @if (!activeShift && closedShift; as report) {
+        <div class="shift-card report">
+          <div class="shift-status">
+            <span class="status-dot inactive"></span>
+            <span>Turno cerrado</span>
+          </div>
+          <div class="shift-details">
+            <div class="detail">
+              <span class="detail-label">Cerrada a las</span>
+              <span class="detail-value">{{ report.closeTime | date: 'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+            <div class="detail">
+              <span class="detail-label">Monto inicial</span>
+              <span class="detail-value">S/ {{ report.initialAmount.toFixed(2) }}</span>
+            </div>
+            <div class="detail">
+              <span class="detail-label">Efectivo esperado</span>
+              <span class="detail-value">S/ {{ (report.expectedCash ?? 0).toFixed(2) }}</span>
+            </div>
+            <div class="detail">
+              <span class="detail-label">Efectivo contado</span>
+              <span class="detail-value">S/ {{ (report.actualCash ?? 0).toFixed(2) }}</span>
+            </div>
+          </div>
+          <div
+            class="difference"
+            [class.over]="(report.difference ?? 0) > 0"
+            [class.short]="(report.difference ?? 0) < 0"
+            >
+            <span class="difference-label">
+              {{
+              (report.difference ?? 0) === 0
               ? 'Caja cuadrada'
               : (report.difference ?? 0) > 0
-                ? 'Sobrante'
-                : 'Faltante'
-          }}
-        </span>
-        <span class="difference-value">S/ {{ absDifference(report).toFixed(2) }}</span>
-      </div>
-
-      <div class="sales-grid">
-        <div class="sale-tile">
-          <span class="sale-label">Efectivo</span>
-          <span class="sale-value">S/ {{ (report.cashSales ?? 0).toFixed(2) }}</span>
+              ? 'Sobrante'
+              : 'Faltante'
+              }}
+            </span>
+            <span class="difference-value">S/ {{ absDifference(report).toFixed(2) }}</span>
+          </div>
+          <div class="sales-grid">
+            <div class="sale-tile">
+              <span class="sale-label">Efectivo</span>
+              <span class="sale-value">S/ {{ (report.cashSales ?? 0).toFixed(2) }}</span>
+            </div>
+            <div class="sale-tile">
+              <span class="sale-label">Tarjeta</span>
+              <span class="sale-value">S/ {{ (report.cardSales ?? 0).toFixed(2) }}</span>
+            </div>
+            <div class="sale-tile">
+              <span class="sale-label">Yape</span>
+              <span class="sale-value">S/ {{ (report.yapeSales ?? 0).toFixed(2) }}</span>
+            </div>
+            <div class="sale-tile">
+              <span class="sale-label">Plin</span>
+              <span class="sale-value">S/ {{ (report.plinSales ?? 0).toFixed(2) }}</span>
+            </div>
+          </div>
+          <button type="button" class="open-shift-btn" (click)="dismissClosedReport()">Entendido</button>
         </div>
-        <div class="sale-tile">
-          <span class="sale-label">Tarjeta</span>
-          <span class="sale-value">S/ {{ (report.cardSales ?? 0).toFixed(2) }}</span>
+      }
+      <!-- Sin caja aperturada -->
+      @if (!activeShift && !closedShift) {
+        <div class="shift-card closed">
+          <div class="shift-status">
+            <span class="status-dot inactive"></span>
+            <span>No hay una caja aperturada</span>
+          </div>
+          <p class="closed-hint">
+            Debes aperturar la caja antes de poder enviar pedidos desde Venta rapida o Salon.
+          </p>
+          <button type="button" class="open-shift-btn" (click)="openOpenModal()">Aperturar caja</button>
         </div>
-        <div class="sale-tile">
-          <span class="sale-label">Yape</span>
-          <span class="sale-value">S/ {{ (report.yapeSales ?? 0).toFixed(2) }}</span>
-        </div>
-        <div class="sale-tile">
-          <span class="sale-label">Plin</span>
-          <span class="sale-value">S/ {{ (report.plinSales ?? 0).toFixed(2) }}</span>
-        </div>
-      </div>
-
-      <button type="button" class="open-shift-btn" (click)="dismissClosedReport()">Entendido</button>
-    </div>
-
-    <!-- Sin caja aperturada -->
-    <div class="shift-card closed" *ngIf="!activeShift && !closedShift">
-      <div class="shift-status">
-        <span class="status-dot inactive"></span>
-        <span>No hay una caja aperturada</span>
-      </div>
-      <p class="closed-hint">
-        Debes aperturar la caja antes de poder enviar pedidos desde Venta rapida o Salon.
-      </p>
-      <button type="button" class="open-shift-btn" (click)="openOpenModal()">Aperturar caja</button>
-    </div>
-    <!--
+      }
+      <!--
       Historial de ventas: fuera de la tarjeta y debajo de ella. Se abre en una
       ventana aparte para no alargar la pantalla de caja, que es donde se apertura
       y se cierra el turno.
-    -->
-    <button
-      type="button"
-      class="history-btn"
-      *ngIf="activeShift || closedShift"
-      (click)="openSales()"
-    >
-      Historial de ventas
-      <span class="history-count">
-        {{ mySales.length }} {{ mySales.length === 1 ? 'venta' : 'ventas' }}
-      </span>
-    </button>
-  </div>
-
-  <!--
-    Ventana del historial: la lista a la izquierda y el detalle de la venta
-    elegida a la derecha. Desplegar el detalle hacia abajo empujaba la lista y
-    obligaba a rebuscar la venta despues de mirarla.
-  -->
-  <div class="modal-overlay" *ngIf="showSales" (click)="closeSales()">
-    <div class="modal-content history-modal" (click)="$event.stopPropagation()">
-      <div class="history-head">
-        <div>
-          <h2>Historial de ventas</h2>
-          <p class="modal-hint">
-            Tus ventas desde que se aperturo esta caja.
-            <ng-container *ngIf="showsSalesTotal">
-              Total: S/ {{ mySalesTotal.toFixed(2) }}.
-            </ng-container>
-          </p>
-        </div>
-        <button type="button" class="close-x" (click)="closeSales()">&times;</button>
-      </div>
-
-      <!-- Una pestana por origen de venta -->
-      <div class="sale-tabs">
+      -->
+      @if (activeShift || closedShift) {
         <button
           type="button"
-          class="sale-tab"
-          *ngFor="let tab of saleTabs"
-          [class.active]="activeTab === tab.key"
-          (click)="selectTab(tab.key)"
-        >
-          {{ tab.label }}
-          <span class="sale-tab-count">{{ countOf(tab.key) }}</span>
+          class="history-btn"
+          (click)="openSales()"
+          >
+          Historial de ventas
+          <span class="history-count">
+            {{ mySales.length }} {{ mySales.length === 1 ? 'venta' : 'ventas' }}
+          </span>
         </button>
-      </div>
+      }
+    </div>
+  }
 
-      <div class="history-body">
-        <!-- Columna izquierda: las ventas de la pestana -->
-        <div class="sales-column">
-          <p class="sales-empty" *ngIf="loadingSales">Cargando tus ventas...</p>
-          <div class="error-message" *ngIf="!loadingSales && salesError">{{ salesError }}</div>
-          <p class="sales-empty" *ngIf="!loadingSales && !salesError && visibleSales.length === 0">
-            No tienes ventas de este tipo en el turno.
-          </p>
-
-          <ul class="sale-list">
-            <li *ngFor="let p of visibleSales">
-              <button
-                type="button"
-                class="sale-row"
-                [class.open]="expandedSale === p.idPayment"
-                [class.cancelled]="isCancelled(p)"
-                (click)="toggleSale(p)"
-              >
-                <span class="sale-main">
-                  <span class="sale-code">
-                    {{ p.orderCode }}
-                    <span class="sale-badge" *ngIf="isCancelled(p)">Anulada</span>
-                  </span>
-                  <span class="sale-sub">
-                    {{ p.paymentDate | date: 'HH:mm' }}
-                    <ng-container *ngIf="tableOf(p)"> &middot; {{ tableOf(p) }}</ng-container>
-                    &middot; {{ p.paymentMethod.name }}
-                  </span>
-                </span>
-                <span class="sale-amount">S/ {{ p.amount.toFixed(2) }}</span>
-              </button>
-            </li>
-          </ul>
-        </div>
-
-        <!-- Columna derecha: el detalle de la venta elegida -->
-        <div class="detail-column">
-          <p class="detail-msg" *ngIf="!expandedSale">
-            Elige una venta de la izquierda para ver su detalle.
-          </p>
-          <p class="detail-msg" *ngIf="expandedSale && loadingDetail">Cargando el pedido...</p>
-          <div class="error-message" *ngIf="expandedSale && !loadingDetail && detailError">
-            {{ detailError }}
+  <!--
+  Ventana del historial: la lista a la izquierda y el detalle de la venta
+  elegida a la derecha. Desplegar el detalle hacia abajo empujaba la lista y
+  obligaba a rebuscar la venta despues de mirarla.
+  -->
+  @if (showSales) {
+    <div class="modal-overlay" (click)="closeSales()">
+      <div class="modal-content history-modal" (click)="$event.stopPropagation()">
+        <div class="history-head">
+          <div>
+            <h2>Historial de ventas</h2>
+            <p class="modal-hint">
+              Tus ventas desde que se aperturo esta caja.
+              @if (showsSalesTotal) {
+                Total: S/ {{ mySalesTotal.toFixed(2) }}.
+              }
+            </p>
           </div>
-
-          <ng-container *ngIf="expandedSale && !loadingDetail && !detailError && saleDetail as order">
-            <div class="detail-head">
-              <span class="detail-code">{{ order.orderCode }}</span>
-              <span class="detail-sub">
-                {{ selectedSale?.paymentDate | date: 'dd/MM/yyyy HH:mm' }}
-                &middot; {{ selectedSale?.paymentMethod?.name }}
-              </span>
-            </div>
-
-            <table class="detail-table">
-              <thead>
-                <tr>
-                  <th class="qty">Cant</th>
-                  <th>Producto</th>
-                  <th class="amount">Importe</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let d of order.details">
-                  <td class="qty">{{ d.quantity }}</td>
-                  <td>
-                    {{ d.productName }}
-                    <span class="detail-option" *ngIf="d.flavorName">{{ d.flavorName }}</span>
-                    <span class="detail-unit">S/ {{ d.unitPrice.toFixed(2) }} c/u</span>
-                  </td>
-                  <td class="amount">S/ {{ d.subtotal.toFixed(2) }}</td>
-                </tr>
-              </tbody>
-            </table>
-
-            <div class="detail-totals">
-              <div class="detail-total-row">
-                <span>Consumo</span><span>S/ {{ (order.subtotal ?? 0).toFixed(2) }}</span>
+          <button type="button" class="close-x" (click)="closeSales()">&times;</button>
+        </div>
+        <!-- Una pestana por origen de venta -->
+        <div class="sale-tabs">
+          @for (tab of saleTabs; track tab) {
+            <button
+              type="button"
+              class="sale-tab"
+              [class.active]="activeTab === tab.key"
+              (click)="selectTab(tab.key)"
+              >
+              {{ tab.label }}
+              <span class="sale-tab-count">{{ countOf(tab.key) }}</span>
+            </button>
+          }
+        </div>
+        <div class="history-body">
+          <!-- Columna izquierda: las ventas de la pestana -->
+          <div class="sales-column">
+            @if (loadingSales) {
+              <p class="sales-empty">Cargando tus ventas...</p>
+            }
+            @if (!loadingSales && salesError) {
+              <div class="error-message">{{ salesError }}</div>
+            }
+            @if (!loadingSales && !salesError && visibleSales.length === 0) {
+              <p class="sales-empty">
+                No tienes ventas de este tipo en el turno.
+              </p>
+            }
+            <ul class="sale-list">
+              @for (p of visibleSales; track p) {
+                <li>
+                  <button
+                    type="button"
+                    class="sale-row"
+                    [class.open]="expandedSale === p.idPayment"
+                    [class.cancelled]="isCancelled(p)"
+                    (click)="toggleSale(p)"
+                    >
+                    <span class="sale-main">
+                      <span class="sale-code">
+                        {{ p.orderCode }}
+                        @if (isCancelled(p)) {
+                          <span class="sale-badge">Anulada</span>
+                        }
+                      </span>
+                      <span class="sale-sub">
+                        {{ p.paymentDate | date: 'HH:mm' }}
+                        @if (tableOf(p)) {
+                          &middot; {{ tableOf(p) }}
+                        }
+                        &middot; {{ p.paymentMethod.name }}
+                      </span>
+                    </span>
+                    <span class="sale-amount">S/ {{ p.amount.toFixed(2) }}</span>
+                  </button>
+                </li>
+              }
+            </ul>
+          </div>
+          <!-- Columna derecha: el detalle de la venta elegida -->
+          <div class="detail-column">
+            @if (!expandedSale) {
+              <p class="detail-msg">
+                Elige una venta de la izquierda para ver su detalle.
+              </p>
+            }
+            @if (expandedSale && loadingDetail) {
+              <p class="detail-msg">Cargando el pedido...</p>
+            }
+            @if (expandedSale && !loadingDetail && detailError) {
+              <div class="error-message">
+                {{ detailError }}
               </div>
-              <div class="detail-total-row" *ngIf="order.deliveryFee">
-                <span>Delivery</span><span>S/ {{ order.deliveryFee.toFixed(2) }}</span>
-              </div>
-              <div class="detail-total-row grand">
-                <span>Total</span><span>S/ {{ (order.total ?? 0).toFixed(2) }}</span>
-              </div>
-            </div>
-
-            <!-- Comprobante y comprador: salen del comprobante vigente, que es
-                 lo que refleja una reemision -->
-            <div class="detail-invoice" *ngIf="saleInvoice as inv">
-              <div class="detail-invoice-head">
-                <span class="detail-invoice-number">{{ inv.fullNumber }}</span>
-                <span class="detail-invoice-type">{{ inv.invoiceType }}</span>
-                <span class="sunat-badge" [ngClass]="sunatClass(inv.sunatStatus)">
-                  {{ sunatLabel(inv.sunatStatus) }}
+            }
+            @if (expandedSale && !loadingDetail && !detailError && saleDetail; as order) {
+              <div class="detail-head">
+                <span class="detail-code">{{ order.orderCode }}</span>
+                <span class="detail-sub">
+                  {{ selectedSale?.paymentDate | date: 'dd/MM/yyyy HH:mm' }}
+                  &middot; {{ selectedSale?.paymentMethod?.name }}
                 </span>
               </div>
-              <!-- El motivo importa sobre todo cuando el comprobante no esta
-                   declarado: es lo que dice si falta enviarlo o si lo rechazaron -->
-              <span class="sunat-note" *ngIf="inv.sunatDescription">
-                {{ inv.sunatDescription }}
-              </span>
-              <span *ngIf="inv.client">
-                {{ inv.client.name }}
-                <ng-container *ngIf="inv.client.docNumber">
-                  &middot; {{ inv.client.docType }} {{ inv.client.docNumber }}
-                </ng-container>
-              </span>
-              <span *ngIf="!inv.client">Sin datos del comprador</span>
-              <span>Gravada S/ {{ (inv.taxableAmount ?? 0).toFixed(2) }} &middot; IGV S/ {{ (inv.igvAmount ?? 0).toFixed(2) }}</span>
-            </div>
-            <p class="detail-msg" *ngIf="!saleInvoice">Esta venta no tiene comprobante vigente.</p>
-
-            <div class="detail-meta">
-              <span *ngIf="order.client">Cliente del pedido: {{ order.client.name }}</span>
-              <span *ngIf="order.deliveryAddress">
-                Direccion: {{ order.deliveryAddress.street }}
-              </span>
-              <span>Estado: {{ order.status }}</span>
-              <span *ngIf="order.cancelledBy">
-                Anulada por {{ order.cancelledBy.fullName || order.cancelledBy.username }}
-                el {{ order.cancelledAt | date: 'dd/MM/yyyy HH:mm' }}
-              </span>
-              <span *ngIf="order.cancelReason">Motivo: {{ order.cancelReason }}</span>
-            </div>
-
-            <div class="success-message" *ngIf="reissueMessage">{{ reissueMessage }}</div>
-
-            <!--
+              <table class="detail-table">
+                <thead>
+                  <tr>
+                    <th class="qty">Cant</th>
+                    <th>Producto</th>
+                    <th class="amount">Importe</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (d of order.details; track d) {
+                    <tr>
+                      <td class="qty">{{ d.quantity }}</td>
+                      <td>
+                        {{ d.productName }}
+                        @if (d.flavorName) {
+                          <span class="detail-option">{{ d.flavorName }}</span>
+                        }
+                        <span class="detail-unit">S/ {{ d.unitPrice.toFixed(2) }} c/u</span>
+                      </td>
+                      <td class="amount">S/ {{ d.subtotal.toFixed(2) }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+              <div class="detail-totals">
+                <div class="detail-total-row">
+                  <span>Consumo</span><span>S/ {{ (order.subtotal ?? 0).toFixed(2) }}</span>
+                </div>
+                @if (order.deliveryFee) {
+                  <div class="detail-total-row">
+                    <span>Delivery</span><span>S/ {{ order.deliveryFee.toFixed(2) }}</span>
+                  </div>
+                }
+                <div class="detail-total-row grand">
+                  <span>Total</span><span>S/ {{ (order.total ?? 0).toFixed(2) }}</span>
+                </div>
+              </div>
+              <!-- Comprobante y comprador: salen del comprobante vigente, que es
+              lo que refleja una reemision -->
+              @if (saleInvoice; as inv) {
+                <div class="detail-invoice">
+                  <div class="detail-invoice-head">
+                    <span class="detail-invoice-number">{{ inv.fullNumber }}</span>
+                    <span class="detail-invoice-type">{{ inv.invoiceType }}</span>
+                    <span class="sunat-badge" [ngClass]="sunatClass(inv.sunatStatus)">
+                      {{ sunatLabel(inv.sunatStatus) }}
+                    </span>
+                  </div>
+                  <!-- El motivo importa sobre todo cuando el comprobante no esta
+                  declarado: es lo que dice si falta enviarlo o si lo rechazaron -->
+                  @if (inv.sunatDescription) {
+                    <span class="sunat-note">
+                      {{ inv.sunatDescription }}
+                    </span>
+                  }
+                  @if (inv.client) {
+                    <span>
+                      {{ inv.client.name }}
+                      @if (inv.client.docNumber) {
+                        &middot; {{ inv.client.docType }} {{ inv.client.docNumber }}
+                      }
+                    </span>
+                  }
+                  @if (!inv.client) {
+                    <span>Sin datos del comprador</span>
+                  }
+                  <span>Gravada S/ {{ (inv.taxableAmount ?? 0).toFixed(2) }} &middot; IGV S/ {{ (inv.igvAmount ?? 0).toFixed(2) }}</span>
+                </div>
+              }
+              @if (!saleInvoice) {
+                <p class="detail-msg">Esta venta no tiene comprobante vigente.</p>
+              }
+              <div class="detail-meta">
+                @if (order.client) {
+                  <span>Cliente del pedido: {{ order.client.name }}</span>
+                }
+                @if (order.deliveryAddress) {
+                  <span>
+                    Direccion: {{ order.deliveryAddress.street }}
+                  </span>
+                }
+                <span>Estado: {{ order.status }}</span>
+                @if (order.cancelledBy) {
+                  <span>
+                    Anulada por {{ order.cancelledBy.fullName || order.cancelledBy.username }}
+                    el {{ order.cancelledAt | date: 'dd/MM/yyyy HH:mm' }}
+                  </span>
+                }
+                @if (order.cancelReason) {
+                  <span>Motivo: {{ order.cancelReason }}</span>
+                }
+              </div>
+              @if (reissueMessage) {
+                <div class="success-message">{{ reissueMessage }}</div>
+              }
+              <!--
               Editar aqui es reemitir el comprobante: cambia el documento, no lo
               vendido. Las dos acciones piden el PIN antes de abrir el formulario.
-            -->
-            <div class="detail-actions">
-              <button type="button" class="mini strong" (click)="downloadReceipt()">
-                Descargar boleta
-              </button>
-              <ng-container *ngIf="canActOnSale">
-                <button type="button" class="mini" (click)="askPin('reemitir')">
-                  Editar comprobante
+              -->
+              <div class="detail-actions">
+                <button type="button" class="mini strong" (click)="downloadReceipt()">
+                  Descargar boleta
                 </button>
-                <button type="button" class="mini danger" (click)="askPin('anular')">
-                  Anular venta
-                </button>
-              </ng-container>
-            </div>
-            <p class="detail-hint" *ngIf="canActOnSale">
-              Para cambiar lo pedido hay que anular y volver a tomar la orden.
-            </p>
-          </ng-container>
+                @if (canActOnSale) {
+                  <button type="button" class="mini" (click)="askPin('reemitir')">
+                    Editar comprobante
+                  </button>
+                  <button type="button" class="mini danger" (click)="askPin('anular')">
+                    Anular venta
+                  </button>
+                }
+              </div>
+              @if (canActOnSale) {
+                <p class="detail-hint">
+                  Para cambiar lo pedido hay que anular y volver a tomar la orden.
+                </p>
+              }
+            }
+          </div>
         </div>
+        @if (!showsSalesTotal && mySales.length) {
+          <p class="sales-note">
+            Solo se ven tus ventas. El total del turno aparece al cerrar la caja.
+          </p>
+        }
+        @if (showsSalesTotal && mySales.length) {
+          <p class="sales-note">
+            Solo se ven tus ventas; las de los demas quedan en su propia caja.
+          </p>
+        }
       </div>
-
-      <p class="sales-note" *ngIf="!showsSalesTotal && mySales.length">
-        Solo se ven tus ventas. El total del turno aparece al cerrar la caja.
-      </p>
-      <p class="sales-note" *ngIf="showsSalesTotal && mySales.length">
-        Solo se ven tus ventas; las de los demas quedan en su propia caja.
-      </p>
     </div>
-  </div>
+  }
 
   <!-- El PIN se pide antes de abrir la accion, con el teclado compartido. -->
-  <app-pin-pad
-    *ngIf="pendingAction"
-    [subtitle]="pinSubtitle"
-    (authorized)="onPinAuthorized($event)"
-    (cancelled)="cancelPin()"
-  ></app-pin-pad>
+  @if (pendingAction) {
+    <app-pin-pad
+      [subtitle]="pinSubtitle"
+      (authorized)="onPinAuthorized($event)"
+      (cancelled)="cancelPin()"
+    ></app-pin-pad>
+  }
 
 
   <!-- Ventana: la accion, ya autorizada por el PIN -->
-  <div class="modal-overlay pin-overlay" *ngIf="authorizedAction" (click)="cancelAction()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <h2>{{ authorizedAction === 'anular' ? 'Anular venta' : 'Editar comprobante' }}</h2>
-      <p class="modal-hint">
-        {{ selectedSale?.orderCode }} &middot; S/ {{ (selectedSale?.amount ?? 0).toFixed(2) }}.
-        <ng-container *ngIf="authorizedAction === 'anular'">
-          La venta queda registrada como anulada y deja de sumar a la caja.
-        </ng-container>
-        <ng-container *ngIf="authorizedAction === 'reemitir'">
-          Se anula el comprobante actual y se emite uno nuevo por el mismo total.
-        </ng-container>
-      </p>
-
-      <ng-container *ngIf="authorizedAction === 'reemitir'">
-        <div class="form-group">
-          <label for="tipoComprobante">Tipo de comprobante</label>
-          <select id="tipoComprobante" [(ngModel)]="reissue.invoiceType">
-            <option value="BOLETA">Boleta</option>
-            <option value="FACTURA">Factura</option>
-            <option value="NOTA_VENTA">Nota de venta</option>
-          </select>
+  @if (authorizedAction) {
+    <div class="modal-overlay pin-overlay" (click)="cancelAction()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <h2>{{ authorizedAction === 'anular' ? 'Anular venta' : 'Editar comprobante' }}</h2>
+        <p class="modal-hint">
+          {{ selectedSale?.orderCode }} &middot; S/ {{ (selectedSale?.amount ?? 0).toFixed(2) }}.
+          @if (authorizedAction === 'anular') {
+            La venta queda registrada como anulada y deja de sumar a la caja.
+          }
+          @if (authorizedAction === 'reemitir') {
+            Se anula el comprobante actual y se emite uno nuevo por el mismo total.
+          }
+        </p>
+        @if (authorizedAction === 'reemitir') {
+          <div class="form-group">
+            <label for="tipoComprobante">Tipo de comprobante</label>
+            <select id="tipoComprobante" [(ngModel)]="reissue.invoiceType">
+              <option value="BOLETA">Boleta</option>
+              <option value="FACTURA">Factura</option>
+              <option value="NOTA_VENTA">Nota de venta</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="docComprobante">
+              {{ reissue.invoiceType === 'FACTURA' ? 'RUC (11 digitos)' : 'DNI (opcional)' }}
+            </label>
+            <input id="docComprobante" type="text" inputmode="numeric" [(ngModel)]="reissue.docNumber" />
+          </div>
+          <div class="form-group">
+            <label for="nombreComprobante">Nombre o razon social</label>
+            <input id="nombreComprobante" type="text" [(ngModel)]="reissue.clientName" />
+          </div>
+        }
+        @if (authorizedAction === 'anular') {
+          <div class="form-group">
+            <label for="motivoAnulacion">Motivo (opcional)</label>
+            <input
+              id="motivoAnulacion"
+              type="text"
+              [(ngModel)]="pinReason"
+              placeholder="Ej. el cliente ya no quiso el pedido"
+              />
+          </div>
+        }
+        @if (actionError) {
+          <div class="error-message">{{ actionError }}</div>
+        }
+        <div class="modal-actions">
+          <button type="button" class="secondary" (click)="cancelAction()">Cancelar</button>
+          <button type="button" class="confirm-btn" [disabled]="working" (click)="confirmAction()">
+            {{ working ? 'Procesando...' : (authorizedAction === 'anular' ? 'Anular' : 'Reemitir') }}
+          </button>
         </div>
-        <div class="form-group">
-          <label for="docComprobante">
-            {{ reissue.invoiceType === 'FACTURA' ? 'RUC (11 digitos)' : 'DNI (opcional)' }}
-          </label>
-          <input id="docComprobante" type="text" inputmode="numeric" [(ngModel)]="reissue.docNumber" />
-        </div>
-        <div class="form-group">
-          <label for="nombreComprobante">Nombre o razon social</label>
-          <input id="nombreComprobante" type="text" [(ngModel)]="reissue.clientName" />
-        </div>
-      </ng-container>
-
-      <div class="form-group" *ngIf="authorizedAction === 'anular'">
-        <label for="motivoAnulacion">Motivo (opcional)</label>
-        <input
-          id="motivoAnulacion"
-          type="text"
-          [(ngModel)]="pinReason"
-          placeholder="Ej. el cliente ya no quiso el pedido"
-        />
-      </div>
-
-      <div class="error-message" *ngIf="actionError">{{ actionError }}</div>
-
-      <div class="modal-actions">
-        <button type="button" class="secondary" (click)="cancelAction()">Cancelar</button>
-        <button type="button" class="confirm-btn" [disabled]="working" (click)="confirmAction()">
-          {{ working ? 'Procesando...' : (authorizedAction === 'anular' ? 'Anular' : 'Reemitir') }}
-        </button>
       </div>
     </div>
-  </div>
+  }
 
 
   <!-- Modal: registrar ingreso o egreso de efectivo (HU-05) -->
-  <div class="modal-overlay" *ngIf="showMovementModal" (click)="closeMovementModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <h2>Registrar movimiento</h2>
-      <p class="modal-hint">Dinero que entra o sale del cajón fuera de una venta.</p>
-
-      <div class="preset-row">
-        <button type="button" class="preset-btn" [class.active]="movementType === 'INGRESO'" (click)="movementType = 'INGRESO'">Ingreso</button>
-        <button type="button" class="preset-btn" [class.active]="movementType === 'EGRESO'" (click)="movementType = 'EGRESO'">Egreso</button>
-      </div>
-
-      <div class="form-group">
-        <label for="movementAmount">Monto (S/)</label>
-        <input type="number" id="movementAmount" min="0" step="0.5" [(ngModel)]="movementAmount" placeholder="0.00" />
-      </div>
-      <div class="form-group">
-        <label for="movementReason">Motivo</label>
-        <input type="text" id="movementReason" [(ngModel)]="movementReason" placeholder="Ej. Compra de hielo" maxlength="200" />
-      </div>
-
-      <div class="error-message" *ngIf="movementError">{{ movementError }}</div>
-
-      <div class="modal-actions">
-        <button type="button" class="secondary" (click)="closeMovementModal()">Cancelar</button>
-        <button type="button" class="confirm-btn" [disabled]="savingMovement" (click)="saveMovement()">
-          {{ savingMovement ? 'Guardando...' : 'Guardar' }}
-        </button>
+  @if (showMovementModal) {
+    <div class="modal-overlay" (click)="closeMovementModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <h2>Registrar movimiento</h2>
+        <p class="modal-hint">Dinero que entra o sale del cajón fuera de una venta.</p>
+        <div class="preset-row">
+          <button type="button" class="preset-btn" [class.active]="movementType === 'INGRESO'" (click)="movementType = 'INGRESO'">Ingreso</button>
+          <button type="button" class="preset-btn" [class.active]="movementType === 'EGRESO'" (click)="movementType = 'EGRESO'">Egreso</button>
+        </div>
+        <div class="form-group">
+          <label for="movementAmount">Monto (S/)</label>
+          <input type="number" id="movementAmount" min="0" step="0.5" [(ngModel)]="movementAmount" placeholder="0.00" />
+        </div>
+        <div class="form-group">
+          <label for="movementReason">Motivo</label>
+          <input type="text" id="movementReason" [(ngModel)]="movementReason" placeholder="Ej. Compra de hielo" maxlength="200" />
+        </div>
+        @if (movementError) {
+          <div class="error-message">{{ movementError }}</div>
+        }
+        <div class="modal-actions">
+          <button type="button" class="secondary" (click)="closeMovementModal()">Cancelar</button>
+          <button type="button" class="confirm-btn" [disabled]="savingMovement" (click)="saveMovement()">
+            {{ savingMovement ? 'Guardando...' : 'Guardar' }}
+          </button>
+        </div>
       </div>
     </div>
-  </div>
+  }
 
   <!-- Modal: aperturar caja -->
-  <div class="modal-overlay" *ngIf="showOpenModal" (click)="closeOpenModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <h2>Aperturar caja</h2>
-      <p class="modal-hint">Indica con cuanto efectivo se abre la caja.</p>
-
-      <div class="amount-display">S/ {{ (openAmount ?? 0).toFixed(2) }}</div>
-
-      <div class="preset-row">
-        <button
-          type="button"
-          class="preset-btn"
-          *ngFor="let preset of amountPresets"
-          [class.active]="openAmount === preset"
-          (click)="pickPresetAmount(preset)"
-        >
-          S/ {{ preset }}
-        </button>
-      </div>
-
-      <div class="form-group">
-        <label for="openAmount">O ingresa un monto</label>
-        <input type="number" id="openAmount" min="0" step="0.5" [(ngModel)]="openAmount" placeholder="0.00" />
-      </div>
-
-      <div class="form-group">
-        <label for="openNotes">Notas (opcional)</label>
-        <input type="text" id="openNotes" [(ngModel)]="openNotes" placeholder="Ej. turno maÃ±ana" />
-      </div>
-
-      <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
-
-      <div class="modal-actions">
-        <button type="button" class="secondary" (click)="closeOpenModal()">Cancelar</button>
-        <button type="button" class="confirm-btn" [disabled]="opening" (click)="confirmOpenShift()">
-          {{ opening ? 'Aperturando...' : 'Aperturar caja' }}
-        </button>
+  @if (showOpenModal) {
+    <div class="modal-overlay" (click)="closeOpenModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <h2>Aperturar caja</h2>
+        <p class="modal-hint">Indica con cuanto efectivo se abre la caja.</p>
+        <div class="amount-display">S/ {{ (openAmount ?? 0).toFixed(2) }}</div>
+        <div class="preset-row">
+          @for (preset of amountPresets; track preset) {
+            <button
+              type="button"
+              class="preset-btn"
+              [class.active]="openAmount === preset"
+              (click)="pickPresetAmount(preset)"
+              >
+              S/ {{ preset }}
+            </button>
+          }
+        </div>
+        <div class="form-group">
+          <label for="openAmount">O ingresa un monto</label>
+          <input type="number" id="openAmount" min="0" step="0.5" [(ngModel)]="openAmount" placeholder="0.00" />
+        </div>
+        <div class="form-group">
+          <label for="openNotes">Notas (opcional)</label>
+          <input type="text" id="openNotes" [(ngModel)]="openNotes" placeholder="Ej. turno maÃ±ana" />
+        </div>
+        @if (errorMessage) {
+          <div class="error-message">{{ errorMessage }}</div>
+        }
+        <div class="modal-actions">
+          <button type="button" class="secondary" (click)="closeOpenModal()">Cancelar</button>
+          <button type="button" class="confirm-btn" [disabled]="opening" (click)="confirmOpenShift()">
+            {{ opening ? 'Aperturando...' : 'Aperturar caja' }}
+          </button>
+        </div>
       </div>
     </div>
-  </div>
+  }
 
   <!-- Modal: cobros pendientes (bloquea el cierre) -->
-  <div class="modal-overlay" *ngIf="showPendingModal" (click)="closePendingModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <h2>Primero hay que cobrar</h2>
-      <p class="modal-hint">
-        No se puede cerrar la caja mientras queden mesas sin cobrar. Cobra estas y vuelve a
-        intentarlo.
-      </p>
-
-      <div class="pending-group" *ngIf="myPending.length">
-        <h3>Mesas que atendiste</h3>
-        <ul class="pending-list">
-          <li *ngFor="let item of myPending">
-            <button type="button" class="pending-item" (click)="goToTable(item)">
-              <span class="pending-name">{{ item.label }}</span>
-              <span class="pending-waiters">{{ item.waiters.join(', ') || 'Sin mesero registrado' }}</span>
-            </button>
-          </li>
-        </ul>
-      </div>
-
-      <div class="pending-group" *ngIf="otherPending.length">
-        <h3>{{ myPending.length ? 'Otras mesas sin cobrar' : 'Mesas sin cobrar' }}</h3>
-        <ul class="pending-list">
-          <li *ngFor="let item of otherPending">
-            <button type="button" class="pending-item" (click)="goToTable(item)">
-              <span class="pending-name">{{ item.label }}</span>
-              <span class="pending-waiters">{{ item.waiters.join(', ') || 'Sin mesero registrado' }}</span>
-            </button>
-          </li>
-        </ul>
-      </div>
-
-      <p class="pending-note">
-        Si varios meseros atendieron la misma mesa, basta con que cualquiera de ellos la cobre.
-      </p>
-
-      <div class="modal-actions">
-        <button type="button" class="secondary" (click)="closePendingModal()">Cerrar</button>
-        <button type="button" class="confirm-btn" [disabled]="checkingPending" (click)="recheckPending()">
-          {{ checkingPending ? 'Verificando...' : 'Ya cobre, verificar' }}
-        </button>
+  @if (showPendingModal) {
+    <div class="modal-overlay" (click)="closePendingModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <h2>Primero hay que cobrar</h2>
+        <p class="modal-hint">
+          No se puede cerrar la caja mientras queden mesas sin cobrar. Cobra estas y vuelve a
+          intentarlo.
+        </p>
+        @if (myPending.length) {
+          <div class="pending-group">
+            <h3>Mesas que atendiste</h3>
+            <ul class="pending-list">
+              @for (item of myPending; track item) {
+                <li>
+                  <button type="button" class="pending-item" (click)="goToTable(item)">
+                    <span class="pending-name">{{ item.label }}</span>
+                    <span class="pending-waiters">{{ item.waiters.join(', ') || 'Sin mesero registrado' }}</span>
+                  </button>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+        @if (otherPending.length) {
+          <div class="pending-group">
+            <h3>{{ myPending.length ? 'Otras mesas sin cobrar' : 'Mesas sin cobrar' }}</h3>
+            <ul class="pending-list">
+              @for (item of otherPending; track item) {
+                <li>
+                  <button type="button" class="pending-item" (click)="goToTable(item)">
+                    <span class="pending-name">{{ item.label }}</span>
+                    <span class="pending-waiters">{{ item.waiters.join(', ') || 'Sin mesero registrado' }}</span>
+                  </button>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+        <p class="pending-note">
+          Si varios meseros atendieron la misma mesa, basta con que cualquiera de ellos la cobre.
+        </p>
+        <div class="modal-actions">
+          <button type="button" class="secondary" (click)="closePendingModal()">Cerrar</button>
+          <button type="button" class="confirm-btn" [disabled]="checkingPending" (click)="recheckPending()">
+            {{ checkingPending ? 'Verificando...' : 'Ya cobre, verificar' }}
+          </button>
+        </div>
       </div>
     </div>
-  </div>
+  }
 
   <!-- Modal: cerrar caja -->
-  <div class="modal-overlay" *ngIf="showCloseModal" (click)="closeCloseModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <h2>Cerrar caja</h2>
-      <p class="modal-hint">
-        Cuenta el efectivo que hay en caja y registralo. El resultado del arqueo se muestra
-        al confirmar el cierre.
-      </p>
-
-      <div class="form-group">
-        <label for="closeAmount">Efectivo contado</label>
-        <input type="number" id="closeAmount" min="0" step="0.5" [(ngModel)]="closeAmount" placeholder="0.00" />
-      </div>
-
-      <div class="form-group">
-        <label for="closeNotes">Notas (opcional)</label>
-        <input type="text" id="closeNotes" [(ngModel)]="closeNotes" placeholder="Ej. diferencia por vueltos" />
-      </div>
-
-      <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
-
-      <div class="modal-actions">
-        <button type="button" class="secondary" (click)="closeCloseModal()">Cancelar</button>
-        <button type="button" class="confirm-btn" [disabled]="closing" (click)="confirmCloseShift()">
-          {{ closing ? 'Cerrando...' : 'Cerrar caja' }}
-        </button>
+  @if (showCloseModal) {
+    <div class="modal-overlay" (click)="closeCloseModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <h2>Cerrar caja</h2>
+        <p class="modal-hint">
+          Cuenta el efectivo que hay en caja y registralo. El resultado del arqueo se muestra
+          al confirmar el cierre.
+        </p>
+        <div class="form-group">
+          <label for="closeAmount">Efectivo contado</label>
+          <input type="number" id="closeAmount" min="0" step="0.5" [(ngModel)]="closeAmount" placeholder="0.00" />
+        </div>
+        <div class="form-group">
+          <label for="closeNotes">Notas (opcional)</label>
+          <input type="text" id="closeNotes" [(ngModel)]="closeNotes" placeholder="Ej. diferencia por vueltos" />
+        </div>
+        @if (errorMessage) {
+          <div class="error-message">{{ errorMessage }}</div>
+        }
+        <div class="modal-actions">
+          <button type="button" class="secondary" (click)="closeCloseModal()">Cancelar</button>
+          <button type="button" class="confirm-btn" [disabled]="closing" (click)="confirmCloseShift()">
+            {{ closing ? 'Cerrando...' : 'Cerrar caja' }}
+          </button>
+        </div>
       </div>
     </div>
-  </div>
+  }
 </div>

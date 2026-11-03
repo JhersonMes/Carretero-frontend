@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { RolService } from '../../services/rol.service';
 import { Role } from '../../model/role';
@@ -7,7 +7,7 @@ import { Role } from '../../model/role';
 @Component({
   selector: 'app-role',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterOutlet],
+  imports: [RouterLink, RouterOutlet],
   templateUrl: './role.component.html'
 })
 export class RoleComponent implements OnInit {

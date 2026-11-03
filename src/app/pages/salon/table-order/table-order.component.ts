@@ -1,6 +1,6 @@
 import { forkJoin } from 'rxjs';
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DiningTableService } from '../../../services/dining-table.service';
@@ -42,15 +42,14 @@ const CASHIER_ROLES = ['MESERO', 'CAJERO', 'ADMIN'];
   selector: 'app-table-order',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     RouterLink,
     CheckoutModalComponent,
     FlavorModalComponent,
     PinPadComponent,
     StationModalComponent,
-    ClientModalComponent,
-  ],
+    ClientModalComponent
+],
   templateUrl: './table-order.component.html',
   styleUrl: './table-order.component.css',
 })

@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { ClientService } from '../../services/client.service';
 import { Client } from '../../model/client';
@@ -10,7 +10,7 @@ const DOC_TYPES: DocumentType[] = ['DNI', 'RUC', 'CE', 'PASAPORTE', 'SIN_DOC'];
 @Component({
   selector: 'app-client',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   templateUrl: './client.component.html',
   styleUrl: './client.component.css',
 })

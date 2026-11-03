@@ -4,8 +4,12 @@
 
   <router-outlet></router-outlet>
 
-  <p class="feedback ok" *ngIf="message">{{ message }}</p>
-  <p class="feedback err" *ngIf="errorMessage">{{ errorMessage }}</p>
+  @if (message) {
+    <p class="feedback ok">{{ message }}</p>
+  }
+  @if (errorMessage) {
+    <p class="feedback err">{{ errorMessage }}</p>
+  }
 
   <table>
     <thead>
@@ -20,24 +24,32 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let u of users" [class.disabled-row]="u.enabled === false">
-        <td>{{ u.idUser }}</td>
-        <td>{{ u.username }}</td>
-        <td>{{ u.fullName }}</td>
-        <td>{{ u.email }}</td>
-        <td>{{ u.role.name || 'N/A' }}</td>
-        <td>
-          <span class="state" [class.off]="u.enabled === false">{{ u.enabled === false ? 'De baja' : 'Activa' }}</span>
-        </td>
-        <td>
-          <button [routerLink]="['edit', u.idUser]">Editar</button>
-          <button *ngIf="u.enabled !== false" (click)="deactivate(u)">Dar de baja</button>
-          <button *ngIf="u.enabled === false" (click)="activate(u)">Reactivar</button>
-        </td>
-      </tr>
-      <tr *ngIf="users.length === 0">
-        <td colspan="7">No hay usuarios registrados.</td>
-      </tr>
+      @for (u of users; track u) {
+        <tr [class.disabled-row]="u.enabled === false">
+          <td>{{ u.idUser }}</td>
+          <td>{{ u.username }}</td>
+          <td>{{ u.fullName }}</td>
+          <td>{{ u.email }}</td>
+          <td>{{ u.role.name || 'N/A' }}</td>
+          <td>
+            <span class="state" [class.off]="u.enabled === false">{{ u.enabled === false ? 'De baja' : 'Activa' }}</span>
+          </td>
+          <td>
+            <button [routerLink]="['edit', u.idUser]">Editar</button>
+            @if (u.enabled !== false) {
+              <button (click)="deactivate(u)">Dar de baja</button>
+            }
+            @if (u.enabled === false) {
+              <button (click)="activate(u)">Reactivar</button>
+            }
+          </td>
+        </tr>
+      }
+      @if (users.length === 0) {
+        <tr>
+          <td colspan="7">No hay usuarios registrados.</td>
+        </tr>
+      }
     </tbody>
   </table>
 </div>

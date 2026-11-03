@@ -6,7 +6,7 @@
       class="mobile-switch-btn"
       [class.active]="mobileView === 'catalog'"
       (click)="setMobileView('catalog')"
-    >
+      >
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="switch-icon">
         <rect x="3" y="3" width="7" height="7"></rect>
         <rect x="14" y="3" width="7" height="7"></rect>
@@ -20,14 +20,16 @@
       class="mobile-switch-btn"
       [class.active]="mobileView === 'order'"
       (click)="setMobileView('order')"
-    >
+      >
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="switch-icon">
         <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
         <line x1="3" y1="6" x2="21" y2="6"></line>
         <path d="M16 10a4 4 0 0 1-8 0"></path>
       </svg>
       <span>Pedido</span>
-      <span class="mobile-count-pill" *ngIf="totalItemsCount > 0">{{ totalItemsCount }}</span>
+      @if (totalItemsCount > 0) {
+        <span class="mobile-count-pill">{{ totalItemsCount }}</span>
+      }
     </button>
   </div>
 
@@ -51,9 +53,11 @@
         </span>
       </div>
 
-      <div class="shift-warning" *ngIf="!checkingShift && !activeShift">
-        No hay una caja aperturada. <a routerLink="/pages/cash-shift">Apertura la caja</a> para enviar pedidos.
-      </div>
+      @if (!checkingShift && !activeShift) {
+        <div class="shift-warning">
+          No hay una caja aperturada. <a routerLink="/pages/cash-shift">Apertura la caja</a> para enviar pedidos.
+        </div>
+      }
     </header>
 
     <!-- Fila de selección de cliente (como en Imagen 1 y 2) -->
@@ -67,86 +71,105 @@
           {{ selectedClient ? (selectedClient.name + (selectedClient.docNumber ? ' · ' + selectedClient.docNumber : '')) : 'Selecciona un cliente' }}
         </span>
       </div>
-      <button
-        type="button"
-        class="pos-client-clear"
-        *ngIf="selectedClient"
-        (click)="$event.stopPropagation(); selectedClient = null"
-        title="Quitar cliente"
-      >
-        &times;
-      </button>
+      @if (selectedClient) {
+        <button
+          type="button"
+          class="pos-client-clear"
+          (click)="$event.stopPropagation(); selectedClient = null"
+          title="Quitar cliente"
+          >
+          &times;
+        </button>
+      }
     </div>
 
     <!-- Cuerpo del pedido: vacío o lista de productos -->
     <div class="pos-order-body">
       <!-- Estado vacío (como en Imagen 1) -->
-      <div class="pos-empty-cart" *ngIf="cart.length === 0">
-        <svg class="pos-cart-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-          <circle cx="9" cy="21" r="1.5"></circle>
-          <circle cx="20" cy="21" r="1.5"></circle>
-          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-        </svg>
-        <h3 class="pos-empty-title">Agrega un producto</h3>
-        <p class="pos-empty-desc">Selecciona una categoría y productos del panel de la derecha</p>
-      </div>
+      @if (cart.length === 0) {
+        <div class="pos-empty-cart">
+          <svg class="pos-cart-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <circle cx="9" cy="21" r="1.5"></circle>
+            <circle cx="20" cy="21" r="1.5"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+          </svg>
+          <h3 class="pos-empty-title">Agrega un producto</h3>
+          <p class="pos-empty-desc">Selecciona una categoría y productos del panel de la derecha</p>
+        </div>
+      }
 
       <!-- Tabla de productos del pedido (como en Imagen 2) -->
-      <div class="pos-cart-table" *ngIf="cart.length > 0">
-        <div class="pos-table-header">
-          <span class="th-qty">Cant.</span>
-          <span class="th-name">Producto</span>
-          <span class="th-price">Precio</span>
-        </div>
-
-        <div class="pos-table-body">
-          <div class="pos-table-row draft-row" *ngFor="let line of cart">
-            <div class="pos-row-qty pos-qty-controls">
-              <button type="button" class="pos-qty-btn" (click)="incrementLine(line)">+</button>
-              <span class="pos-qty-num">{{ line.quantity }}</span>
-              <button type="button" class="pos-qty-btn" (click)="decrementLine(line)">-</button>
-            </div>
-            <div class="pos-row-product">
-              <div class="pos-product-title-row">
-                <span class="pos-station-badge">S</span>
-                <span class="pos-product-name">{{ line.product.name }}</span>
+      @if (cart.length > 0) {
+        <div class="pos-cart-table">
+          <div class="pos-table-header">
+            <span class="th-qty">Cant.</span>
+            <span class="th-name">Producto</span>
+            <span class="th-price">Precio</span>
+          </div>
+          <div class="pos-table-body">
+            @for (line of cart; track line) {
+              <div class="pos-table-row draft-row">
+                <div class="pos-row-qty pos-qty-controls">
+                  <button type="button" class="pos-qty-btn" (click)="incrementLine(line)">+</button>
+                  <span class="pos-qty-num">{{ line.quantity }}</span>
+                  <button type="button" class="pos-qty-btn" (click)="decrementLine(line)">-</button>
+                </div>
+                <div class="pos-row-product">
+                  <div class="pos-product-title-row">
+                    <span class="pos-station-badge">S</span>
+                    <span class="pos-product-name">{{ line.product.name }}</span>
+                  </div>
+                  @if (line.flavor) {
+                    <div class="pos-product-flavors">
+                      <strong>SABORES:</strong> +{{ line.flavor.name }}
+                    </div>
+                  }
+                  @if (line.station) {
+                    <div class="pos-product-note">
+                      Área: {{ line.station }}
+                    </div>
+                  }
+                </div>
+                <div class="pos-row-price">
+                  S/ {{ (line.unitPrice * line.quantity).toFixed(2) }}
+                </div>
               </div>
-              <div class="pos-product-flavors" *ngIf="line.flavor">
-                <strong>SABORES:</strong> +{{ line.flavor.name }}
-              </div>
-              <div class="pos-product-note" *ngIf="line.station">
-                Área: {{ line.station }}
-              </div>
-            </div>
-            <div class="pos-row-price">
-              S/ {{ (line.unitPrice * line.quantity).toFixed(2) }}
-            </div>
+            }
           </div>
         </div>
-      </div>
+      }
     </div>
 
     <!-- Selector de método de pago -->
-    <div class="pos-payment-selector" *ngIf="paymentMethods.length > 0">
-      <span class="pos-payment-label">Método de cobro</span>
-      <div class="pos-payment-chips">
-        <button
-          type="button"
-          class="pos-pay-chip"
-          *ngFor="let method of paymentMethods"
-          [class.active]="selectedMethodId === method.idPaymentMethod"
-          (click)="selectMethod(method)"
-        >
-          {{ method.name }}
-        </button>
+    @if (paymentMethods.length > 0) {
+      <div class="pos-payment-selector">
+        <span class="pos-payment-label">Método de cobro</span>
+        <div class="pos-payment-chips">
+          @for (method of paymentMethods; track method) {
+            <button
+              type="button"
+              class="pos-pay-chip"
+              [class.active]="selectedMethodId === method.idPaymentMethod"
+              (click)="selectMethod(method)"
+              >
+              {{ method.name }}
+            </button>
+          }
+        </div>
       </div>
-    </div>
+    }
 
     <!-- Alertas y avisos -->
-    <div class="pos-alerts-area" *ngIf="errorMessage || successMessage">
-      <div class="alert-box error" *ngIf="errorMessage">{{ errorMessage }}</div>
-      <div class="alert-box success" *ngIf="successMessage">{{ successMessage }}</div>
-    </div>
+    @if (errorMessage || successMessage) {
+      <div class="pos-alerts-area">
+        @if (errorMessage) {
+          <div class="alert-box error">{{ errorMessage }}</div>
+        }
+        @if (successMessage) {
+          <div class="alert-box success">{{ successMessage }}</div>
+        }
+      </div>
+    }
 
     <!-- ================= BARRA DE ACCIÓN INFERIOR ================= -->
     <footer class="pos-order-footer quick-sale-footer">
@@ -156,7 +179,7 @@
         [disabled]="cart.length === 0"
         (click)="cart = []"
         title="Limpiar carrito"
-      >
+        >
         <svg class="pos-footer-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="3 6 5 6 21 6"></polyline>
           <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -169,7 +192,7 @@
         class="pos-pay-button full-pay"
         [disabled]="!canSend"
         (click)="sendOrder()"
-      >
+        >
         <span class="pos-pay-label">{{ sendLabel }}</span>
         <span class="pos-pay-amount">S/ {{ total.toFixed(2) }}</span>
       </button>
@@ -185,7 +208,7 @@
         class="pos-nav-tab"
         [class.active]="activeTab === 'categoria'"
         (click)="setTab('categoria')"
-      >
+        >
         Categoría
       </button>
       <button
@@ -193,7 +216,7 @@
         class="pos-nav-tab"
         [class.active]="activeTab === 'menu'"
         (click)="setTab('menu')"
-      >
+        >
         Menú
       </button>
       <button
@@ -201,7 +224,7 @@
         class="pos-nav-tab"
         [class.active]="activeTab === 'busqueda'"
         (click)="setTab('busqueda')"
-      >
+        >
         Búsqueda
       </button>
       <button
@@ -209,162 +232,187 @@
         class="pos-nav-tab"
         [class.active]="activeTab === 'favoritos'"
         (click)="setTab('favoritos')"
-      >
+        >
         Favoritos
       </button>
     </nav>
 
     <div class="pos-catalog-content">
       <!-- PESTAÑA 1: CATEGORÍAS (Grid como en Imagen 1 y 2) -->
-      <div class="pos-view-categories" *ngIf="activeTab === 'categoria'">
-        <div class="pos-category-grid">
-          <button
-            type="button"
-            class="pos-category-card"
-            *ngFor="let cat of categories"
-            (click)="selectCategoryAndOpenMenu(cat)"
-          >
-            <span class="pos-category-name">{{ cat.name }}</span>
-            <span class="pos-category-count">{{ productCounts[cat.idCategory!] || 0 }} prod.</span>
-          </button>
+      @if (activeTab === 'categoria') {
+        <div class="pos-view-categories">
+          <div class="pos-category-grid">
+            @for (cat of categories; track cat) {
+              <button
+                type="button"
+                class="pos-category-card"
+                (click)="selectCategoryAndOpenMenu(cat)"
+                >
+                <span class="pos-category-name">{{ cat.name }}</span>
+                <span class="pos-category-count">{{ productCounts[cat.idCategory!] || 0 }} prod.</span>
+              </button>
+            }
+          </div>
         </div>
-      </div>
+      }
 
       <!-- PESTAÑA 2: MENÚ (Productos de la categoría elegida) -->
-      <div class="pos-view-menu" *ngIf="activeTab === 'menu'">
-        <div class="pos-menu-toolbar">
-          <button type="button" class="pos-return-cats-btn" (click)="setTab('categoria')">
-            &larr; Volver a Categorías
-          </button>
-          <span class="pos-active-cat-name" *ngIf="selectedCategory">
-            {{ selectedCategory.name }} ({{ products.length }} prod.)
-          </span>
+      @if (activeTab === 'menu') {
+        <div class="pos-view-menu">
+          <div class="pos-menu-toolbar">
+            <button type="button" class="pos-return-cats-btn" (click)="setTab('categoria')">
+              &larr; Volver a Categorías
+            </button>
+            @if (selectedCategory) {
+              <span class="pos-active-cat-name">
+                {{ selectedCategory.name }} ({{ products.length }} prod.)
+              </span>
+            }
+          </div>
+          <div class="pos-product-grid">
+            @for (product of products; track product) {
+              <button
+                type="button"
+                class="pos-prod-card"
+                (click)="addToCart(product)"
+                >
+                <span class="pos-prod-card-name">{{ product.name }}</span>
+                <div class="pos-prod-card-bottom">
+                  <span class="pos-prod-card-price">S/ {{ product.price.toFixed(2) }}</span>
+                  @if (product.requiresFlavor) {
+                    <span class="pos-prod-badge">Opciones</span>
+                  }
+                  @if (product.requiresStation) {
+                    <span class="pos-prod-badge">Adicional</span>
+                  }
+                </div>
+              </button>
+            }
+            @if (products.length === 0) {
+              <p class="empty-state">
+                Esta categoría no tiene productos registrados.
+              </p>
+            }
+          </div>
         </div>
-
-        <div class="pos-product-grid">
-          <button
-            type="button"
-            class="pos-prod-card"
-            *ngFor="let product of products"
-            (click)="addToCart(product)"
-          >
-            <span class="pos-prod-card-name">{{ product.name }}</span>
-            <div class="pos-prod-card-bottom">
-              <span class="pos-prod-card-price">S/ {{ product.price.toFixed(2) }}</span>
-              <span class="pos-prod-badge" *ngIf="product.requiresFlavor">Opciones</span>
-              <span class="pos-prod-badge" *ngIf="product.requiresStation">Adicional</span>
-            </div>
-          </button>
-
-          <p class="empty-state" *ngIf="products.length === 0">
-            Esta categoría no tiene productos registrados.
-          </p>
-        </div>
-      </div>
+      }
 
       <!-- PESTAÑA 3: BÚSQUEDA RÁPIDA -->
-      <div class="pos-view-search" *ngIf="activeTab === 'busqueda'">
-        <div class="pos-search-wrapper">
-          <svg class="pos-search-lens" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      @if (activeTab === 'busqueda') {
+        <div class="pos-view-search">
+          <div class="pos-search-wrapper">
+            <svg class="pos-search-lens" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input
+              aria-label="Buscar producto"
+              type="text"
+              class="pos-search-input"
+              [(ngModel)]="searchQuery"
+              (input)="onSearchChange()"
+              placeholder="Buscar producto por nombre, categoría o descripción..."
+              autofocus
+              />
+            </div>
+            <div class="pos-product-grid">
+              @for (product of searchResults; track product) {
+                <button
+                  type="button"
+                  class="pos-prod-card"
+                  (click)="addToCart(product)"
+                  >
+                  <span class="pos-prod-card-name">{{ product.name }}</span>
+                  <div class="pos-prod-card-bottom">
+                    <span class="pos-prod-card-price">S/ {{ product.price.toFixed(2) }}</span>
+                    @if (product.category) {
+                      <span class="pos-prod-badge">{{ product.category.name }}</span>
+                    }
+                  </div>
+                </button>
+              }
+              @if (searchResults.length === 0) {
+                <p class="empty-state">
+                  No se encontraron productos que coincidan con "{{ searchQuery }}".
+                </p>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- PESTAÑA 4: FAVORITOS -->
+        @if (activeTab === 'favoritos') {
+          <div class="pos-view-favorites">
+            <div class="pos-product-grid">
+              @for (product of favoriteProducts; track product) {
+                <button
+                  type="button"
+                  class="pos-prod-card"
+                  (click)="addToCart(product)"
+                  >
+                  <span class="pos-prod-card-name">{{ product.name }}</span>
+                  <div class="pos-prod-card-bottom">
+                    <span class="pos-prod-card-price">S/ {{ product.price.toFixed(2) }}</span>
+                    <span class="pos-prod-badge">Destacado</span>
+                  </div>
+                </button>
+              }
+              @if (favoriteProducts.length === 0) {
+                <p class="empty-state">
+                  No hay productos favoritos en este momento.
+                </p>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </main>
+
+    <!-- ===================== BARRA FLOTANTE MÓVIL (EN CARTA) ===================== -->
+    @if (mobileView === 'catalog' && (cart.length > 0 || totalItemsCount > 0)) {
+      <div
+        class="pos-mobile-cart-float"
+        (click)="setMobileView('order')"
+        >
+        <div class="cart-float-info">
+          <span class="cart-float-qty">{{ totalItemsCount }}</span>
+          <div class="cart-float-texts">
+            <span class="cart-float-label">{{ totalItemsCount === 1 ? '1 producto agregado' : totalItemsCount + ' productos agregados' }}</span>
+            <span class="cart-float-total">S/ {{ total.toFixed(2) }}</span>
+          </div>
+        </div>
+        <div class="cart-float-action">
+          <span>Ver Pedido</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="float-arrow">
+            <polyline points="9 18 15 12 9 6"></polyline>
           </svg>
-          <input
-            aria-label="Buscar producto"
-            type="text"
-            class="pos-search-input"
-            [(ngModel)]="searchQuery"
-            (input)="onSearchChange()"
-            placeholder="Buscar producto por nombre, categoría o descripción..."
-            autofocus
-          />
-        </div>
-
-        <div class="pos-product-grid">
-          <button
-            type="button"
-            class="pos-prod-card"
-            *ngFor="let product of searchResults"
-            (click)="addToCart(product)"
-          >
-            <span class="pos-prod-card-name">{{ product.name }}</span>
-            <div class="pos-prod-card-bottom">
-              <span class="pos-prod-card-price">S/ {{ product.price.toFixed(2) }}</span>
-              <span class="pos-prod-badge" *ngIf="product.category">{{ product.category.name }}</span>
-            </div>
-          </button>
-
-          <p class="empty-state" *ngIf="searchResults.length === 0">
-            No se encontraron productos que coincidan con "{{ searchQuery }}".
-          </p>
         </div>
       </div>
-
-      <!-- PESTAÑA 4: FAVORITOS -->
-      <div class="pos-view-favorites" *ngIf="activeTab === 'favoritos'">
-        <div class="pos-product-grid">
-          <button
-            type="button"
-            class="pos-prod-card"
-            *ngFor="let product of favoriteProducts"
-            (click)="addToCart(product)"
-          >
-            <span class="pos-prod-card-name">{{ product.name }}</span>
-            <div class="pos-prod-card-bottom">
-              <span class="pos-prod-card-price">S/ {{ product.price.toFixed(2) }}</span>
-              <span class="pos-prod-badge">Destacado</span>
-            </div>
-          </button>
-
-          <p class="empty-state" *ngIf="favoriteProducts.length === 0">
-            No hay productos favoritos en este momento.
-          </p>
-        </div>
-      </div>
-    </div>
-  </main>
-
-  <!-- ===================== BARRA FLOTANTE MÓVIL (EN CARTA) ===================== -->
-  <div
-    class="pos-mobile-cart-float"
-    *ngIf="mobileView === 'catalog' && (cart.length > 0 || totalItemsCount > 0)"
-    (click)="setMobileView('order')"
-  >
-    <div class="cart-float-info">
-      <span class="cart-float-qty">{{ totalItemsCount }}</span>
-      <div class="cart-float-texts">
-        <span class="cart-float-label">{{ totalItemsCount === 1 ? '1 producto agregado' : totalItemsCount + ' productos agregados' }}</span>
-        <span class="cart-float-total">S/ {{ total.toFixed(2) }}</span>
-      </div>
-    </div>
-    <div class="cart-float-action">
-      <span>Ver Pedido</span>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="float-arrow">
-        <polyline points="9 18 15 12 9 6"></polyline>
-      </svg>
-    </div>
+    }
   </div>
-</div>
 
-<!-- ===================== MODALES COMPARTIDOS ===================== -->
-<app-client-modal
-  *ngIf="showClientModal"
-  [currentClient]="selectedClient"
-  (clientSelected)="onClientSelected($event)"
-  (closed)="closeClientModal()"
-></app-client-modal>
+  <!-- ===================== MODALES COMPARTIDOS ===================== -->
+  @if (showClientModal) {
+    <app-client-modal
+      [currentClient]="selectedClient"
+      (clientSelected)="onClientSelected($event)"
+      (closed)="closeClientModal()"
+    ></app-client-modal>
+  }
 
-<app-flavor-modal
-  *ngIf="pendingFlavorProduct"
-  [product]="pendingFlavorProduct"
-  (confirmed)="onFlavorChosen($event)"
-  (cancelled)="onFlavorCancelled()"
-></app-flavor-modal>
+  @if (pendingFlavorProduct) {
+    <app-flavor-modal
+      [product]="pendingFlavorProduct"
+      (confirmed)="onFlavorChosen($event)"
+      (cancelled)="onFlavorCancelled()"
+    ></app-flavor-modal>
+  }
 
-<app-station-modal
-  *ngIf="pendingStationProduct"
-  [product]="pendingStationProduct"
-  [dishes]="stationDishes"
-  (confirmed)="onStationChosen($event)"
-  (cancelled)="onStationCancelled()"
-></app-station-modal>
+  @if (pendingStationProduct) {
+    <app-station-modal
+      [product]="pendingStationProduct"
+      [dishes]="stationDishes"
+      (confirmed)="onStationChosen($event)"
+      (cancelled)="onStationCancelled()"
+    ></app-station-modal>
+  }

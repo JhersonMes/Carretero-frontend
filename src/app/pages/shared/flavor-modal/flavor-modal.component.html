@@ -3,24 +3,33 @@
     <h2>Elige una opcion</h2>
     <p class="modal-hint">{{ product.name }}</p>
 
-    <p class="loading-msg" *ngIf="loading">Cargando opciones...</p>
+    @if (loading) {
+      <p class="loading-msg">Cargando opciones...</p>
+    }
 
-    <div class="flavor-grid" *ngIf="!loading && flavors.length > 0">
-      <button
-        type="button"
-        class="flavor-option"
-        *ngFor="let flavor of flavors"
-        [class.selected]="selected?.idFlavor === flavor.idFlavor"
-        (click)="select(flavor)"
-      >
-        <span class="flavor-name">{{ flavor.name }}</span>
-        <span class="flavor-price" *ngIf="priceWith(flavor) > 0">
-          S/ {{ priceWith(flavor).toFixed(2) }}
-        </span>
-      </button>
-    </div>
+    @if (!loading && flavors.length > 0) {
+      <div class="flavor-grid">
+        @for (flavor of flavors; track flavor) {
+          <button
+            type="button"
+            class="flavor-option"
+            [class.selected]="selected?.idFlavor === flavor.idFlavor"
+            (click)="select(flavor)"
+            >
+            <span class="flavor-name">{{ flavor.name }}</span>
+            @if (priceWith(flavor) > 0) {
+              <span class="flavor-price">
+                S/ {{ priceWith(flavor).toFixed(2) }}
+              </span>
+            }
+          </button>
+        }
+      </div>
+    }
 
-    <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
+    @if (errorMessage) {
+      <div class="error-message">{{ errorMessage }}</div>
+    }
 
     <div class="modal-actions">
       <button type="button" class="cancel-btn" (click)="cancel()">Cancelar</button>

@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { PaymentMethodService } from '../../services/payment-method.service';
 import { PaymentMethod } from '../../model/payment-method';
@@ -7,7 +7,7 @@ import { PaymentMethod } from '../../model/payment-method';
 @Component({
   selector: 'app-payment-method',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterOutlet],
+  imports: [RouterLink, RouterOutlet],
   templateUrl: './payment-method.component.html'
 })
 export class PaymentMethodComponent implements OnInit {

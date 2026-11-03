@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MenuService } from '../../../services/menu.service';
@@ -8,7 +8,7 @@ import { Menu } from '../../../model/menu';
 @Component({
   selector: 'app-menu-edit',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink],
   templateUrl: './menu-edit.component.html'
 })
 export class MenuEditComponent implements OnInit {

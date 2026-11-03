@@ -4,38 +4,44 @@
     <p class="modal-hint">
       {{ product.name }} &middot;
       {{
-        hasDishes
-          ? 'sale a la misma area que el plato que elijas'
-          : 'el pedido aun no tiene platos, elige el area'
+      hasDishes
+      ? 'sale a la misma area que el plato que elijas'
+      : 'el pedido aun no tiene platos, elige el area'
       }}
     </p>
 
     <!-- Lo habitual: se elige el plato y el area sale de el -->
-    <div class="dish-list" *ngIf="hasDishes">
-      <button
-        type="button"
-        class="dish-option"
-        *ngFor="let d of dishes"
-        [class.selected]="selectedDish === d.name"
-        (click)="selectDish(d)"
-      >
-        <span class="dish-name">{{ d.name }}</span>
-        <span class="dish-area">{{ labelOf(d.station) }}</span>
-      </button>
-    </div>
+    @if (hasDishes) {
+      <div class="dish-list">
+        @for (d of dishes; track d) {
+          <button
+            type="button"
+            class="dish-option"
+            [class.selected]="selectedDish === d.name"
+            (click)="selectDish(d)"
+            >
+            <span class="dish-name">{{ d.name }}</span>
+            <span class="dish-area">{{ labelOf(d.station) }}</span>
+          </button>
+        }
+      </div>
+    }
 
     <!-- Sin platos a los que engancharse: se elige el area directamente -->
-    <div class="dish-list" *ngIf="!hasDishes">
-      <button
-        type="button"
-        class="dish-option"
-        *ngFor="let s of stations"
-        [class.selected]="selected === s.key"
-        (click)="selectStation(s.key)"
-      >
-        <span class="dish-name">{{ s.label }}</span>
-      </button>
-    </div>
+    @if (!hasDishes) {
+      <div class="dish-list">
+        @for (s of stations; track s) {
+          <button
+            type="button"
+            class="dish-option"
+            [class.selected]="selected === s.key"
+            (click)="selectStation(s.key)"
+            >
+            <span class="dish-name">{{ s.label }}</span>
+          </button>
+        }
+      </div>
+    }
 
     <div class="modal-actions">
       <button type="button" class="secondary" (click)="cancel()">Cancelar</button>

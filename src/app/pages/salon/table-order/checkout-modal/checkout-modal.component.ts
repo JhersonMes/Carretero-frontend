@@ -1,5 +1,5 @@
 import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { PaymentMethodService } from '../../../../services/payment-method.service';
 import { PaymentService } from '../../../../services/payment.service';
@@ -22,7 +22,7 @@ interface PaymentLine {
 @Component({
   selector: 'app-checkout-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   templateUrl: './checkout-modal.component.html',
   styleUrl: './checkout-modal.component.css',
 })

@@ -1,12 +1,12 @@
 import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-unauthorized',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
     <div class="unauthorized">
       <h1>No autorizado</h1>

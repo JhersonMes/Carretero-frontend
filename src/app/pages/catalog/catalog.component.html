@@ -2,50 +2,61 @@
   <h1>Carta</h1>
   <p class="lead">Categorias, productos y sus opciones (sabores, tamanos, preparaciones).</p>
 
-  <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
+  @if (errorMessage) {
+    <div class="error-message">{{ errorMessage }}</div>
+  }
 
   <div class="catalog-columns">
     <!-- ---------- Categorias ---------- -->
     <section class="panel">
       <h2>Categorias</h2>
 
-      <p class="loading-msg" *ngIf="loadingCategories">Cargando...</p>
+      @if (loadingCategories) {
+        <p class="loading-msg">Cargando...</p>
+      }
 
-      <ul class="entity-list" *ngIf="!loadingCategories">
-        <li
-          *ngFor="let c of categories"
-          class="entity-row"
-          [class.selected]="selectedCategory?.idCategory === c.idCategory"
-          [class.off]="c.active === false"
-        >
-          <button type="button" class="entity-pick" (click)="selectCategory(c)">
-            <span class="entity-name">{{ c.name }}</span>
-          </button>
-          <div class="row-actions">
-            <!-- El area se corrige aqui mismo: es el dato que decide a que
-                 estacion sale la comanda. -->
-            <select
-              aria-label="Area a la que salen sus comandas"
-              class="station-select"
-              [ngModel]="c.station"
-              (ngModelChange)="changeCategoryStation(c, $event)"
-              title="Area a la que salen sus comandas"
-            >
-              <option *ngFor="let s of stations" [ngValue]="s">{{ s }}</option>
-            </select>
-            <button type="button" class="mini" (click)="toggleCategoryActive(c)">
-              {{ c.active === false ? 'Activar' : 'Desactivar' }}
-            </button>
-            <button type="button" class="mini danger" (click)="deleteCategory(c)">Borrar</button>
-          </div>
-        </li>
-      </ul>
+      @if (!loadingCategories) {
+        <ul class="entity-list">
+          @for (c of categories; track c) {
+            <li
+              class="entity-row"
+              [class.selected]="selectedCategory?.idCategory === c.idCategory"
+              [class.off]="c.active === false"
+              >
+              <button type="button" class="entity-pick" (click)="selectCategory(c)">
+                <span class="entity-name">{{ c.name }}</span>
+              </button>
+              <div class="row-actions">
+                <!-- El area se corrige aqui mismo: es el dato que decide a que
+                estacion sale la comanda. -->
+                <select
+                  aria-label="Area a la que salen sus comandas"
+                  class="station-select"
+                  [ngModel]="c.station"
+                  (ngModelChange)="changeCategoryStation(c, $event)"
+                  title="Area a la que salen sus comandas"
+                  >
+                  @for (s of stations; track s) {
+                    <option [ngValue]="s">{{ s }}</option>
+                  }
+                </select>
+                <button type="button" class="mini" (click)="toggleCategoryActive(c)">
+                  {{ c.active === false ? 'Activar' : 'Desactivar' }}
+                </button>
+                <button type="button" class="mini danger" (click)="deleteCategory(c)">Borrar</button>
+              </div>
+            </li>
+          }
+        </ul>
+      }
 
       <div class="add-form">
         <h3>Nueva categoria</h3>
         <input aria-label="Nombre de la categoria" type="text" placeholder="Nombre" [(ngModel)]="newCategory.name" />
         <select aria-label="Area de la categoria" [(ngModel)]="newCategory.station">
-          <option *ngFor="let s of stations" [ngValue]="s">{{ s }}</option>
+          @for (s of stations; track s) {
+            <option [ngValue]="s">{{ s }}</option>
+          }
         </select>
         <button type="button" class="primary" (click)="createCategory()">Agregar categoria</button>
       </div>
@@ -54,134 +65,155 @@
     <!-- ---------- Productos ---------- -->
     <section class="panel">
       <h2>Productos</h2>
-      <p class="panel-hint" *ngIf="!selectedCategory">Elige una categoria.</p>
+      @if (!selectedCategory) {
+        <p class="panel-hint">Elige una categoria.</p>
+      }
 
-      <ng-container *ngIf="selectedCategory">
+      @if (selectedCategory) {
         <p class="panel-hint">Categoria: <strong>{{ selectedCategory.name }}</strong></p>
-        <p class="loading-msg" *ngIf="loadingProducts">Cargando...</p>
-
-        <ul class="entity-list" *ngIf="!loadingProducts">
-          <li
-            *ngFor="let p of products"
-            class="entity-row"
-            [class.selected]="selectedProduct?.idProduct === p.idProduct"
-            [class.off]="p.active === false"
-          >
-            <button type="button" class="entity-pick" (click)="selectProduct(p)">
-              <span class="entity-name">{{ p.name }}</span>
-              <span class="entity-meta">
-                <span class="warn-price" *ngIf="p.price <= 0">sin precio</span>
-                <span *ngIf="p.price > 0">S/ {{ p.price.toFixed(2) }}</span>
-                <span class="tag" *ngIf="p.requiresFlavor">pide opcion</span>
-                <span class="tag" *ngIf="p.requiresStation">pide area</span>
-              </span>
-            </button>
-            <div class="row-actions stacked">
-              <!-- Se puede activar despues: un adicional que hoy va solo a cocina
-                   puede empezar a acompanar platos de parrilla. -->
-              <label class="check inline">
-                <input
-                  type="checkbox"
-                  [ngModel]="p.requiresStation"
-                  (ngModelChange)="setRequiresStation(p, $event)"
-                />
-                Area al pedir
+        @if (loadingProducts) {
+          <p class="loading-msg">Cargando...</p>
+        }
+        @if (!loadingProducts) {
+          <ul class="entity-list">
+            @for (p of products; track p) {
+              <li
+                class="entity-row"
+                [class.selected]="selectedProduct?.idProduct === p.idProduct"
+                [class.off]="p.active === false"
+                >
+                <button type="button" class="entity-pick" (click)="selectProduct(p)">
+                  <span class="entity-name">{{ p.name }}</span>
+                  <span class="entity-meta">
+                    @if (p.price <= 0) {
+                      <span class="warn-price">sin precio</span>
+                    }
+                    @if (p.price > 0) {
+                      <span>S/ {{ p.price.toFixed(2) }}</span>
+                    }
+                    @if (p.requiresFlavor) {
+                      <span class="tag">pide opcion</span>
+                    }
+                    @if (p.requiresStation) {
+                      <span class="tag">pide area</span>
+                    }
+                  </span>
+                </button>
+                <div class="row-actions stacked">
+                  <!-- Se puede activar despues: un adicional que hoy va solo a cocina
+                  puede empezar a acompanar platos de parrilla. -->
+                  <label class="check inline">
+                    <input
+                      type="checkbox"
+                      [ngModel]="p.requiresStation"
+                      (ngModelChange)="setRequiresStation(p, $event)"
+                      />
+                      Area al pedir
+                    </label>
+                    <input
+                      aria-label="Precio"
+                      type="number"
+                      min="0.10"
+                      step="0.10"
+                      class="price-input"
+                      [(ngModel)]="p.price"
+                      (keyup.enter)="saveProduct(p)"
+                      />
+                      <button type="button" class="mini" (click)="saveProduct(p)">Guardar</button>
+                      <button type="button" class="mini" (click)="toggleProductActive(p)">
+                        {{ p.active === false ? 'Activar' : 'Desactivar' }}
+                      </button>
+                      <button type="button" class="mini danger" (click)="deleteProduct(p)">Borrar</button>
+                    </div>
+                  </li>
+                }
+                @if (products.length === 0) {
+                  <li class="empty-row">Esta categoria no tiene productos.</li>
+                }
+              </ul>
+            }
+            <div class="add-form">
+              <h3>Nuevo producto</h3>
+              <input aria-label="Nombre del producto" type="text" placeholder="Nombre" [(ngModel)]="newProduct.name" />
+              <input aria-label="Precio" type="number" min="0.10" step="0.10" placeholder="Precio" [(ngModel)]="newProduct.price" />
+              <label class="check">
+                <input type="checkbox" [(ngModel)]="newProduct.requiresFlavor" />
+                Pide elegir una opcion
               </label>
-              <input
-                aria-label="Precio"
-                type="number"
-                min="0.10"
-                step="0.10"
-                class="price-input"
-                [(ngModel)]="p.price"
-                (keyup.enter)="saveProduct(p)"
-              />
-              <button type="button" class="mini" (click)="saveProduct(p)">Guardar</button>
-              <button type="button" class="mini" (click)="toggleProductActive(p)">
-                {{ p.active === false ? 'Activar' : 'Desactivar' }}
-              </button>
-              <button type="button" class="mini danger" (click)="deleteProduct(p)">Borrar</button>
+              <!-- Para los adicionales: el area la decide el mesero segun con que plato va. -->
+              <label class="check">
+                <input type="checkbox" [(ngModel)]="newProduct.requiresStation" />
+                El area se elige al pedirlo
+              </label>
+              <button type="button" class="primary" (click)="createProduct()">Agregar producto</button>
             </div>
-          </li>
+          }
+        </section>
 
-          <li class="empty-row" *ngIf="products.length === 0">Esta categoria no tiene productos.</li>
-        </ul>
+        <!-- ---------- Opciones ---------- -->
+        <section class="panel">
+          <h2>Opciones</h2>
+          @if (!selectedProduct) {
+            <p class="panel-hint">Elige un producto.</p>
+          }
 
-        <div class="add-form">
-          <h3>Nuevo producto</h3>
-          <input aria-label="Nombre del producto" type="text" placeholder="Nombre" [(ngModel)]="newProduct.name" />
-          <input aria-label="Precio" type="number" min="0.10" step="0.10" placeholder="Precio" [(ngModel)]="newProduct.price" />
-          <label class="check">
-            <input type="checkbox" [(ngModel)]="newProduct.requiresFlavor" />
-            Pide elegir una opcion
-          </label>
-          <!-- Para los adicionales: el area la decide el mesero segun con que plato va. -->
-          <label class="check">
-            <input type="checkbox" [(ngModel)]="newProduct.requiresStation" />
-            El area se elige al pedirlo
-          </label>
-          <button type="button" class="primary" (click)="createProduct()">Agregar producto</button>
+          @if (selectedProduct) {
+            <p class="panel-hint">Producto: <strong>{{ selectedProduct.name }}</strong></p>
+            @if (flavorsAreInherited) {
+              <div class="inherited-note">
+                Estas opciones vienen de la categoria <strong>{{ selectedProduct.category.name }}</strong> y
+                las comparten todos sus productos. Si agregas una opcion "solo para este producto", dejara de
+                heredarlas.
+              </div>
+            }
+            @if (loadingFlavors) {
+              <p class="loading-msg">Cargando...</p>
+            }
+            @if (!loadingFlavors) {
+              <ul class="entity-list">
+                @for (f of flavors; track f) {
+                  <li class="entity-row" [class.off]="!f.active">
+                    <div class="flavor-edit">
+                      <input aria-label="Nombre de la opcion" type="text" [(ngModel)]="f.name" (keyup.enter)="saveFlavor(f)" />
+                      <input
+                        aria-label="Ajuste de precio"
+                        type="number"
+                        step="0.10"
+                        class="delta-input"
+                        [(ngModel)]="f.priceDelta"
+                        (keyup.enter)="saveFlavor(f)"
+                        title="Cuanto suma o resta al precio"
+                        />
+                      </div>
+                      <div class="row-actions">
+                        <button type="button" class="mini" (click)="saveFlavor(f)">Guardar</button>
+                        <button type="button" class="mini danger" (click)="deleteFlavor(f)">Borrar</button>
+                      </div>
+                    </li>
+                  }
+                  @if (flavors.length === 0) {
+                    <li class="empty-row">Este producto no tiene opciones.</li>
+                  }
+                </ul>
+              }
+              <div class="add-form">
+                <h3>Nueva opcion</h3>
+                <input aria-label="Nombre de la opcion" type="text" placeholder="Nombre (ej. BBQ, 500 Ml)" [(ngModel)]="newFlavor.name" />
+                <input
+                  aria-label="Ajuste de precio"
+                  type="number"
+                  step="0.10"
+                  placeholder="Ajuste de precio (0 si no cambia)"
+                  [(ngModel)]="newFlavor.priceDelta"
+                  />
+                  <button type="button" class="primary" (click)="createFlavor('PRODUCT')">
+                    Agregar solo para este producto
+                  </button>
+                  <button type="button" class="secondary" (click)="createFlavor('CATEGORY')">
+                    Agregar para toda la categoria
+                  </button>
+                </div>
+              }
+            </section>
+          </div>
         </div>
-      </ng-container>
-    </section>
-
-    <!-- ---------- Opciones ---------- -->
-    <section class="panel">
-      <h2>Opciones</h2>
-      <p class="panel-hint" *ngIf="!selectedProduct">Elige un producto.</p>
-
-      <ng-container *ngIf="selectedProduct">
-        <p class="panel-hint">Producto: <strong>{{ selectedProduct.name }}</strong></p>
-
-        <div class="inherited-note" *ngIf="flavorsAreInherited">
-          Estas opciones vienen de la categoria <strong>{{ selectedProduct.category.name }}</strong> y
-          las comparten todos sus productos. Si agregas una opcion "solo para este producto", dejara de
-          heredarlas.
-        </div>
-
-        <p class="loading-msg" *ngIf="loadingFlavors">Cargando...</p>
-
-        <ul class="entity-list" *ngIf="!loadingFlavors">
-          <li *ngFor="let f of flavors" class="entity-row" [class.off]="!f.active">
-            <div class="flavor-edit">
-              <input aria-label="Nombre de la opcion" type="text" [(ngModel)]="f.name" (keyup.enter)="saveFlavor(f)" />
-              <input
-                aria-label="Ajuste de precio"
-                type="number"
-                step="0.10"
-                class="delta-input"
-                [(ngModel)]="f.priceDelta"
-                (keyup.enter)="saveFlavor(f)"
-                title="Cuanto suma o resta al precio"
-              />
-            </div>
-            <div class="row-actions">
-              <button type="button" class="mini" (click)="saveFlavor(f)">Guardar</button>
-              <button type="button" class="mini danger" (click)="deleteFlavor(f)">Borrar</button>
-            </div>
-          </li>
-
-          <li class="empty-row" *ngIf="flavors.length === 0">Este producto no tiene opciones.</li>
-        </ul>
-
-        <div class="add-form">
-          <h3>Nueva opcion</h3>
-          <input aria-label="Nombre de la opcion" type="text" placeholder="Nombre (ej. BBQ, 500 Ml)" [(ngModel)]="newFlavor.name" />
-          <input
-            aria-label="Ajuste de precio"
-            type="number"
-            step="0.10"
-            placeholder="Ajuste de precio (0 si no cambia)"
-            [(ngModel)]="newFlavor.priceDelta"
-          />
-          <button type="button" class="primary" (click)="createFlavor('PRODUCT')">
-            Agregar solo para este producto
-          </button>
-          <button type="button" class="secondary" (click)="createFlavor('CATEGORY')">
-            Agregar para toda la categoria
-          </button>
-        </div>
-      </ng-container>
-    </section>
-  </div>
-</div>
