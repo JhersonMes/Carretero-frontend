@@ -144,7 +144,7 @@ export class SalonComponent implements OnInit, OnDestroy {
   private minutesSince(from: string | undefined, until: number): number {
     if (!from) return 0;
     const start = new Date(from).getTime();
-    if (isNaN(start)) return 0;
+    if (Number.isNaN(start)) return 0;
     return Math.max(0, Math.floor((until - start) / 60_000));
   }
 

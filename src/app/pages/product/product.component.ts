@@ -170,7 +170,7 @@ export class ProductComponent implements OnInit {
       price = Number(raw);
     }
 
-    if (!isFinite(price) || price <= 0) {
+    if (!Number.isFinite(price) || price <= 0) {
       this.errorMessage = `"${product.name}": el precio debe ser mayor a 0.`;
       return;
     }

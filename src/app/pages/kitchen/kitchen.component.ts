@@ -87,7 +87,7 @@ export class KitchenComponent implements OnInit, OnDestroy {
   /** Minutos completos que la comanda lleva esperando en la estacion. */
   elapsedMinutes(item: KitchenItem): number {
     const sent = new Date(item.sentAt).getTime();
-    if (isNaN(sent)) return 0;
+    if (Number.isNaN(sent)) return 0;
     return Math.max(0, Math.floor((this.now - sent) / 60_000));
   }
 
