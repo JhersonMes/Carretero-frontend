@@ -7,25 +7,26 @@
   <div class="add-form">
     <h3>Nuevo cliente</h3>
     <div class="form-row">
-      <select [(ngModel)]="newClient.docType">
+      <select aria-label="Tipo de documento" [(ngModel)]="newClient.docType">
         <option *ngFor="let d of docTypes" [ngValue]="d">{{ d }}</option>
       </select>
-      <input type="text" placeholder="N° documento" [(ngModel)]="newClient.docNumber" />
-      <input type="text" placeholder="Nombre o razon social" [(ngModel)]="newClient.name" />
+      <input aria-label="Numero de documento" type="text" placeholder="N° documento" [(ngModel)]="newClient.docNumber" />
+      <input aria-label="Nombre o razon social" type="text" placeholder="Nombre o razon social" [(ngModel)]="newClient.name" />
       <input
+        aria-label="Telefono"
         type="tel"
         inputmode="numeric"
         maxlength="9"
         placeholder="Telefono (9 digitos)"
         [(ngModel)]="newClient.phone"
       />
-      <input type="email" placeholder="Correo" [(ngModel)]="newClient.email" />
+      <input aria-label="Correo" type="email" placeholder="Correo" [(ngModel)]="newClient.email" />
       <button type="button" class="primary" (click)="create()">Agregar</button>
     </div>
   </div>
 
   <div class="filter-bar">
-    <input type="text" placeholder="Buscar por nombre, documento o telefono" [(ngModel)]="query" />
+    <input aria-label="Buscar cliente" type="text" placeholder="Buscar por nombre, documento o telefono" [(ngModel)]="query" />
   </div>
 
   <p class="loading-msg" *ngIf="loading">Cargando clientes...</p>
@@ -55,14 +56,14 @@
 
         <tr *ngIf="editing && editing.idClient === c.idClient" class="editing-row">
           <td>
-            <select [(ngModel)]="editing.docType">
+            <select aria-label="Tipo de documento" [(ngModel)]="editing.docType">
               <option *ngFor="let d of docTypes" [ngValue]="d">{{ d }}</option>
             </select>
-            <input type="text" [(ngModel)]="editing.docNumber" />
+            <input aria-label="Numero de documento" type="text" [(ngModel)]="editing.docNumber" />
           </td>
-          <td><input type="text" [(ngModel)]="editing.name" /></td>
-          <td><input type="tel" inputmode="numeric" maxlength="9" [(ngModel)]="editing.phone" /></td>
-          <td><input type="email" [(ngModel)]="editing.email" /></td>
+          <td><input aria-label="Nombre o razon social" type="text" [(ngModel)]="editing.name" /></td>
+          <td><input aria-label="Telefono" type="tel" inputmode="numeric" maxlength="9" [(ngModel)]="editing.phone" /></td>
+          <td><input aria-label="Correo" type="email" [(ngModel)]="editing.email" /></td>
           <td class="actions-cell">
             <button type="button" class="mini" (click)="saveEdit()">Guardar</button>
             <button type="button" class="mini" (click)="cancelEdit()">Cancelar</button>

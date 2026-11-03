@@ -43,6 +43,7 @@
         <p class="panel-hint">Escribe el nombre, el numero o el DNI de quien llama.</p>
 
         <input
+          aria-label="Buscar cliente"
           type="text"
           class="search-input"
           placeholder="Nombre, telefono o DNI"
@@ -345,7 +346,7 @@
           </div>
           <div class="delivery-row fee-row">
             <span>Delivery (S/)</span>
-            <input type="number" min="0" step="0.50" [(ngModel)]="deliveryFee" />
+            <input aria-label="Costo de delivery" type="number" min="0" step="0.50" [(ngModel)]="deliveryFee" />
           </div>
           <button type="button" class="link-btn" (click)="backToClient()">Cambiar cliente o direccion</button>
         </div>

@@ -48,6 +48,7 @@
         <!-- Toggle Por posición (como en la Imagen 2) -->
         <div class="pos-toggle-group">
           <label class="pos-switch">
+            <span class="sr-only">Por posición</span>
             <input type="checkbox" [(ngModel)]="byPosition" />
             <span class="pos-slider"></span>
           </label>
@@ -361,6 +362,7 @@
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
           <input
+            aria-label="Buscar producto"
             type="text"
             class="pos-search-input"
             [(ngModel)]="searchQuery"

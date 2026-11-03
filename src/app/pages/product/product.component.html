@@ -18,6 +18,7 @@
          lo que mas se vende. -->
     <div class="search-box">
       <input
+        aria-label="Buscar producto"
         type="search"
         id="productSearch"
         [(ngModel)]="query"
@@ -57,6 +58,7 @@
           <!-- Texto y no "number": el campo numerico del navegador descartaba la coma y
                24,50 se guardaba como 2450 (CP-15-1-1). savePrice acepta coma o punto. -->
           <input
+            aria-label="Precio"
             type="text"
             inputmode="decimal"
             [ngModel]="priceDraft.get(p.idProduct!)"

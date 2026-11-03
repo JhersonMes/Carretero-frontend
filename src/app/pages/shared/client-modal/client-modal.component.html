@@ -18,6 +18,7 @@
           <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
         </svg>
         <input
+          aria-label="Buscar cliente"
           type="text"
           class="search-input"
           [(ngModel)]="searchQuery"
@@ -89,14 +90,15 @@
 
       <div class="form-row">
         <div class="form-field doc-type-field">
-          <label>Tipo Doc.</label>
-          <select [(ngModel)]="newClient.docType">
+          <label for="new-client-docType">Tipo Doc.</label>
+          <select id="new-client-docType" [(ngModel)]="newClient.docType">
             <option *ngFor="let dt of docTypes" [value]="dt">{{ dt }}</option>
           </select>
         </div>
         <div class="form-field doc-num-field">
-          <label>N° Documento</label>
+          <label for="new-client-docNumber">N° Documento</label>
           <input
+            id="new-client-docNumber"
             type="text"
             [(ngModel)]="newClient.docNumber"
             placeholder="DNI o RUC"
@@ -105,8 +107,9 @@
       </div>
 
       <div class="form-field">
-        <label>Nombre o Razón Social *</label>
+        <label for="new-client-name">Nombre o Razón Social *</label>
         <input
+          id="new-client-name"
           type="text"
           [(ngModel)]="newClient.name"
           placeholder="Ej. Juan Pérez / Empresa SAC"
@@ -115,8 +118,9 @@
       </div>
 
       <div class="form-field">
-        <label>Teléfono / Celular</label>
+        <label for="new-client-phone">Teléfono / Celular</label>
         <input
+          id="new-client-phone"
           type="tel"
           [(ngModel)]="newClient.phone"
           placeholder="Ej. 987654321"

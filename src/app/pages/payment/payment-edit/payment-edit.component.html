@@ -2,27 +2,27 @@
   <h3>{{ isEdit ? 'Editar Pago' : 'Nuevo Registro de Pago' }}</h3>
   <form (ngSubmit)="save()">
     <div class="form-group">
-      <label>Monto (S/):</label>
-      <input type="number" step="0.1" [(ngModel)]="amount" name="amount" required>
+      <label for="payment-amount">Monto (S/):</label>
+      <input id="payment-amount" type="number" step="0.1" [(ngModel)]="amount" name="amount" required>
     </div>
     <div class="form-group">
-      <label>RUC / DNI del Cliente:</label>
-      <input type="text" [(ngModel)]="rucClient" name="rucClient" required>
+      <label for="payment-rucClient">RUC / DNI del Cliente:</label>
+      <input id="payment-rucClient" type="text" [(ngModel)]="rucClient" name="rucClient" required>
     </div>
     <div class="form-group">
-      <label>Nombre / Razón Social del Cliente:</label>
-      <input type="text" [(ngModel)]="clientName" name="clientName" required>
+      <label for="payment-clientName">Nombre / Razón Social del Cliente:</label>
+      <input id="payment-clientName" type="text" [(ngModel)]="clientName" name="clientName" required>
     </div>
     <div class="form-group">
-      <label>Método de Pago:</label>
-      <select [(ngModel)]="idPaymentMethod" name="idPaymentMethod" required>
+      <label for="payment-method">Método de Pago:</label>
+      <select id="payment-method" [(ngModel)]="idPaymentMethod" name="idPaymentMethod" required>
         <option [value]="0">Seleccione Método de Pago</option>
         <option *ngFor="let pm of paymentMethods" [value]="pm.idPaymentMethod">{{ pm.name }}</option>
       </select>
     </div>
     <div class="form-group">
-      <label>Detalles / Observaciones:</label>
-      <textarea [(ngModel)]="details" name="details" rows="3"></textarea>
+      <label for="payment-details">Detalles / Observaciones:</label>
+      <textarea id="payment-details" [(ngModel)]="details" name="details" rows="3"></textarea>
     </div>
     <button type="submit">Guardar Pago</button>
     <button type="button" routerLink="/pages/payment">Cancelar</button>

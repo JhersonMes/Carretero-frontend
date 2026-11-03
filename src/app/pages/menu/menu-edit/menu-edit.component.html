@@ -2,20 +2,20 @@
   <h3>{{ isEdit ? 'Editar Platillo' : 'Nuevo Platillo' }}</h3>
   <form (ngSubmit)="save()">
     <div class="form-group">
-      <label>Nombre:</label>
-      <input type="text" [(ngModel)]="name" name="name" required>
+      <label for="menu-name">Nombre:</label>
+      <input id="menu-name" type="text" [(ngModel)]="name" name="name" required>
     </div>
     <div class="form-group">
-      <label>Descripción:</label>
-      <input type="text" [(ngModel)]="description" name="description">
+      <label for="menu-description">Descripción:</label>
+      <input id="menu-description" type="text" [(ngModel)]="description" name="description">
     </div>
     <div class="form-group">
-      <label>Precio (S/):</label>
-      <input type="number" step="0.5" [(ngModel)]="price" name="price" required>
+      <label for="menu-price">Precio (S/):</label>
+      <input id="menu-price" type="number" step="0.5" [(ngModel)]="price" name="price" required>
     </div>
     <div class="form-group">
-      <label>Categoría:</label>
-      <input type="text" [(ngModel)]="category" name="category" required>
+      <label for="menu-category">Categoría:</label>
+      <input id="menu-category" type="text" [(ngModel)]="category" name="category" required>
     </div>
     <div class="form-group">
       <label>

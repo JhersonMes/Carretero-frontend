@@ -35,10 +35,10 @@
 
       <h3>Metodo(s) de pago</h3>
       <div class="payment-line" *ngFor="let line of paymentLines">
-        <select [(ngModel)]="line.idPaymentMethod">
+        <select aria-label="Metodo de pago" [(ngModel)]="line.idPaymentMethod">
           <option *ngFor="let m of paymentMethods" [value]="m.idPaymentMethod">{{ m.name }}</option>
         </select>
-        <input type="number" min="0" [max]="remainingBalance" step="0.5" [(ngModel)]="line.amount" placeholder="0.00" />
+        <input aria-label="Monto a pagar" type="number" min="0" [max]="remainingBalance" step="0.5" [(ngModel)]="line.amount" placeholder="0.00" />
         <button
           type="button"
           class="remove-line-btn"
@@ -88,13 +88,13 @@
       </div>
 
       <div class="form-group" *ngIf="showDocNumber">
-        <label>{{ docNumberLabel }}</label>
-        <input type="text" [(ngModel)]="docNumber" placeholder="Ej. 10453218976" />
+        <label for="checkout-docNumber">{{ docNumberLabel }}</label>
+        <input id="checkout-docNumber" type="text" [(ngModel)]="docNumber" placeholder="Ej. 10453218976" />
       </div>
 
       <div class="form-group">
-        <label>Nombre del cliente (opcional)</label>
-        <input type="text" [(ngModel)]="clientName" placeholder="Ej. Juan Perez" />
+        <label for="checkout-clientName">Nombre del cliente (opcional)</label>
+        <input id="checkout-clientName" type="text" [(ngModel)]="clientName" placeholder="Ej. Juan Perez" />
       </div>
 
       <p class="invoice-note">
