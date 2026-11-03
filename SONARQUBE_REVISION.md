@@ -158,3 +158,32 @@ Se verificó con `ng build` (compila sin errores).
 
 - **Bloque 3 (`autofocus`, 3 issues):** no se tocó. Queda pendiente decidir si se marcan como *Accepted* o si se quita `autofocus`.
 - **Verificación en SonarQube:** los issues se cerrarán cuando se haga push y SonarQube vuelva a analizar `master`.
+
+---
+
+## Riesgos de dependencia (61)
+
+SonarQube (SCA) revisa `package-lock.json` y avisa de CVEs conocidos en librerías de terceros. Las 61 alertas se reparten así:
+
+| Origen | Paquetes | ¿Llega al navegador? |
+|---|---|---|
+| **Angular 19.2.25** (dependencia directa) | `@angular/core`, `common`, `compiler`, `router` | **Sí**: es código que se ejecuta en la app |
+| **Herramientas de build** (`@angular/build`) | `vite`, `piscina`, `@babel/core`, `esbuild`, `source-map-js`, `brace-expansion`, `picomatch` | No: solo se usan al compilar |
+| **CLI de Angular** (`@angular/cli`) | `tar`, `pacote`, `sigstore`, `glob`, `minimatch`, `fast-uri`, `ip-address`, `http-cache-semantics`… | No: solo se usan en `ng add` / `ng update` |
+
+### Corregido sin cambiar de versión mayor
+
+| Acción | Resultado |
+|---|---|
+| `@angular/cli` y `@angular/build` de 19.2.25 a **19.2.27** (último parche de la 19) | — |
+| `npm audit fix` | Corrige `brace-expansion`, `fast-uri`, `ip-address`, `source-map-js` |
+| `overrides` en `package.json`: `vite 6.4.5`, `piscina 4.9.4`, `@babel/core 7.29.7` | Corrige `vite` (7 CVEs), `piscina` (incluye el **crítico** 9.2) y `@babel/core` |
+
+`npm audit` pasó de 36 a 29 paquetes vulnerables. Se verificó con `ng build` y `npm test` (8/8 pruebas en verde).
+
+### Lo que queda: requiere migrar a Angular 21
+
+- **Angular 19 ya no recibe parches de seguridad.** 19.2.25 es la última versión publicada de 19, y los CVEs de `@angular/core`, `common`, `compiler` y `router` solo están corregidos en Angular 21.2.26.
+- Lo mismo ocurre con `tar`, `pacote`, `sigstore`, `glob` y `minimatch`: los arregla `@angular/cli` 21.
+- **Única solución real:** migrar con `ng update` de 19 → 20 → 21, una versión mayor cada vez, probando entre cada paso.
+- Mientras tanto, los paquetes de la CLI y del build no se incluyen en el bundle que se sirve al navegador. Su riesgo se limita a la máquina o al contenedor donde se compila.
