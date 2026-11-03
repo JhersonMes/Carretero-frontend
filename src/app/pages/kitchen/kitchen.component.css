@@ -35,9 +35,9 @@
 }
 
 .ticket-card.late {
+  border-color: #f0c9c9;
   border-left-color: #c62828;
   background: #fdf2f2;
-  border-color: #f0c9c9;
 }
 
 .ticket-header {
