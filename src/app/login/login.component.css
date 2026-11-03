@@ -228,6 +228,12 @@
   margin-top: 0;
 }
 
+.forgot-password-form label {
+  font-size: 0.86rem;
+  font-weight: 600;
+  margin-bottom: -4px;
+}
+
 .forgot-password-form input {
   width: 100%;
   padding: 11px 14px;

@@ -3,28 +3,28 @@
   <p *ngIf="loading">Cargando datos de la cuenta...</p>
   <form (ngSubmit)="save()" *ngIf="!loading">
     <div class="form-group">
-      <label>Nombre de Usuario:</label>
-      <input type="text" [(ngModel)]="username" name="username" required>
+      <label for="username">Nombre de Usuario:</label>
+      <input id="username" type="text" [(ngModel)]="username" name="username" required>
     </div>
     <div class="form-group">
-      <label>Nombre completo:</label>
-      <input type="text" [(ngModel)]="fullName" name="fullName" placeholder="Ej. Ana Torres">
+      <label for="fullName">Nombre completo:</label>
+      <input id="fullName" type="text" [(ngModel)]="fullName" name="fullName" placeholder="Ej. Ana Torres">
     </div>
     <div class="form-group">
-      <label>Email:</label>
-      <input type="email" [(ngModel)]="email" name="email" required>
+      <label for="email">Email:</label>
+      <input id="email" type="email" [(ngModel)]="email" name="email" required>
     </div>
     <div class="form-group">
-      <label>Teléfono:</label>
-      <input type="tel" [(ngModel)]="phone" name="phone" maxlength="9" placeholder="9 dígitos">
+      <label for="phone">Teléfono:</label>
+      <input id="phone" type="tel" [(ngModel)]="phone" name="phone" maxlength="9" placeholder="9 dígitos">
     </div>
     <div class="form-group">
-      <label>{{ isEdit ? 'Nueva contraseña (déjala vacía para no cambiarla):' : 'Contraseña:' }}</label>
-      <input type="password" [(ngModel)]="password" name="password" autocomplete="new-password" [required]="!isEdit">
+      <label for="password">{{ isEdit ? 'Nueva contraseña (déjala vacía para no cambiarla):' : 'Contraseña:' }}</label>
+      <input id="password" type="password" [(ngModel)]="password" name="password" autocomplete="new-password" [required]="!isEdit">
     </div>
     <div class="form-group">
-      <label>Rol:</label>
-      <select [(ngModel)]="idRole" name="idRole" required>
+      <label for="idRole">Rol:</label>
+      <select id="idRole" [(ngModel)]="idRole" name="idRole" required>
         <option [value]="0">Seleccione un rol</option>
         <option *ngFor="let r of roles" [value]="r.idRole">{{ r.name }}</option>
       </select>

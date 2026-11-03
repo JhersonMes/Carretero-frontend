@@ -43,7 +43,7 @@ export class LoginComponent {
     this.recoveryMessage = '';
     this.recoveryError = '';
     const email = this.recoveryEmail.trim();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!this.isValidEmail(email)) {
       this.recoveryError = 'Escribe un correo válido.';
       return;
     }
@@ -58,6 +58,15 @@ export class LoginComponent {
         this.sendingRecovery = false;
       },
     });
+  }
+
+  /** usuario@dominio.ext sin espacios; sin regex para evitar backtracking. */
+  private isValidEmail(email: string): boolean {
+    const at = email.indexOf('@');
+    if (at < 1 || at !== email.lastIndexOf('@') || /\s/.test(email)) return false;
+    const domain = email.slice(at + 1);
+    const dot = domain.lastIndexOf('.');
+    return dot > 0 && dot < domain.length - 1;
   }
 
   onSubmit() {
