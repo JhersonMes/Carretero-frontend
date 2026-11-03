@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -16,7 +16,7 @@ import { LogoComponent } from '../../shared/logo/logo.component';
   templateUrl: './reset-password.component.html',
   styleUrl: '../register/register.component.css',
 })
-export class ResetPasswordComponent {
+export class ResetPasswordComponent implements OnInit {
   private loginService = inject(LoginService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);

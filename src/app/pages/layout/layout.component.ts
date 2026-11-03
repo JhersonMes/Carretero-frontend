@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
@@ -57,7 +57,7 @@ const STATION_ROLES = ['COCINA', 'PARRILLA', 'BEBIDAS'];
   templateUrl: './layout.component.html',
   styleUrl: './layout.component.css',
 })
-export class LayoutComponent {
+export class LayoutComponent implements OnInit {
   private loginService = inject(LoginService);
   public authService = inject(AuthService);
   private router = inject(Router);
