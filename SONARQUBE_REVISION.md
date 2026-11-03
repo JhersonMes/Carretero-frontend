@@ -181,9 +181,34 @@ SonarQube (SCA) revisa `package-lock.json` y avisa de CVEs conocidos en librerí
 
 `npm audit` pasó de 36 a 29 paquetes vulnerables. Se verificó con `ng build` y `npm test` (8/8 pruebas en verde).
 
-### Lo que queda: requiere migrar a Angular 21
+### Migración a Angular 21 (rama `chore/angular-21`)
 
-- **Angular 19 ya no recibe parches de seguridad.** 19.2.25 es la última versión publicada de 19, y los CVEs de `@angular/core`, `common`, `compiler` y `router` solo están corregidos en Angular 21.2.26.
-- Lo mismo ocurre con `tar`, `pacote`, `sigstore`, `glob` y `minimatch`: los arregla `@angular/cli` 21.
-- **Única solución real:** migrar con `ng update` de 19 → 20 → 21, una versión mayor cada vez, probando entre cada paso.
-- Mientras tanto, los paquetes de la CLI y del build no se incluyen en el bundle que se sirve al navegador. Su riesgo se limita a la máquina o al contenedor donde se compila.
+Angular 19 ya no recibe parches de seguridad: 19.2.25 es su última versión, y los CVEs de `@angular/core`, `common`, `compiler` y `router` solo están corregidos en Angular 21. Por eso se migró con `ng update`, una versión mayor cada vez:
+
+| Commit | Paso | Detalle |
+|---|---|---|
+| `1694d97` | Quitar `overrides` | Las versiones nuevas ya traen los parches; forzar `vite 6` habría chocado con Angular 21. |
+| `8966c4c` | Angular 19 → **20.3** | TypeScript 5.9. `zone.js` pasa a ser dependencia explícita (antes llegaba de forma indirecta y el build fallaba sin él). |
+| `b0f17a5` | Angular 20 → **21.2.26** | `ng update` migró automáticamente las plantillas a la nueva sintaxis `@if` / `@for` y quitó imports que ya no se usan. Se ajustó `tsconfig.spec.json` para que el script de pruebas encuentre los tipos de `@angular/common/http`, `core/rxjs-interop` y `cdk/drag-drop`. |
+
+**Verificación:** `ng build` compila sin errores y `npm test` pasa 8/8. Los `aria-label` y labels añadidos antes se conservan.
+
+**Resultado de `npm audit`:**
+
+| Severidad | Angular 19 (inicio) | Tras parches | Angular 21 |
+|---|---|---|---|
+| Crítica | 2 | 1 | **0** |
+| Alta | 12 | 7 | **0** |
+| Moderada | 20 | 20 | 16 |
+| Baja | 2 | 1 | **0** |
+| **Total** | **36** | **29** | **16** |
+
+Versiones clave ahora: `@angular/core 21.2.26`, `vite 7.3.7`, `esbuild 0.28.1`, `piscina 5.3.2`, `tar 7.5.22`.
+
+### Lo que queda (16 moderadas) → propuesto como *Accepted*
+
+Todas están dentro de `@angular/cli` (`pacote`, `sigstore`, `tuf-js`, `cacache`, `glob`, `minimatch`, `make-fetch-happen`…):
+
+- Solo se usan al ejecutar `ng add` / `ng update` para descargar paquetes. **No forman parte del bundle** que se sirve al navegador ni de la imagen final de Nginx.
+- La corrección solo existe en `@angular/cli` 22, que aún no tiene versión estable.
+- Cuando salga Angular 22 estable, se cierran con otro `ng update`.
