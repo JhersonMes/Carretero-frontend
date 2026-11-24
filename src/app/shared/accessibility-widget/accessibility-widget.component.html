@@ -1,0 +1,77 @@
+<button
+  #toggleButton
+  type="button"
+  class="a11y-toggle"
+  [class.has-changes]="a11y.hasChanges()"
+  aria-label="Opciones de accesibilidad"
+  aria-controls="a11y-panel"
+  [attr.aria-expanded]="open()"
+  (click)="toggleOpen()"
+  >
+  <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" focusable="false">
+    <circle cx="12" cy="4.5" r="2" fill="currentColor" />
+    <path
+      d="M4 8.5c2.7.8 5.3 1.2 8 1.2s5.3-.4 8-1.2M12 9.7v4.6m0 0-3 6.2m3-6.2 3 6.2"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </svg>
+</button>
+
+@if (open()) {
+  <section #panel id="a11y-panel" class="a11y-panel" role="dialog" aria-labelledby="a11y-title">
+    <header class="a11y-header">
+      <h2 id="a11y-title">Accesibilidad</h2>
+      <button type="button" class="a11y-close" aria-label="Cerrar opciones de accesibilidad" (click)="close()">×</button>
+    </header>
+    <p class="a11y-owner">Se guarda para: <strong>{{ a11y.owner() }}</strong></p>
+
+    <fieldset class="a11y-group">
+      <legend>Tamaño de letra</legend>
+      <div class="a11y-sizes">
+        @for (size of sizes; track size.value; let i = $index) {
+          <button
+            type="button"
+            class="a11y-size"
+            [class.selected]="a11y.prefs().textSize === size.value"
+            [attr.aria-pressed]="a11y.prefs().textSize === size.value"
+            (click)="setSize(size.value)"
+            >
+            <span class="a11y-size-sample" [style.font-size.px]="14 + i * 4" aria-hidden="true">{{ size.sample }}</span>
+            <span class="a11y-size-label">{{ size.label }}</span>
+          </button>
+        }
+      </div>
+    </fieldset>
+
+    <ul class="a11y-toggles">
+      @for (opt of toggles; track opt.key) {
+        <li>
+          <button
+            type="button"
+            role="switch"
+            class="a11y-switch"
+            [attr.aria-checked]="a11y.prefs()[opt.key]"
+            [attr.aria-describedby]="'a11y-hint-' + opt.key"
+            (click)="flip(opt.key)"
+            >
+            <span class="a11y-switch-text">
+              <span class="a11y-switch-label">{{ opt.label }}</span>
+              <span class="a11y-switch-hint" [id]="'a11y-hint-' + opt.key">{{ opt.hint }}</span>
+            </span>
+            <span class="a11y-switch-track" aria-hidden="true">
+              <span class="a11y-switch-state">{{ a11y.prefs()[opt.key] ? 'Sí' : 'No' }}</span>
+            </span>
+          </button>
+        </li>
+      }
+    </ul>
+
+    <button type="button" class="a11y-reset" [disabled]="!a11y.hasChanges()" (click)="a11y.reset()">
+      Restablecer
+    </button>
+  </section>
+}

@@ -150,6 +150,7 @@
               type="button"
               class="pos-pay-chip"
               [class.active]="selectedMethodId === method.idPaymentMethod"
+              [attr.aria-pressed]="selectedMethodId === method.idPaymentMethod"
               (click)="selectMethod(method)"
               >
               {{ method.name }}
@@ -288,7 +289,9 @@
                 </div>
               </button>
             }
-            @if (products.length === 0) {
+            @if (loadingProducts && products.length === 0) {
+              <p class="empty-state" role="status">Cargando productos...</p>
+            } @else if (products.length === 0) {
               <p class="empty-state">
                 Esta categoría no tiene productos registrados.
               </p>

@@ -344,7 +344,9 @@
                                 <span class="product-price">S/ {{ product.price.toFixed(2) }}</span>
                               </button>
                             }
-                            @if (products.length === 0) {
+                            @if (loadingProducts && products.length === 0) {
+                              <p class="empty-state" role="status">Cargando productos...</p>
+                            } @else if (products.length === 0) {
                               <p class="empty-state">Esta categoria no tiene productos.</p>
                             }
                           </div>
@@ -447,6 +449,7 @@
                                     type="button"
                                     class="method-chip"
                                     [class.active]="selectedMethodId === method.idPaymentMethod"
+                                    [attr.aria-pressed]="selectedMethodId === method.idPaymentMethod"
                                     (click)="selectMethod(method)"
                                     >
                                     {{ method.name }}

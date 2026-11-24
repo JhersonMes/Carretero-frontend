@@ -137,6 +137,8 @@ export class DeliveryComponent implements OnInit {
   categories: Category[] = [];
   products: Product[] = [];
   selectedCategory: Category | null = null;
+  loadingProducts = false;
+  private readonly productsByCategory = new Map<number, Product[]>();
   cart: CartLine[] = [];
   pendingFlavorProduct: Product | null = null;
   /** Producto esperando que se elija el plato al que acompana. */
@@ -688,9 +690,23 @@ export class DeliveryComponent implements OnInit {
 
   selectCategory(category: Category): void {
     this.selectedCategory = category;
-    if (!category.idCategory) return;
-    this.productService.findByCategory(category.idCategory).subscribe((data) => {
-      this.products = data;
+    const id = category.idCategory;
+    if (!id) return;
+    // Mostrar al instante lo ya cargado (o nada) en vez de la categoria anterior,
+    // y descartar respuestas que lleguen despues de cambiar de categoria.
+    const cached = this.productsByCategory.get(id);
+    this.products = cached ?? [];
+    this.loadingProducts = !cached;
+    this.productService.findByCategory(id).subscribe({
+      next: (data) => {
+        this.productsByCategory.set(id, data);
+        if (this.selectedCategory?.idCategory !== id) return;
+        this.products = data;
+        this.loadingProducts = false;
+      },
+      error: () => {
+        if (this.selectedCategory?.idCategory === id) this.loadingProducts = false;
+      },
     });
   }
 

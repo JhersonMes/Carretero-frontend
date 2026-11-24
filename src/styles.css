@@ -1599,3 +1599,84 @@ tbody tr:last-child td {
   stroke: var(--text-muted);
 }
 
+
+/* ===================================================================
+   Widget de accesibilidad propio (app-accessibility-widget).
+   Cada opcion responde a una condicion de la evaluacion del publico:
+   - Tamano de letra -> se aplica cambiando font-size de <html> (todo usa rem).
+   - .a11y-contrast  -> baja vision; pantallas con reflejo o vapor.
+   - .a11y-reading   -> dislexia (espaciado de WCAG 1.4.12).
+   - .a11y-cues      -> daltonismo: lo que antes era solo color tambien se dice en texto.
+   =================================================================== */
+
+/* --- Alto contraste --- */
+html.a11y-contrast {
+  --surface: #ffffff;
+  --surface-border: #5c5654;
+  --text-primary: #000000;
+  --text-muted: #2f2a29;
+}
+
+html.a11y-contrast p {
+  color: var(--text-primary);
+}
+
+html.a11y-contrast :focus-visible {
+  outline: 3px solid #000000 !important;
+  outline-offset: 2px;
+}
+
+/* El color de la insignia de estado de la mesa viene en linea: se oscurece para que el texto blanco resalte. */
+html.a11y-contrast .status-badge {
+  filter: brightness(0.7);
+}
+
+html.a11y-contrast .timer.warn .timer-value {
+  color: #7a4d00;
+}
+
+html.a11y-contrast .timer.late .timer-value {
+  color: #a01216;
+}
+
+/* --- Lectura comoda --- */
+html.a11y-reading body :not(app-accessibility-widget, app-accessibility-widget *) {
+  line-height: 1.5 !important;
+  letter-spacing: 0.12em !important;
+  word-spacing: 0.16em !important;
+}
+
+html.a11y-reading p,
+html.a11y-reading li,
+html.a11y-reading td {
+  text-align: left !important;
+}
+
+/* --- Senales sin color --- */
+/* Urgencia de las comandas (cocina) y del cronometro de la mesa (salon). */
+html.a11y-cues .ticket-timer.warn::after,
+html.a11y-cues .timer.warn .timer-value::after {
+  content: ' · Demorado';
+  font-weight: 800;
+}
+
+html.a11y-cues .ticket-timer.late::after,
+html.a11y-cues .timer.late .timer-value::after {
+  content: ' · Atrasado';
+  font-weight: 800;
+}
+
+/* Opcion elegida al cobrar: marca de verificacion y borde grueso, ademas del color. */
+html.a11y-cues .pos-pay-chip.active::before,
+html.a11y-cues .method-chip.active::before,
+html.a11y-cues .invoice-type-btn.active::before {
+  content: '✓ ';
+  font-weight: 800;
+}
+
+html.a11y-cues .pos-pay-chip.active,
+html.a11y-cues .method-chip.active,
+html.a11y-cues .invoice-type-btn.active {
+  outline: 3px solid var(--carretero-ink);
+  outline-offset: 1px;
+}

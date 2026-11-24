@@ -370,7 +370,9 @@
                   </div>
                 </button>
               }
-              @if (products.length === 0) {
+              @if (loadingProducts && products.length === 0) {
+                <p class="empty-state" role="status">Cargando productos...</p>
+              } @else if (products.length === 0) {
                 <p class="empty-state">
                   Esta categoría no tiene productos registrados.
                 </p>

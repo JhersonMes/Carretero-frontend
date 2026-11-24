@@ -1,0 +1,236 @@
+/* El widget usa px a proposito: no crece con el tamano de letra que el propio widget cambia. */
+:host {
+  position: fixed;
+  left: 16px;
+  bottom: 16px;
+  z-index: 2000;
+  font-family: var(--font-sans);
+  line-height: 1.3;
+  letter-spacing: normal;
+  word-spacing: normal;
+}
+
+.a11y-toggle {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 3px solid var(--carretero-white);
+  background: var(--carretero-ink);
+  color: var(--carretero-white);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  position: relative;
+}
+
+.a11y-toggle:hover {
+  background: #000;
+}
+
+.a11y-toggle:focus-visible,
+.a11y-panel button:focus-visible {
+  outline: 3px solid var(--carretero-yellow);
+  outline-offset: 2px;
+}
+
+/* Punto que indica que el operario tiene ajustes activos. */
+.a11y-toggle.has-changes::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--carretero-yellow);
+  border: 2px solid var(--carretero-ink);
+}
+
+.a11y-panel {
+  position: absolute;
+  left: 0;
+  bottom: 64px;
+  width: 320px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+  background: var(--surface-card);
+  color: var(--text-primary);
+  border: 2px solid var(--carretero-ink);
+  border-radius: 14px;
+  box-shadow: var(--shadow-md);
+  padding: 16px;
+  font-size: 15px;
+}
+
+/* Los botones globales usan rem; aqui se fija en px para que el panel no crezca. */
+:where(.a11y-panel) button {
+  font-size: 14px;
+}
+
+.a11y-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.a11y-header h2 {
+  font-size: 18px;
+  margin: 0;
+}
+
+.a11y-close {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--text-primary);
+  border-radius: 8px;
+}
+
+.a11y-close:hover {
+  background: var(--surface);
+}
+
+.a11y-owner {
+  margin: 4px 0 12px;
+  font-size: 13px;
+  color: #4a4442;
+}
+
+.a11y-group {
+  border: none;
+  margin: 0 0 12px;
+  padding: 0;
+}
+
+.a11y-group legend {
+  font-weight: 700;
+  margin-bottom: 8px;
+  padding: 0;
+}
+
+.a11y-sizes {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.a11y-size {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  min-height: 64px;
+  padding: 6px 2px;
+  border: 2px solid #8a8381;
+  border-radius: 10px;
+  background: var(--surface-card);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.a11y-size-sample {
+  font-weight: 800;
+  line-height: 1;
+}
+
+.a11y-size-label {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Seleccionado: color, borde grueso y marca de verificacion (no solo color). */
+.a11y-size.selected {
+  border: 3px solid var(--carretero-ink);
+  background: var(--carretero-ink);
+  color: var(--carretero-white);
+}
+
+.a11y-size.selected .a11y-size-label::before {
+  content: '✓ ';
+}
+
+.a11y-toggles {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.a11y-switch {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px;
+  border: 2px solid #8a8381;
+  border-radius: 10px;
+  background: var(--surface-card);
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+}
+
+.a11y-switch[aria-checked='true'] {
+  border-color: var(--carretero-ink);
+  background: #f1eeec;
+}
+
+.a11y-switch-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.a11y-switch-label {
+  font-weight: 700;
+}
+
+.a11y-switch-hint {
+  font-size: 12px;
+  color: #4a4442;
+}
+
+.a11y-switch-track {
+  flex-shrink: 0;
+  min-width: 46px;
+  padding: 4px 0;
+  border-radius: 999px;
+  border: 2px solid #8a8381;
+  background: var(--surface-card);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.a11y-switch[aria-checked='true'] .a11y-switch-track {
+  background: var(--carretero-ink);
+  border-color: var(--carretero-ink);
+  color: var(--carretero-white);
+}
+
+.a11y-reset {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 2px solid var(--carretero-red-dark);
+  background: var(--surface-card);
+  color: var(--carretero-red-darker);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.a11y-reset:disabled {
+  border-color: #c9c3c0;
+  color: #6b6462;
+  cursor: default;
+}

@@ -67,6 +67,7 @@
             type="button"
             class="invoice-type-btn"
             [class.active]="invoiceType === 'BOLETA'"
+            [attr.aria-pressed]="invoiceType === 'BOLETA'"
             (click)="invoiceType = 'BOLETA'"
             >
             Boleta
@@ -75,6 +76,7 @@
             type="button"
             class="invoice-type-btn"
             [class.active]="invoiceType === 'FACTURA'"
+            [attr.aria-pressed]="invoiceType === 'FACTURA'"
             (click)="invoiceType = 'FACTURA'"
             >
             Factura
@@ -83,6 +85,7 @@
             type="button"
             class="invoice-type-btn"
             [class.active]="invoiceType === 'NOTA_VENTA'"
+            [attr.aria-pressed]="invoiceType === 'NOTA_VENTA'"
             (click)="invoiceType = 'NOTA_VENTA'"
             >
             Nota de venta
